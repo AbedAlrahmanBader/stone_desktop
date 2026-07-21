@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../api/axios";
 import "../styles/login.css";
+import axios from "axios"; // ✅ مهم
 
 
 function Login(){
@@ -14,13 +15,13 @@ function Login(){
 
         try{
 
-            const res = await api.post(
-                "/auth/login",
-                {
-                    email,
-                    password
-                }
-            );
+            const res = await axios.post(
+  "https://server-stone.onrender.com/api/auth/login",
+  {
+    email,
+    password
+  }
+);
 
 
             localStorage.setItem(
