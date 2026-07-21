@@ -1,0 +1,124 @@
+.inventory{
+
+    padding:40px;
+
+    direction:rtl;
+
+}
+
+
+
+.inventory h1{
+
+    color:#1b5e20;
+
+}
+
+
+
+.inventory-tools{
+
+    display:flex;
+
+    gap:15px;
+
+    margin-bottom:25px;
+
+}
+
+
+
+.inventory-tools input,
+.inventory-tools select{
+
+
+    padding:12px;
+
+    border:1px solid #ddd;
+
+    border-radius:8px;
+
+    font-size:16px;
+
+}
+
+
+
+.inventory-tools input{
+
+    width:300px;
+
+}
+
+
+
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    background:white;
+
+}
+
+
+
+th{
+
+    background:#1b5e20;
+
+    color:white;
+
+    padding:12px;
+
+}
+
+
+
+td{
+
+    padding:12px;
+
+    border-bottom:1px solid #ddd;
+
+    text-align:center;
+
+}
+
+
+
+tr:hover{
+
+    background:#f5f5f5;
+
+}
+
+
+
+.available{
+
+    background:#dcedc8;
+
+    color:#33691e;
+
+    padding:6px 12px;
+
+    border-radius:20px;
+
+}
+
+
+
+.shipped{
+
+    background:#ffcdd2;
+
+    color:#b71c1c;
+
+    padding:6px 12px;
+
+    border-radius:20px;
+
+}

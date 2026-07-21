@@ -1,0 +1,104 @@
+.customer-profile{
+
+padding:30px;
+
+}
+
+
+.customer-info{
+
+background:#f5f5f5;
+
+padding:20px;
+
+border-radius:10px;
+
+margin-bottom:30px;
+
+}
+
+
+.customer-profile table{
+
+width:100%;
+
+border-collapse:collapse;
+
+}
+
+
+
+.customer-profile th,
+.customer-profile td{
+
+border:1px solid #ddd;
+
+padding:10px;
+
+text-align:center;
+
+}
+
+
+
+.customer-profile th{
+
+background:#1f6f43;
+
+color:white;
+
+}
+
+
+
+.customer-profile button{
+
+background:#1f6f43;
+
+color:white;
+
+border:none;
+
+padding:8px 15px;
+
+border-radius:5px;
+
+cursor:pointer;
+
+}
+
+.shipment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  z-index: 1000;
+  padding: 30px 0;
+}
+
+.shipment-modal-content {
+  background: #fff;
+  border-radius: 8px;
+  max-width: 95%;
+  position: relative;
+}
+
+.shipment-modal-close {
+  position: sticky;
+  top: 0;
+  left: 0;
+  margin: 10px;
+  padding: 8px 16px;
+  background: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 1001;
+}

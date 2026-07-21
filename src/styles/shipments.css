@@ -1,0 +1,45 @@
+.shipments {
+
+    background:white;
+    padding:30px;
+    border-radius:12px;
+
+}
+
+
+.shipments table {
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+
+.shipments th {
+
+    background:#1b5e20;
+    color:white;
+    padding:15px;
+
+}
+
+
+.shipments td {
+
+    padding:12px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+
+}
+
+
+.shipments button {
+
+    background:#1b5e20;
+    color:white;
+    border:none;
+    padding:8px 20px;
+    border-radius:6px;
+    cursor:pointer;
+
+}

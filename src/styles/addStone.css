@@ -1,0 +1,68 @@
+.add-stone {
+
+    background:white;
+    padding:30px;
+    border-radius:12px;
+
+}
+
+
+.add-stone h1 {
+
+    margin-bottom:25px;
+
+}
+
+
+
+.add-stone input {
+
+    display:block;
+
+    width:400px;
+
+    padding:12px;
+
+    margin-bottom:15px;
+
+    border:1px solid #ddd;
+
+    border-radius:8px;
+
+}
+
+
+
+.add-stone button {
+
+    background:#1b5e20;
+
+    color:white;
+
+    border:none;
+
+    padding:14px 30px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+}
+
+.calculated-preview {
+  background: #f5f5f5;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.calculated-preview p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.add-stone button:hover {
+
+    opacity:.9;
+
+}

@@ -1,0 +1,67 @@
+.customers-page{
+    padding:30px;
+}
+
+.customer-form{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-bottom:30px;
+}
+
+.customer-form input,
+.customer-form textarea{
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:15px;
+}
+
+.customer-form textarea{
+    min-height:80px;
+    resize:vertical;
+}
+
+.customer-form button{
+    background:#1f6f43;
+    color:white;
+    border:none;
+    padding:12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.customer-form button:hover{
+    background:#185534;
+}
+
+.customers-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.customers-table th,
+.customers-table td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+.customers-table th{
+    background:#1f6f43;
+    color:white;
+}
+
+.delete-btn{
+    background:#d32f2f;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.delete-btn:hover{
+    background:#b71c1c;
+}
