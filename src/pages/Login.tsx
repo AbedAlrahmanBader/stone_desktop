@@ -32,11 +32,10 @@ function Login(){
             window.location.href="/dashboard";
 
 
-        }catch(error){
-
-            alert("بيانات الدخول غير صحيحة");
-
-        }
+        }catch (error: any) {
+  console.log("ERROR:", error.response?.data || error.message);
+  alert(error.response?.data?.message || "في مشكلة بالسيرفر");
+}
 
     };
 
