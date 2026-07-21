@@ -1,9 +1,8 @@
 import {
-  BrowserRouter,
+  HashRouter,  // تغيير من BrowserRouter
   Routes,
   Route
 } from "react-router-dom";
-
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -16,61 +15,21 @@ import MainLayout from "./layouts/MainLayout";
 
 
 function App() {
-
   return (
-
-    <BrowserRouter>
-
+    <HashRouter>  {/* تغيير من BrowserRouter */}
       <Routes>
-
-
-        {/* صفحة تسجيل الدخول */}
-        <Route
-          path="/"
-          element={<Login />}
-        />
-
-
-        {/* صفحات النظام مع Sidebar */}
+        <Route path="/" element={<Login />} />
         <Route element={<MainLayout />}>
-
-          <Route
-            path="/dashboard"
-            element={<Dashboard />}
-          />
-<Route path="/customers" element={<Customers />} />
-
-          <Route
-            path="/inventory"
-            element={<Inventory />}
-          />
-
-
-          <Route
-            path="/add-stone"
-            element={<AddStone />}
-          />
-
-<Route
-  path="/customers/profile/:id"
-  element={<CustomerProfile />}
-/>
-          <Route
-            path="/shipments"
-            element={<Shipments />}
-          />
-
-
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/customers" element={<Customers />} />
+          <Route path="/inventory" element={<Inventory />} />
+          <Route path="/add-stone" element={<AddStone />} />
+          <Route path="/customers/profile/:id" element={<CustomerProfile />} />
+          <Route path="/shipments" element={<Shipments />} />
         </Route>
-
-
       </Routes>
-
-    </BrowserRouter>
-
+    </HashRouter>
   );
-
 }
-
 
 export default App;
