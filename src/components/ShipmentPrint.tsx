@@ -177,7 +177,7 @@ function ShipmentPrint({ shipment }: Props) {
                 <div className="title-row">
                     <div className="doc-number">
                         <span className="label-en">No.</span>
-                        <span className="doc-number-value">{shipment?.consignmentNumber || "260137"}</span>
+<span className="doc-number-value">{shipment?.consignmentNumber ?? "---"}</span>
                         <span>: رقم</span>
                     </div>
                     <div className="certificate-title">
