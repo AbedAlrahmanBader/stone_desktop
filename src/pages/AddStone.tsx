@@ -2,257 +2,247 @@ import { useState } from "react";
 import api from "../api/axios";
 import "../styles/addStone.css";
 
-function AddStone() {
-  const [form, setForm] = useState({
-    barcode: "",
-    stoneType: "",
-    length: "",
-    width: "",
-    thickness: "",
-    linearMeter: "",
-    pieces: "",
-  });
+interface StoneItemForm {
+  stoneType: string;
+  length: string;
+  width: string;
+  thickness: string;
+  linearMeter: string;
+  pieces: string;
+}
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
+const emptyItem = (): StoneItemForm => ({
+  stoneType: "",
+  length: "",
+  width: "",
+  thickness: "",
+  linearMeter: "",
+  pieces: "",
+});
 
-
-  const length = Number(form.length) || 0;
-  const width = Number(form.width) || 0;
-  const pieces = Number(form.pieces) || 1;
-  const enteredLinearMeter = Number(form.linearMeter) || 0;
-
+function calcItemPreview(item: StoneItemForm) {
+  const length = Number(item.length) || 0;
+  const width = Number(item.width) || 0;
+  const pieces = Number(item.pieces) || 1;
+  const enteredLinearMeter = Number(item.linearMeter) || 0;
 
   // تحويل من سم إلى متر
   const lengthMeter = length / 100;
   const widthMeter = width / 100;
 
-
   const lengthIsZero = length === 0;
 
-
-  // معاينة الحساب
-  let previewLinearMeter: number;
-  let previewArea: number;
+  let linearMeter: number;
+  let area: number;
   let linearMeterIsAuto = false;
 
-
   if (!lengthIsZero) {
+    linearMeter =
+      item.linearMeter !== "" ? enteredLinearMeter : lengthMeter * pieces;
 
-    // المتر الطولي = الطول بالمتر × عدد القطع
-    previewLinearMeter =
-      form.linearMeter !== ""
-        ? enteredLinearMeter
-        : lengthMeter * pieces;
+    linearMeterIsAuto = item.linearMeter === "";
 
-
-    linearMeterIsAuto = form.linearMeter === "";
-
-
-    // المتر مربع = الطول بالمتر × العرض بالمتر × عدد القطع
-    previewArea =
-      lengthMeter *
-      widthMeter *
-      pieces;
-
-
+    area = lengthMeter * widthMeter * pieces;
   } else {
-
-    // الطول صفر → متر طول يدوي
-    previewLinearMeter = enteredLinearMeter;
-
-
-    // المتر مربع = المتر طول × العرض بالمتر
-    previewArea =
-      enteredLinearMeter *
-      widthMeter;
+    linearMeter = enteredLinearMeter;
+    area = enteredLinearMeter * widthMeter;
   }
 
+  return { lengthIsZero, linearMeter, area, linearMeterIsAuto };
+}
 
+function AddStone() {
+  const [barcode, setBarcode] = useState("");
+  const [items, setItems] = useState<StoneItemForm[]>([emptyItem()]);
+
+  const updateItem = (
+    index: number,
+    field: keyof StoneItemForm,
+    value: string
+  ) => {
+    setItems((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      )
+    );
+  };
+
+  const addItemRow = () => {
+    setItems((prev) => [...prev, emptyItem()]);
+  };
+
+  const removeItemRow = (index: number) => {
+    setItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const previews = items.map(calcItemPreview);
+
+  const totalLinearMeter = previews.reduce((sum, p) => sum + p.linearMeter, 0);
+  const totalArea = previews.reduce((sum, p) => sum + p.area, 0);
 
   const saveStone = async () => {
-
-    if (!form.barcode || !form.stoneType || !form.width) {
-      alert("الرجاء تعبئة الباركود ونوع الحجر والعرض");
+    if (!barcode) {
+      alert("الرجاء إدخال الباركود");
       return;
     }
 
-
-    if (lengthIsZero && enteredLinearMeter === 0) {
-      alert("الطول = 0، الرجاء إدخال المتر طول يدويًا");
+    if (items.length === 0) {
+      alert("أضف نوع حجر واحد على الأقل");
       return;
     }
 
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const preview = previews[i];
+
+      if (!item.stoneType || !item.width) {
+        alert(`الرجاء تعبئة نوع الحجر والعرض للصنف رقم ${i + 1}`);
+        return;
+      }
+
+      if (preview.lengthIsZero && (Number(item.linearMeter) || 0) === 0) {
+        alert(`الطول = 0 للصنف رقم ${i + 1}، الرجاء إدخال المتر طول يدويًا`);
+        return;
+      }
+    }
 
     try {
-
       await api.post("/stones", {
-
-        barcode: form.barcode,
-        stoneType: form.stoneType,
-
-        // إرسال بالسنتيمتر
-        length,
-        width,
-
-        thickness: Number(form.thickness),
-
-        pieces,
-
-        linearMeter:
-          form.linearMeter !== ""
-            ? enteredLinearMeter
-            : 0,
+        barcode,
+        items: items.map((item) => ({
+          stoneType: item.stoneType,
+          length: Number(item.length) || 0,
+          width: Number(item.width) || 0,
+          thickness: Number(item.thickness) || 0,
+          pieces: Number(item.pieces) || 1,
+          linearMeter:
+            item.linearMeter !== "" ? Number(item.linearMeter) : undefined,
+        })),
       });
-
-
 
       alert("تم إضافة المشتاح بنجاح");
 
-
-      setForm({
-        barcode: "",
-        stoneType: "",
-        length: "",
-        width: "",
-        thickness: "",
-        linearMeter: "",
-        pieces: "",
-      });
-
-
+      setBarcode("");
+      setItems([emptyItem()]);
     } catch (error: any) {
-
       console.log(error.response?.data || error);
 
-      alert(
-        error.response?.data?.message ||
-        "حدث خطأ أثناء الإضافة"
-      );
-
+      alert(error.response?.data?.message || "حدث خطأ أثناء الإضافة");
     }
   };
 
-
-
   return (
     <div className="add-stone">
-
       <h1>إضافة مشتاح جديد</h1>
 
-
       <input
-        name="barcode"
         placeholder="الباركود"
-        value={form.barcode}
-        onChange={handleChange}
+        value={barcode}
+        onChange={(e) => setBarcode(e.target.value)}
       />
 
+      {items.map((item, index) => {
+        const preview = previews[index];
 
-      <input
-        name="stoneType"
-        placeholder="نوع الحجر"
-        value={form.stoneType}
-        onChange={handleChange}
-      />
+        return (
+          <div className="stone-item-card" key={index}>
+            <div className="stone-item-header">
+              <h3>نوع حجر #{index + 1}</h3>
 
+              {items.length > 1 && (
+                <button
+                  type="button"
+                  className="remove-item-btn"
+                  onClick={() => removeItemRow(index)}
+                >
+                  حذف
+                </button>
+              )}
+            </div>
 
-      <input
-        type="number"
-        name="length"
-        placeholder="الطول (سم) - اتركه 0 إذا غير متوفر"
-        value={form.length}
-        onChange={handleChange}
-      />
+            <input
+              placeholder="نوع الحجر"
+              value={item.stoneType}
+              onChange={(e) => updateItem(index, "stoneType", e.target.value)}
+            />
 
+            <input
+              type="number"
+              placeholder="الطول (سم) - اتركه 0 إذا غير متوفر"
+              value={item.length}
+              onChange={(e) => updateItem(index, "length", e.target.value)}
+            />
 
-      <input
-        type="number"
-        name="width"
-        placeholder="العرض (سم)"
-        value={form.width}
-        onChange={handleChange}
-      />
+            <input
+              type="number"
+              placeholder="العرض (سم)"
+              value={item.width}
+              onChange={(e) => updateItem(index, "width", e.target.value)}
+            />
 
+            <input
+              type="number"
+              placeholder="السمك (سم)"
+              value={item.thickness}
+              onChange={(e) => updateItem(index, "thickness", e.target.value)}
+            />
 
-      <input
-        type="number"
-        name="thickness"
-        placeholder="السمك (سم)"
-        value={form.thickness}
-        onChange={handleChange}
-      />
-
-
-      <input
-        type="number"
-        name="linearMeter"
-        placeholder={
-          lengthIsZero
-            ? "متر طول (إجباري لأن الطول = 0)"
-            : "متر طول (اتركه فارغ للحساب التلقائي)"
-        }
-        value={form.linearMeter}
-        onChange={handleChange}
-        style={
-          lengthIsZero
-            ? {
-                borderColor: "#B71C1C",
-                borderWidth: 1,
+            <input
+              type="number"
+              placeholder={
+                preview.lengthIsZero
+                  ? "متر طول (إجباري لأن الطول = 0)"
+                  : "متر طول (اتركه فارغ للحساب التلقائي)"
               }
-            : undefined
-        }
-      />
+              value={item.linearMeter}
+              onChange={(e) =>
+                updateItem(index, "linearMeter", e.target.value)
+              }
+              style={
+                preview.lengthIsZero
+                  ? { borderColor: "#B71C1C", borderWidth: 1 }
+                  : undefined
+              }
+            />
 
+            <input
+              type="number"
+              placeholder="عدد القطع"
+              value={item.pieces}
+              onChange={(e) => updateItem(index, "pieces", e.target.value)}
+            />
 
-      <input
-        type="number"
-        name="pieces"
-        placeholder="عدد القطع"
-        value={form.pieces}
-        onChange={handleChange}
-      />
+            <div className="calculated-preview">
+              <p>
+                المتر طول: <strong>{preview.linearMeter.toFixed(2)}</strong>
+                {preview.linearMeterIsAuto && " (تلقائي)"}
+              </p>
 
+              <p>
+                المتر مربع: <strong>{preview.area.toFixed(2)}</strong>
+                {preview.lengthIsZero
+                  ? " (من المتر طول × العرض)"
+                  : " (تلقائي)"}
+              </p>
+            </div>
+          </div>
+        );
+      })}
 
-
-      <div className="calculated-preview">
-
-        <p>
-          المتر طول:
-          <strong>
-            {" "}
-            {previewLinearMeter.toFixed(2)}
-          </strong>
-
-          {linearMeterIsAuto && " (تلقائي)"}
-        </p>
-
-
-        <p>
-          المتر مربع:
-          <strong>
-            {" "}
-            {previewArea.toFixed(2)}
-          </strong>
-
-          {lengthIsZero
-            ? " (من المتر طول × العرض)"
-            : " (تلقائي)"}
-        </p>
-
-      </div>
-
-
-
-      <button onClick={saveStone}>
-        حفظ المشتاح
+      <button type="button" className="add-item-btn" onClick={addItemRow}>
+        + إضافة نوع حجر آخر
       </button>
 
+      <div className="calculated-preview totals-preview">
+        <p>
+          إجمالي المتر طول: <strong>{totalLinearMeter.toFixed(2)}</strong>
+        </p>
+        <p>
+          إجمالي المتر مربع: <strong>{totalArea.toFixed(2)}</strong>
+        </p>
+      </div>
 
+      <button onClick={saveStone}>حفظ المشتاح</button>
     </div>
   );
 }

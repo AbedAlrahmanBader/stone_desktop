@@ -2,8 +2,28 @@ import { useState } from "react";
 import "../styles/print.css";
 import logo from "../assets/AAA.jpg";
 
-interface Stone {
+interface StoneItem {
     _id?: string;
+    stoneType?: string;
+    length?: number;
+    width?: number;
+    thickness?: number;
+    linearMeter?: number;
+    area?: number;
+    pieces?: number;
+}
+
+interface StonePieceDoc {
+    _id?: string;
+    barcode?: string;
+    items?: StoneItem[];
+    totalLinearMeter?: number;
+    totalArea?: number;
+    status?: string;
+}
+
+// صف مسطح جاهز للطباعة: نوع حجر واحد + باركود المشتاح يلي طلع منه
+interface Stone {
     barcode?: string;
     stoneType?: string;
     length?: number;
@@ -35,6 +55,36 @@ const num = (v: any) => Number(v) || 0;
 const SOLD_UNITS = ["قطعة", "متر مربع", "متر طول"] as const;
 type SoldUnit = (typeof SOLD_UNITS)[number];
 
+// يفرد كل مشتاح (بأنواعه المتعددة) إلى صفوف مستقلة، صف لكل نوع حجر
+function flattenStones(stonePieces: StonePieceDoc[]): Stone[] {
+
+    const rows: Stone[] = [];
+
+    stonePieces.forEach((stone) => {
+
+        const items = stone.items && stone.items.length > 0 ? stone.items : [];
+
+        items.forEach((item) => {
+
+            rows.push({
+                barcode: stone.barcode,
+                stoneType: item.stoneType,
+                length: item.length,
+                width: item.width,
+                thickness: item.thickness,
+                linearMeter: item.linearMeter,
+                area: item.area,
+                pieces: item.pieces,
+                status: stone.status,
+            });
+
+        });
+
+    });
+
+    return rows;
+}
+
 function getSoldQuantity(s: Stone): { value: string; unit: SoldUnit } {
     if (num(s.area) > 0) return { value: num(s.area).toFixed(2), unit: "متر مربع" };
     if (num(s.linearMeter) > 0) return { value: num(s.linearMeter).toFixed(2), unit: "متر طول" };
@@ -64,9 +114,11 @@ function ShipmentPrint({ shipment }: Props) {
         window.print();
     };
 
+    // shipment.stones جاي من الباك اند كمصفوفة مشاتيح كاملة (كل وحدة فيها items[])
+    // فبنفردها هون لصفوف طباعة، صف لكل نوع حجر
     const stones: Stone[] =
         shipment?.stones && shipment.stones.length > 0
-            ? shipment.stones
+            ? flattenStones(shipment.stones as StonePieceDoc[])
             : [
                   { barcode: "STN-0001", stoneType: "حجر مسمسم سراحي", length: 0, width: 30, thickness: 5, linearMeter: 0, area: 20, pieces: 20, status: "In Stock" },
                   { barcode: "STN-0002", stoneType: "حجر مسمسم محصور", length: 69, width: 30, thickness: 5, linearMeter: 0, area: 21.74, pieces: 105, status: "In Stock" },
@@ -83,8 +135,8 @@ function ShipmentPrint({ shipment }: Props) {
     const totals = shipment?.totals || {
         count: stones.length,
         cube: shipment?.totalCube ?? 0,
-        sqm: stones.reduce((sum, s) => sum + num(s.area), 0),
-        linearM: stones.reduce((sum, s) => sum + num(s.linearMeter), 0),
+        sqm: shipment?.totalArea ?? stones.reduce((sum, s) => sum + num(s.area), 0),
+        linearM: shipment?.totalLinearMeter ?? stones.reduce((sum, s) => sum + num(s.linearMeter), 0),
         pieces: stones.reduce((sum, s) => sum + num(s.pieces), 0),
     };
 
@@ -258,7 +310,7 @@ function ShipmentPrint({ shipment }: Props) {
                             const soldValue = getValueForUnit(stone, soldUnit);
 
                             return (
-                                <tr key={stone._id || stone.barcode || index}>
+                                <tr key={`${stone.barcode || "row"}-${index}`}>
                                     <td>{index + 1}</td>
                                     <td></td>
                                     <td>{stone.stoneType || "---"}</td>

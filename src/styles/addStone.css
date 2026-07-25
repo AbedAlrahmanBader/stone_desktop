@@ -66,3 +66,52 @@
     opacity:.9;
 
 }
+
+/* بطاقة كل نوع حجر داخل المشتاح */
+.stone-item-card {
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.stone-item-card input {
+  width: 100%;
+}
+
+.stone-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.stone-item-header h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #37474f;
+}
+
+.remove-item-btn {
+  background: #b71c1c;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.add-item-btn {
+  background: #1565c0;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.totals-preview {
+  background: #e3f2fd;
+}

@@ -334,3 +334,103 @@ td button:last-of-type{
     color:white;
 
 }
+/* هاي إضافات على ملف styles/inventory.css الموجود عندك
+   عشان تدعم عرض المشتاح مع أكثر من نوع حجر جواه.
+   ضيفها بآخر الملف، ما في داعي تحذف أي شي موجود. */
+
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inventory-table th {
+  background: #f5f5f5;
+  padding: 10px;
+  text-align: center;
+}
+
+.inventory-table td {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.stone-header-row td {
+  background: #e3f2fd;
+  border-bottom: 2px solid #90caf9;
+  text-align: right;
+}
+
+.stone-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stone-header-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.stone-header-info .available {
+  background: #2e7d32;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.stone-header-info .shipped {
+  background: #b71c1c;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.stone-header-totals {
+  font-size: 13px;
+  color: #0d47a1;
+  font-weight: bold;
+}
+
+.stone-header-actions button {
+  margin-inline-start: 6px;
+}
+
+.barcode-edit-input {
+  width: 160px;
+}
+
+.stone-item-row td {
+  background: #fff;
+}
+
+.stone-item-row.editing td {
+  background: #fffde7;
+}
+
+.add-item-row td {
+  background: #f1f8e9;
+}
+
+.inventory-table input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.inventory-table button {
+  margin: 2px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #1565c0;
+  color: #fff;
+}
