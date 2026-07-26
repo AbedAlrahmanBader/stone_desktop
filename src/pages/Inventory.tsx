@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
 import api from "../api/axios";
 import "../styles/inventory.css";
-
+import { QRCodeSVG } from "qrcode.react";
 
 interface StoneItem {
     _id: string;
@@ -405,16 +405,17 @@ function Inventory() {
 
                 <thead>
 
-                    <tr>
-                        <th>نوع الحجر</th>
-                        <th>الطول (سم)</th>
-                        <th>العرض (سم)</th>
-                        <th>السماكة</th>
-                        <th>متر طول</th>
-                        <th>متر مربع</th>
-                        <th>قطعة</th>
-                        <th>إجراءات</th>
-                    </tr>
+                   <tr>
+    <th>QR</th>
+    <th>نوع الحجر</th>
+    <th>الطول (سم)</th>
+    <th>العرض (سم)</th>
+    <th>السماكة</th>
+    <th>متر طول</th>
+    <th>متر مربع</th>
+    <th>قطعة</th>
+    <th>إجراءات</th>
+</tr>
 
                 </thead>
 
@@ -643,7 +644,14 @@ function Inventory() {
                                     return (
 
                                         <tr key={item._id} className="stone-item-row">
-
+<td>
+    <QRCodeSVG
+        size={80}
+        value={
+            `https://alfawaghra-stone.vercel.app/stone/${stone.barcode}`
+        }
+    />
+</td>
                                             <td>{item.stoneType}</td>
                                             <td>{item.length === 0 ? "مفتوح" : item.length}</td>
                                             <td>{item.width}</td>
