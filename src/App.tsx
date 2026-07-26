@@ -1,5 +1,5 @@
 import {
-  BrowserRouter,
+  HashRouter,
   Routes,
   Route
 } from "react-router-dom";
@@ -13,60 +13,66 @@ import Shipments from "./pages/Shipments";
 import Customers from "./pages/Customers";
 import CustomerProfile from "./pages/CustomerProfile";
 import MainLayout from "./layouts/MainLayout";
-
+import PublicStone from "./publicPages/PublicStone";
 
 function App() {
 
   return (
 
-    <BrowserRouter>
+    <HashRouter>
 
       <Routes>
 
-
-        {/* صفحة تسجيل الدخول */}
         <Route
           path="/"
           element={<Login />}
         />
 
 
-        {/* صفحات النظام مع Sidebar */}
         <Route element={<MainLayout />}>
 
           <Route
             path="/dashboard"
             element={<Dashboard />}
           />
-<Route path="/customers" element={<Customers />} />
+
+          <Route
+            path="/customers"
+            element={<Customers />}
+          />
 
           <Route
             path="/inventory"
             element={<Inventory />}
           />
 
-
+<Route
+    path="/stone/:barcode"
+    element={<PublicStone />}
+/>
           <Route
             path="/add-stone"
             element={<AddStone />}
           />
 
-<Route
-  path="/customers/profile/:id"
-  element={<CustomerProfile />}
-/>
+
+          <Route
+            path="/customers/profile/:id"
+            element={<CustomerProfile />}
+          />
+
+
           <Route
             path="/shipments"
             element={<Shipments />}
           />
-
 
         </Route>
 
 
       </Routes>
 
-    </BrowserRouter>
+    </HashRouter>
 
   );
 

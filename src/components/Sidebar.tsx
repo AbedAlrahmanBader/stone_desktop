@@ -1,42 +1,59 @@
 import "../styles/sidebar.css";
+import { useNavigate } from "react-router-dom";
 
 
 function Sidebar(){
 
-return (
-
-<div className="sidebar">
-
-<h2>
-ALFAWAGHREH FOR MARBLE STONE
-</h2>
+    const navigate = useNavigate();
 
 
-<ul>
+    return (
 
-<li onClick={()=>window.location.href="/Dashboard"}>
-    الرئيسية
-</li>
-<li onClick={()=>window.location.href="/inventory"}>
-المخزون
-</li>
-<li onClick={()=>window.location.href="/add-stone"}>
-إضافة مشتاح
-</li>
-<li onClick={()=>window.location.href="/shipments"}>
-الإرساليات
-</li>
-<li onClick={() => window.location.href="/customers"}>
-    العملاء
-</li>
-<li>الإعدادات</li>
+        <div className="sidebar">
+
+            <h2>
+                ALFAWAGHREH FOR MARBLE STONE
+            </h2>
 
 
-</ul>
+            <ul>
 
-</div>
+                <li onClick={() => navigate("/dashboard")}>
+                    الرئيسية
+                </li>
 
-);
+
+                <li onClick={() => navigate("/inventory")}>
+                    المخزون
+                </li>
+
+
+                <li onClick={() => navigate("/add-stone")}>
+                    إضافة مشتاح
+                </li>
+
+
+                <li onClick={() => navigate("/shipments")}>
+                    الإرساليات
+                </li>
+
+
+                <li onClick={() => navigate("/customers")}>
+                    العملاء
+                </li>
+
+
+                <li>
+                    الإعدادات
+                </li>
+
+
+            </ul>
+
+
+        </div>
+
+    );
 
 }
 
