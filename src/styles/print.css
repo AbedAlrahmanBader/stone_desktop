@@ -33,9 +33,13 @@
     padding: 14mm 12mm;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
     font-family: "Arial", "Tahoma", sans-serif;
-    font-size: 12.5px;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: 1.6;
     box-sizing: border-box;
+
+    /* بيسمح نثبت التواقيع بأسفل الصفحة دايمًا */
+    display: flex;
+    flex-direction: column;
 }
 
 /* ===== وضع التحرير: الصفحة كلها قابلة للتعديل قبل الطباعة ===== */
@@ -61,7 +65,7 @@
     outline-offset: 1px;
 }
 
-/* ===== تغميق الخط في كامل صفحة الطباعة ===== */
+/* ===== تغميق وتكبير الخط في كامل صفحة الطباعة ===== */
 .print-page,
 .print-page * {
     color: #000 !important;
@@ -84,15 +88,15 @@
 }
 
 .label-en {
-    font-size: 10.5px;
+    font-size: 12px;
     font-weight: 700;
     margin-inline-start: 4px;
 }
 
 .certificate-title .label-en {
     display: block;
-    font-size: 12px;
-    margin: 2px 0 0;
+    font-size: 13.5px;
+    margin: 3px 0 0;
 }
 
 /* ---------- Header ---------- */
@@ -100,7 +104,7 @@
 .company-header {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
 }
 
 .header-main {
@@ -112,16 +116,16 @@
 .company-name-block {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
 }
 
 .company-name {
-    font-size: 19px;
+    font-size: 22px;
     letter-spacing: 0.3px;
 }
 
 .company-info-lines {
-    font-size: 12.5px;
+    font-size: 14px;
 }
 
 .logo-container {
@@ -141,12 +145,12 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
 }
 
 .contact-line {
     display: flex;
-    gap: 22px;
+    gap: 24px;
     flex-wrap: wrap;
 }
 
@@ -154,7 +158,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
 }
 
 .license-box {
@@ -162,7 +166,7 @@
     align-items: center;
     gap: 8px;
     border: 1.5px solid #111;
-    padding: 3px 10px;
+    padding: 4px 12px;
     background: #f3f3f3;
 }
 
@@ -173,7 +177,7 @@
 .section-rule {
     border: none;
     border-top: 2px solid #111;
-    margin: 8px 0;
+    margin: 10px 0;
 }
 
 /* ---------- Title row ---------- */
@@ -183,7 +187,7 @@
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 12px;
-    padding: 4px 0;
+    padding: 5px 0;
 }
 
 .doc-number {
@@ -205,7 +209,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 18px;
+    font-size: 21px;
     text-align: center;
     white-space: nowrap;
     justify-self: center;
@@ -227,15 +231,15 @@
 .certificate-details {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 4px 24px;
-    padding: 10px 0 14px;
+    gap: 6px 28px;
+    padding: 12px 0 16px;
 }
 
 .detail-row {
     display: flex;
     justify-content: space-between;
     border-bottom: 1px dotted #999;
-    padding: 3px 0;
+    padding: 4px 0;
 }
 
 .detail-row .label {
@@ -254,15 +258,15 @@
 .shipment-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 6px;
-    font-size: 10px;
+    margin-top: 8px;
+    font-size: 12.5px;
     direction: rtl;
 }
 
 .shipment-table th,
 .shipment-table td {
     border: 1px solid #111;
-    padding: 3px 4px;
+    padding: 5px 6px;
     text-align: center;
 }
 
@@ -276,6 +280,11 @@
 
 /* ---------- Unit select (كمية مدخلة / كمية البيع) ---------- */
 
+.unit-select {
+    font-size: 12px;
+    padding: 2px 4px;
+}
+
 .unit-print-label {
     display: none;
 }
@@ -285,11 +294,11 @@
 .totals-section {
     border: 1px solid #111;
     border-top: none;
-    padding: 6px 10px;
+    padding: 8px 12px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    font-size: 12.5px;
+    gap: 6px;
+    font-size: 14.5px;
     direction: rtl;
     text-align: right;
 }
@@ -312,7 +321,7 @@
 /* ---------- Summary section (by thickness) ---------- */
 
 .summary-section {
-    margin-top: 12px;
+    margin-top: 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -320,20 +329,20 @@
 
 .summary-title {
     text-align: center;
-    margin-bottom: 5px;
-    font-size: 12px;
+    margin-bottom: 6px;
+    font-size: 14px;
 }
 
 .summary-tables {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
 }
 
 .summary-table {
     border-collapse: collapse;
-    font-size: 8px;
+    font-size: 10.5px;
     width: auto;
     direction: rtl;
 }
@@ -341,7 +350,7 @@
 .summary-table th,
 .summary-table td {
     border: 1px solid #111;
-    padding: 1px 4px;
+    padding: 3px 6px;
     text-align: center;
     white-space: nowrap;
 }
@@ -352,7 +361,7 @@
 
 .summary-table.treatment-summary th,
 .summary-table.treatment-summary td {
-    padding: 1px 5px;
+    padding: 3px 7px;
 }
 
 .summary-total-row td {
@@ -361,28 +370,31 @@
 
 /* ---------- Notes & signatures ---------- */
 
+/* هاد العنصر أول شي بعد آخر قسم بالمحتوى، فبيدفع كل شي بعده (الملاحظات + التواقيع + الفوتر)
+   لتحت لآخر الصفحة، بفضل flex-direction:column على .print-page */
 .notes-section {
-    margin-top: 20px;
-    font-size: 11px;
+    margin-top: auto;
+    padding-top: 20px;
+    font-size: 12.5px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
 }
 
 .note {
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 .signatures {
     display: flex;
     justify-content: space-between;
-    margin-top: 34px;
-    font-size: 12.5px;
+    margin-top: 40px;
+    font-size: 14.5px;
 }
 
 .footer {
-    margin-top: 24px;
-    font-size: 12.5px;
+    margin-top: 26px;
+    font-size: 14.5px;
     font-style: italic;
 }
 
@@ -402,6 +414,7 @@
         box-shadow: none;
         width: auto;
         min-height: auto;
+        height: 297mm;
         padding: 8mm 10mm;
     }
 
@@ -430,7 +443,7 @@
         top: 0;
         left: 0;
         width: 210mm;
-        min-height: 297mm;
+        height: 297mm;
         margin: 0;
         padding: 10mm;
         box-shadow: none;
@@ -472,5 +485,5 @@
         margin: 0;
     }
 
- 
+
 }

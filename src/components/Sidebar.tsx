@@ -8,7 +8,7 @@ return (
 <div className="sidebar">
 
 <h2>
-Quarry System
+ALFAWAGHREH FOR MARBLE STONE
 </h2>
 
 

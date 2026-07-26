@@ -132,6 +132,28 @@ function ShipmentPrint({ shipment }: Props) {
     const [soldUnitOverrides, setSoldUnitOverrides] = useState<Record<number, SoldUnit>>({});
     const [enteredUnitOverrides, setEnteredUnitOverrides] = useState<Record<number, SoldUnit>>({});
 
+   type SoldTotals = { pieces: number; sqm: number; linearM: number };
+
+const soldTotals = stones.reduce<SoldTotals>(
+    (acc, stone, index) => {
+        const autoSold = getSoldQuantity(stone);
+        const unit = soldUnitOverrides[index] ?? autoSold.unit;
+        const value = Number(getValueForUnit(stone, unit)) || 0;
+
+        if (unit === "قطعة") acc.pieces += value;
+        else if (unit === "متر مربع") acc.sqm += value;
+        else acc.linearM += value; // متر طول
+
+        return acc;
+    },
+    { pieces: 0, sqm: 0, linearM: 0 }
+);
+
+    const soldTotalParts: string[] = [];
+    if (soldTotals.sqm > 0) soldTotalParts.push(`${soldTotals.sqm.toFixed(2)} متر مربع`);
+    if (soldTotals.linearM > 0) soldTotalParts.push(`${soldTotals.linearM.toFixed(2)} متر طول`);
+    if (soldTotals.pieces > 0) soldTotalParts.push(`${soldTotals.pieces} قطعة`);
+
     const totals = shipment?.totals || {
         count: stones.length,
         cube: shipment?.totalCube ?? 0,
@@ -369,14 +391,13 @@ function ShipmentPrint({ shipment }: Props) {
                         <span className="total-value">{totals.count}</span>
                     </div>
                     <div className="total-line">
-                        <span className="total-label">مجموع الكمية:</span>
-                        <span className="total-value">{Number(totals.cube).toFixed(2)} كوب</span>
-                        <span className="total-value">،</span>
-                        <span className="total-value">{Number(totals.sqm).toFixed(3)} متر مربع</span>
-                        <span className="total-value">،</span>
-                        <span className="total-value">{Number(totals.linearM).toFixed(2)} متر طول</span>
-                        <span className="total-value">،</span>
-                        <span className="total-value">{totals.pieces} قطعة</span>
+                        <span className="total-label">مجموع الكمية: 0.0 كوب,</span>
+                        {soldTotalParts.map((part, i) => (
+                            <span key={i} className="total-value">
+                                {part}
+                                {i < soldTotalParts.length - 1 ? " ، " : ""}
+                            </span>
+                        ))}
                     </div>
                 </div>
 
