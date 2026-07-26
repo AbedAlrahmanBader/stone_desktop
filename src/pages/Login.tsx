@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../api/axios";
+import logo from "../assets/AAA.jpg";
 import "../styles/login.css";
 
 function Login() {
@@ -30,27 +31,31 @@ function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <div className="logo">🪨</div>
+        <div className="logo">
+          <img src={logo} alt="Alfawaghreh Logo" />
+        </div>
 
-        <h1>Quarry System</h1>
+        <h1>ALFAWAGHREH FOR MARBLE STONE</h1>
 
         <p>نظام إدارة المحجر</p>
 
-        <input
-          placeholder="البريد الإلكتروني"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <div className="input-group">
+          <input
+            placeholder="البريد الإلكتروني"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-        <input
-          placeholder="كلمة المرور"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <input
+            placeholder="كلمة المرور"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
 
         <button onClick={handleLogin} disabled={loading}>
-          {loading ? "..." : "دخول"}
+          {loading ? "جاري الدخول..." : "دخول"}
         </button>
       </div>
     </div>
