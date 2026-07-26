@@ -85,6 +85,38 @@ function flattenStones(stonePieces: StonePieceDoc[]): Stone[] {
     return rows;
 }
 
+// دالة جديدة لتجميع الصفوف المتشابهة
+function groupSimilarStones(stones: Stone[]): Stone[] {
+    const grouped: Stone[] = [];
+    
+    stones.forEach((stone) => {
+        // البحث عن صف موجود بنفس الخصائص
+        const existingIndex = grouped.findIndex((g) => 
+            g.stoneType === stone.stoneType &&
+            g.length === stone.length &&
+            g.width === stone.width &&
+            g.thickness === stone.thickness
+        );
+
+        if (existingIndex !== -1) {
+            // دمج الكميات في الصف الموجود
+            const existing = grouped[existingIndex];
+            existing.pieces = (existing.pieces || 0) + (stone.pieces || 0);
+            existing.area = (existing.area || 0) + (stone.area || 0);
+            existing.linearMeter = (existing.linearMeter || 0) + (stone.linearMeter || 0);
+            // دمج الباركودات (اختياري)
+            if (stone.barcode && !existing.barcode?.includes(stone.barcode)) {
+                existing.barcode = existing.barcode ? `${existing.barcode}, ${stone.barcode}` : stone.barcode;
+            }
+        } else {
+            // إضافة صف جديد
+            grouped.push({ ...stone });
+        }
+    });
+
+    return grouped;
+}
+
 function getSoldQuantity(s: Stone): { value: string; unit: SoldUnit } {
     if (num(s.area) > 0) return { value: num(s.area).toFixed(2), unit: "متر مربع" };
     if (num(s.linearMeter) > 0) return { value: num(s.linearMeter).toFixed(2), unit: "متر طول" };
@@ -116,7 +148,7 @@ function ShipmentPrint({ shipment }: Props) {
 
     // shipment.stones جاي من الباك اند كمصفوفة مشاتيح كاملة (كل وحدة فيها items[])
     // فبنفردها هون لصفوف طباعة، صف لكل نوع حجر
-    const stones: Stone[] =
+    let stones: Stone[] =
         shipment?.stones && shipment.stones.length > 0
             ? flattenStones(shipment.stones as StonePieceDoc[])
             : [
@@ -127,6 +159,9 @@ function ShipmentPrint({ shipment }: Props) {
                   { barcode: "STN-0005", stoneType: "سقف مسمسم/مطبة", length: 30, width: 25, thickness: 15, linearMeter: 0, area: 0, pieces: 20, status: "In Stock" },
                   { barcode: "STN-0006", stoneType: "سقف مسمسم/مطبة", length: 15, width: 25, thickness: 15, linearMeter: 0, area: 0, pieces: 17, status: "In Stock" },
               ];
+
+    // تجميع الصفوف المتشابهة
+    stones = groupSimilarStones(stones);
 
     // تخزين اختيار الوحدة لكل صف (لو المستخدم غيّر الوحدة يدويًا)
     const [soldUnitOverrides, setSoldUnitOverrides] = useState<Record<number, SoldUnit>>({});
