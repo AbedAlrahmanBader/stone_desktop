@@ -13,7 +13,7 @@ import Shipments from "./pages/Shipments";
 import Customers from "./pages/Customers";
 import CustomerProfile from "./pages/CustomerProfile";
 import MainLayout from "./layouts/MainLayout";
-import PublicStone from "./publicPages/PublicStone";
+
 
 function App() {
 
@@ -46,10 +46,7 @@ function App() {
             element={<Inventory />}
           />
 
-<Route
-    path="/stone/:barcode"
-    element={<PublicStone />}
-/>
+
           <Route
             path="/add-stone"
             element={<AddStone />}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../styles/print.css";
 import logo from "../assets/AAA.jpg";
-import { QRCodeSVG } from "qrcode.react";
+
 interface StoneItem {
     _id?: string;
     stoneType?: string;
@@ -343,19 +343,18 @@ const soldTotals = stones.reduce<SoldTotals>(
                 </div>
 
                 <table className="shipment-table">
-                 <thead>
-<tr>
-    <th>الرقم</th>
-    <th>QR</th>
-    <th>بيان الصنف</th>
-    <th>المعالجة المطلوبة</th>
-    <th>الطول (سم)</th>
-    <th>العرض (سم)</th>
-    <th>السمك (سم)</th>
-    <th colSpan={2}>كمية مدخلة</th>
-    <th colSpan={2}>كمية البيع</th>
-</tr>
-</thead>
+                    <thead>
+                        <tr>
+                            <th>الرقم</th>
+                            <th>بيان الصنف</th>
+                            <th>المعالجة المطلوبة</th>
+                            <th>الطول (سم)</th>
+                            <th>العرض (سم)</th>
+                            <th>السمك (سم)</th>
+                            <th colSpan={2}>كمية مدخلة</th>
+                            <th colSpan={2}>كمية البيع</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         {stones.map((stone, index) => {
                             const enteredDefault = getEnteredQuantity(stone);
@@ -370,14 +369,6 @@ const soldTotals = stones.reduce<SoldTotals>(
                             return (
                                 <tr key={`${stone.barcode || "row"}-${index}`}>
                                     <td>{index + 1}</td>
-                                    <td>
-    {stone.barcode && (
-        <QRCodeSVG
-    size={70}
-    value={`https://stone-desktop-anil.vercel.app/stone/${stone.barcode}`}
-/>
-    )}
-</td>
                                     <td></td>
                                     <td>{stone.stoneType || "---"}</td>
                                     <td>{num(stone.length) === 0 ? "مفتوح" : stone.length}</td>
