@@ -12,7 +12,6 @@ interface Stone {
     weight: number;
     status: string;
 }
-
 interface Shipment {
     _id: string;
     customer: string;

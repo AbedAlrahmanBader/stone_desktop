@@ -107,6 +107,65 @@ function Inventory() {
     }, []);
 
 
+    // ------- طباعة QR Code لمشتاح معيّن -------
+
+    const printQRCode = (barcode: string) => {
+
+        const printWindow = window.open("", "_blank", "width=400,height=500");
+
+        if (!printWindow) {
+            alert("الرجاء السماح بالنوافذ المنبثقة (Popups) لهذا الموقع للسماح بالطباعة");
+            return;
+        }
+
+        const qrElement = document.getElementById(`qr-${barcode}`);
+
+        if (!qrElement) return;
+
+        const svgHTML = qrElement.innerHTML;
+
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>${barcode}</title>
+                    <style>
+                        body {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            font-family: sans-serif;
+                            padding: 20px;
+                        }
+                        svg {
+                            width: 250px;
+                            height: 250px;
+                        }
+                        p {
+                            margin-top: 10px;
+                            font-size: 18px;
+                            font-weight: bold;
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${svgHTML}
+                    <p>${barcode}</p>
+                </body>
+            </html>
+        `);
+
+        printWindow.document.close();
+
+        printWindow.onload = () => {
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        };
+
+    };
+
+
 
     // ------- تعديل بيانات المشتاح العامة (باركود / حالة) -------
 
@@ -644,14 +703,21 @@ function Inventory() {
                                     return (
 
                                         <tr key={item._id} className="stone-item-row">
-<td>
-    <QRCodeSVG
-        size={80}
-        value={
-            `https://alfawaghra-stone.vercel.app/stone/${stone.barcode}`
-        }
-    />
-</td>
+                                            <td>
+                                                <div
+                                                    id={`qr-${stone.barcode}`}
+                                                    onClick={() => printQRCode(stone.barcode)}
+                                                    style={{ cursor: "pointer", display: "inline-block" }}
+                                                    title="اضغط للطباعة"
+                                                >
+                                                    <QRCodeSVG
+                                                        size={80}
+                                                        value={
+                                                            `https://alfawaghra-stone.vercel.app/stone/${stone.barcode}`
+                                                        }
+                                                    />
+                                                </div>
+                                            </td>
                                             <td>{item.stoneType}</td>
                                             <td>{item.length === 0 ? "مفتوح" : item.length}</td>
                                             <td>{item.width}</td>
