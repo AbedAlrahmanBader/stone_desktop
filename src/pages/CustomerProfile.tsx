@@ -15,6 +15,10 @@ interface NewOrderItem {
   thickness: number;
 }
 
+interface EditOrderItem extends NewOrderItem {
+  _id?: string;
+}
+
 function CustomerProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,6 +32,14 @@ function CustomerProfile() {
     items: [{ stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0 }]
   });
   const [loading, setLoading] = useState(false);
+
+  // ------- تعديل طلبية موجودة -------
+  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  const [editOrder, setEditOrder] = useState<{ orderNumber: string; items: EditOrderItem[] }>({
+    orderNumber: "",
+    items: []
+  });
+  const [editLoading, setEditLoading] = useState(false);
 
   const loadCustomer = async () => {
     try {
@@ -124,6 +136,104 @@ function CustomerProfile() {
     setNewOrder({ ...newOrder, items: updatedItems });
   };
 
+  // ------- إجراءات تعديل الطلبية -------
+  const startEditOrder = (order: any) => {
+    setEditingOrderId(order._id);
+    setEditOrder({
+      orderNumber: order.orderNumber,
+      items: (order.items || []).map((item: any) => ({
+        _id: item._id,
+        stoneType: item.stoneType,
+        unit: item.unit,
+        requiredQty: item.requiredQty,
+        length: item.length || 0,
+        width: item.width || 0,
+        thickness: item.thickness || 0,
+      }))
+    });
+  };
+
+  const cancelEditOrder = () => {
+    setEditingOrderId(null);
+    setEditOrder({ orderNumber: "", items: [] });
+  };
+
+  const addEditOrderItem = () => {
+    setEditOrder({
+      ...editOrder,
+      items: [...editOrder.items, { stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0 }]
+    });
+  };
+
+  const removeEditOrderItem = (index: number) => {
+    if (editOrder.items.length === 1) {
+      alert("لا يمكن حذف الصنف الوحيد");
+      return;
+    }
+    setEditOrder({
+      ...editOrder,
+      items: editOrder.items.filter((_, i) => i !== index)
+    });
+  };
+
+  const updateEditOrderItem = (index: number, field: keyof EditOrderItem, value: any) => {
+    setEditOrder({
+      ...editOrder,
+      items: editOrder.items.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      )
+    });
+  };
+
+  const handleUpdateOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingOrderId) return;
+
+    setEditLoading(true);
+
+    try {
+      const validItems = editOrder.items.filter(
+        item => item.stoneType.trim() && item.requiredQty > 0
+      );
+
+      if (validItems.length === 0) {
+        alert("يرجى إضافة على الأقل صنف واحد صحيح");
+        setEditLoading(false);
+        return;
+      }
+
+      await api.put(`/orders/${editingOrderId}`, {
+        orderNumber: editOrder.orderNumber,
+        items: validItems
+      });
+
+      cancelEditOrder();
+      await loadCustomer();
+
+      alert("تم تعديل الطلبية بنجاح");
+    } catch (error: any) {
+      console.error(error);
+      alert(error.response?.data?.message || "حدث خطأ أثناء تعديل الطلبية");
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    const confirmed = window.confirm(
+      "متأكد إنك بدك تحذف هذه الطلبية؟ هاد الإجراء ما بينرجع."
+    );
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/orders/${orderId}`);
+      await loadCustomer();
+    } catch (error: any) {
+      console.error(error);
+      alert(error.response?.data?.message || "حدث خطأ أثناء حذف الطلبية");
+    }
+  };
+
   if (!data) {
     return <h2>جاري تحميل بيانات العميل...</h2>;
   }
@@ -187,6 +297,18 @@ function CustomerProfile() {
                     >
                       عرض التفاصيل
                     </button>
+                    <button
+                      className="btn-edit-order"
+                      onClick={() => startEditOrder(order)}
+                    >
+                      ✏️ تعديل
+                    </button>
+                    <button
+                      className="btn-delete-order"
+                      onClick={() => handleDeleteOrder(order._id)}
+                    >
+                      🗑 حذف
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -240,6 +362,7 @@ function CustomerProfile() {
         </table>
       )}
 
+      {/* مودال إضافة طلبية */}
       {showAddOrder && (
         <div className="modal-overlay" onClick={() => setShowAddOrder(false)}>
           <div
@@ -345,6 +468,120 @@ function CustomerProfile() {
                   type="button"
                   className="btn-cancel"
                   onClick={() => setShowAddOrder(false)}
+                >
+                  إلغاء
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* مودال تعديل طلبية */}
+      {editingOrderId && (
+        <div className="modal-overlay" onClick={cancelEditOrder}>
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h2>تعديل الطلبية</h2>
+              <button
+                className="modal-close"
+                onClick={cancelEditOrder}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateOrder}>
+              <div className="form-group">
+                <label>رقم الطلبية *</label>
+                <input
+                  type="text"
+                  value={editOrder.orderNumber}
+                  onChange={(e) => setEditOrder({ ...editOrder, orderNumber: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>الأصناف</label>
+                {editOrder.items.map((item, index) => (
+                  <div key={item._id ?? index} className="order-item-row">
+                    <input
+                      type="text"
+                      placeholder="نوع الحجر"
+                      value={item.stoneType}
+                      onChange={(e) => updateEditOrderItem(index, "stoneType", e.target.value)}
+                      required
+                    />
+                    <select
+                      value={item.unit}
+                      onChange={(e) => updateEditOrderItem(index, "unit", e.target.value)}
+                    >
+                      <option value="pieces">قطع</option>
+                      <option value="linearMeter">متر طولي</option>
+                      <option value="area">مساحة</option>
+                    </select>
+                    <input
+                      type="number"
+                      placeholder="الطول (سم)"
+                      value={item.length || ""}
+                      onChange={(e) => updateEditOrderItem(index, "length", Number(e.target.value))}
+                    />
+                    <input
+                      type="number"
+                      placeholder="العرض (سم)"
+                      value={item.width || ""}
+                      onChange={(e) => updateEditOrderItem(index, "width", Number(e.target.value))}
+                    />
+                    <input
+                      type="number"
+                      placeholder="السمك (سم)"
+                      value={item.thickness || ""}
+                      onChange={(e) => updateEditOrderItem(index, "thickness", Number(e.target.value))}
+                    />
+                    <input
+                      type="number"
+                      placeholder="الكمية"
+                      value={item.requiredQty || ""}
+                      onChange={(e) => updateEditOrderItem(index, "requiredQty", Number(e.target.value))}
+                      required
+                      min="1"
+                    />
+                    {editOrder.items.length > 1 && (
+                      <button
+                        type="button"
+                        className="btn-remove-item"
+                        onClick={() => removeEditOrderItem(index)}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="btn-add-item"
+                  onClick={addEditOrderItem}
+                >
+                  + إضافة صنف
+                </button>
+              </div>
+
+              <div className="form-actions">
+                <button
+                  type="submit"
+                  className="btn-submit"
+                  disabled={editLoading}
+                >
+                  {editLoading ? "جاري الحفظ..." : "حفظ التعديل"}
+                </button>
+                <button
+                  type="button"
+                  className="btn-cancel"
+                  onClick={cancelEditOrder}
                 >
                   إلغاء
                 </button>
