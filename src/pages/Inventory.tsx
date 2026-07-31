@@ -81,6 +81,7 @@ function Inventory() {
     useEffect(() => {
         loadStones();
     }, []);
+
 // Inventory.tsx - تعديل دالة الطباعة
 const printQRAndBarcode = (barcode: string) => {
     const printWindow = window.open("", "_blank", "width=800,height=900");
@@ -129,12 +130,12 @@ const printQRAndBarcode = (barcode: string) => {
         document.body.removeChild(svg);
         document.body.removeChild(barcodeDiv);
 
-        // إنشاء صفحة الطباعة بتصميم مطابق لصورة WAGERA
+        // إنشاء صفحة الطباعة بتصميم احترافي
         printWindow.document.write(`
             <!DOCTYPE html>
             <html dir="rtl">
                 <head>
-                    <title>WAGERA - ${barcode}</title>
+                    <title>${barcode}</title>
                     <style>
                         * {
                             margin: 0;
@@ -144,12 +145,12 @@ const printQRAndBarcode = (barcode: string) => {
                         
                         @page {
                             size: A4;
-                            margin: 10mm;
+                            margin: 15mm;
                         }
                         
                         body {
                             font-family: 'Arial', 'Segoe UI', sans-serif;
-                            background: #f0ede8;
+                            background: #f5f5f5;
                             display: flex;
                             justify-content: center;
                             align-items: center;
@@ -157,278 +158,273 @@ const printQRAndBarcode = (barcode: string) => {
                             padding: 20px;
                         }
                         
-                        /* البطاقة الرئيسية - تصميم أنيق مثل الصورة */
-                        .wagera-card {
+                        .certificate-wrapper {
                             background: white;
-                            width: 180mm;
+                            width: 210mm;
                             max-width: 100%;
-                            min-height: 120mm;
-                            padding: 12mm 10mm 10mm 10mm;
-                            box-shadow: 0 8px 40px rgba(0,0,0,0.12);
-                            border-radius: 4px;
+                            min-height: 297mm;
+                            padding: 15mm 12mm;
+                            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+                            border-radius: 8px;
                             position: relative;
-                            border: 1px solid #d4c5a0;
                         }
                         
-                        /* الإطار الذهبي المزدوج */
-                        .wagera-card::before {
+                        /* إطار ذهبي */
+                        .certificate-wrapper::before {
                             content: '';
                             position: absolute;
-                            top: 5mm;
-                            left: 5mm;
-                            right: 5mm;
-                            bottom: 5mm;
-                            border: 2px solid #c9a84c;
+                            top: 8mm;
+                            left: 8mm;
+                            right: 8mm;
+                            bottom: 8mm;
+                            border: 3px solid #c9a84c;
+                            border-radius: 4px;
+                            pointer-events: none;
+                        }
+                        
+                        /* خلفية مزخرفة */
+                        .certificate-wrapper::after {
+                            content: '';
+                            position: absolute;
+                            top: 10mm;
+                            left: 10mm;
+                            right: 10mm;
+                            bottom: 10mm;
+                            border: 1px solid #e8d5b5;
                             border-radius: 2px;
                             pointer-events: none;
                         }
                         
-                        .wagera-card::after {
-                            content: '';
-                            position: absolute;
-                            top: 7mm;
-                            left: 7mm;
-                            right: 7mm;
-                            bottom: 7mm;
-                            border: 1px solid #e8dcc8;
-                            border-radius: 1px;
-                            pointer-events: none;
-                        }
-                        
-                        /* الهيدر - شعار WAGERA */
-                        .header-wagera {
+                        .header {
                             text-align: center;
-                            border-bottom: 2px solid #c9a84c;
-                            padding-bottom: 6mm;
-                            margin-bottom: 5mm;
-                            position: relative;
+                            margin-bottom: 10mm;
+                            border-bottom: 3px double #c9a84c;
+                            padding-bottom: 8mm;
                         }
                         
-                        .logo-text {
-                            font-size: 38px;
-                            font-weight: 900;
-                            color: #1a1a1a;
-                            letter-spacing: 6px;
-                            font-family: 'Times New Roman', 'Arial', serif;
-                            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
-                        }
-                        
-                        .logo-text .gold {
-                            color: #c9a84c;
-                            font-weight: 700;
-                        }
-                        
-                        .logo-text .gold-star {
-                            color: #c9a84c;
-                            font-size: 28px;
-                            margin: 0 5px;
-                        }
-                        
-                        .sub-header {
-                            display: flex;
-                            justify-content: center;
-                            gap: 20px;
-                            flex-wrap: wrap;
-                            font-size: 12px;
-                            color: #555;
-                            margin-top: 3px;
-                            letter-spacing: 0.5px;
-                        }
-                        
-                        .sub-header span {
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 4px;
-                        }
-                        
-                        .sub-header .divider-line {
-                            color: #c9a84c;
+                        .company-name {
+                            font-size: 32px;
                             font-weight: bold;
+                            color: #1a1a1a;
+                            letter-spacing: 3px;
+                            text-transform: uppercase;
+                            font-family: 'Times New Roman', serif;
+                            margin-bottom: 5px;
                         }
                         
-                        /* محتوى البطاقة - توزيع QR والباركود */
-                        .card-content {
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
-                            padding: 2mm 0;
+                        .company-name span {
+                            color: #c9a84c;
                         }
                         
-                        .top-section {
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            gap: 15mm;
-                            width: 100%;
-                            padding: 3mm 0;
-                            flex-wrap: wrap;
+                        .company-info {
+                            font-size: 14px;
+                            color: #555;
+                            margin-top: 5px;
+                            line-height: 1.6;
                         }
                         
-                        /* جهة اليمين - QR Code */
-                        .qr-side {
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
-                            background: #faf8f5;
-                            padding: 8px 12px 5px 12px;
-                            border-radius: 6px;
-                            border: 1px solid #e8dcc8;
+                        .company-info a {
+                            color: #c9a84c;
+                            text-decoration: none;
                         }
                         
-                        .qr-side svg {
-                            width: 120px;
-                            height: 120px;
-                            display: block;
+                        .title-section {
+                            text-align: center;
+                            margin: 8mm 0 10mm 0;
                         }
                         
-                        .qr-label-text {
-                            font-size: 10px;
-                            color: #999;
+                        .title-section h2 {
+                            font-size: 26px;
+                            color: #1a1a1a;
                             font-weight: bold;
                             letter-spacing: 2px;
-                            margin-top: 3px;
-                            text-transform: uppercase;
+                            position: relative;
+                            display: inline-block;
+                            padding: 0 20px;
                         }
                         
-                        /* جهة اليسار - معلومات المنتج */
-                        .info-side {
+                        .title-section h2::before,
+                        .title-section h2::after {
+                            content: '';
+                            position: absolute;
+                            top: 50%;
+                            width: 40px;
+                            height: 2px;
+                            background: #c9a84c;
+                        }
+                        
+                        .title-section h2::before {
+                            right: -50px;
+                        }
+                        
+                        .title-section h2::after {
+                            left: -50px;
+                        }
+                        
+                        .content {
                             display: flex;
                             flex-direction: column;
-                            align-items: flex-start;
-                            padding: 5px 0;
+                            align-items: center;
+                            justify-content: center;
+                            padding: 5mm 0;
                         }
                         
-                        .info-side .product-title {
-                            font-size: 14px;
+                        .qr-container {
+                            background: white;
+                            padding: 15px;
+                            border-radius: 12px;
+                            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                            margin-bottom: 10mm;
+                            border: 2px solid #f0ebe0;
+                            display: inline-block;
+                        }
+                        
+                        .qr-container svg {
+                            width: 200px;
+                            height: 200px;
+                            display: block;
+                            margin: 0 auto;
+                        }
+                        
+                        .qr-label {
+                            text-align: center;
+                            font-size: 12px;
                             color: #888;
+                            margin-top: 5px;
                             font-weight: bold;
-                            letter-spacing: 1px;
-                            margin-bottom: 3px;
+                            letter-spacing: 2px;
                         }
                         
-                        .info-side .product-id-big {
-                            font-size: 28px;
-                            font-weight: 900;
-                            color: #1a1a1a;
-                            font-family: 'Courier New', monospace;
-                            letter-spacing: 4px;
-                            background: #f5f2ec;
-                            padding: 2px 15px;
-                            border-radius: 4px;
-                            border: 1px dashed #c9a84c;
-                            direction: ltr;
-                        }
-                        
-                        .info-side .product-sub {
-                            font-size: 11px;
-                            color: #aaa;
-                            margin-top: 4px;
-                            letter-spacing: 1px;
-                        }
-                        
-                        /* الفاصل المزخرف */
-                        .divider-gold {
-                            width: 70%;
-                            height: 1px;
+                        .divider {
+                            width: 60%;
+                            height: 2px;
                             background: linear-gradient(to right, transparent, #c9a84c, transparent);
-                            margin: 4mm auto;
+                            margin: 8mm auto;
                             position: relative;
                         }
                         
-                        .divider-gold::after {
-                            content: '◆';
+                        .divider::after {
+                            content: '✦';
                             position: absolute;
                             top: 50%;
                             left: 50%;
                             transform: translate(-50%, -50%);
                             background: white;
-                            padding: 0 12px;
+                            padding: 0 15px;
                             color: #c9a84c;
-                            font-size: 14px;
+                            font-size: 18px;
                         }
                         
-                        /* الباركود */
-                        .barcode-section {
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
+                        .barcode-container {
+                            background: white;
+                            padding: 15px 20px;
+                            border-radius: 8px;
+                            border: 2px solid #f0ebe0;
+                            margin: 5mm 0 8mm 0;
                             width: 100%;
-                            padding: 2mm 0;
-                            background: #faf8f5;
-                            border-radius: 4px;
-                            border: 1px solid #e8dcc8;
-                            margin: 2mm 0;
+                            display: flex;
+                            justify-content: center;
                         }
                         
-                        .barcode-section svg {
-                            max-width: 320px;
+                        .barcode-container svg {
+                            max-width: 350px;
                             width: 100%;
                             height: auto;
                         }
                         
-                        .barcode-number {
+                        .product-id {
+                            text-align: center;
                             font-size: 18px;
                             font-weight: bold;
                             color: #1a1a1a;
-                            font-family: 'Courier New', monospace;
                             letter-spacing: 3px;
-                            margin-top: 2px;
-                            background: #f5f2ec;
-                            padding: 2px 20px;
-                            border-radius: 3px;
-                            direction: ltr;
+                            font-family: 'Courier New', monospace;
+                            background: #f8f6f1;
+                            padding: 8px 25px;
+                            border-radius: 25px;
+                            display: inline-block;
+                            margin: 5mm 0;
+                            border: 1px dashed #c9a84c;
                         }
                         
-                        /* الفوتر */
-                        .footer-wagera {
+                        .product-id-label {
+                            font-size: 12px;
+                            color: #888;
+                            font-weight: normal;
+                            letter-spacing: 1px;
+                            margin-left: 8px;
+                        }
+                        
+                        .footer {
                             text-align: center;
-                            margin-top: 4mm;
-                            padding-top: 4mm;
-                            border-top: 1px solid #e8dcc8;
-                            font-size: 11px;
-                            color: #999;
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            flex-wrap: wrap;
+                            margin-top: 10mm;
+                            padding-top: 8mm;
+                            border-top: 2px solid #f0ebe0;
+                            font-size: 13px;
+                            color: #777;
                         }
                         
-                        .footer-wagera .brand {
-                            font-weight: bold;
+                        .footer .thanks {
+                            font-size: 16px;
                             color: #c9a84c;
-                            font-size: 13px;
+                            font-weight: bold;
+                            margin-bottom: 3px;
+                        }
+                        
+                        .stone-details-grid {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr 1fr;
+                            gap: 10px;
+                            margin: 5mm 0;
+                            width: 100%;
+                            max-width: 400px;
+                            background: #faf8f5;
+                            padding: 10px;
+                            border-radius: 8px;
+                        }
+                        
+                        .stone-detail-item {
+                            text-align: center;
+                            padding: 5px;
+                            border-left: 1px solid #f0ebe0;
+                        }
+                        
+                        .stone-detail-item:last-child {
+                            border-left: none;
+                        }
+                        
+                        .stone-detail-item .label {
+                            font-size: 10px;
+                            color: #999;
+                            text-transform: uppercase;
                             letter-spacing: 1px;
                         }
                         
-                        .footer-wagera .brand span {
-                            font-weight: 900;
-                            color: #1a1a1a;
-                        }
-                        
-                        .footer-wagera .date {
-                            font-size: 10px;
-                            color: #bbb;
-                        }
-                        
-                        /* زر الطباعة - يظهر فقط على الشاشة */
-                        .print-btn {
-                            display: inline-block;
-                            margin-top: 10mm;
-                            padding: 10px 30px;
-                            background: #c9a84c;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
+                        .stone-detail-item .value {
                             font-size: 16px;
                             font-weight: bold;
-                            cursor: pointer;
-                            transition: all 0.3s;
+                            color: #1a1a1a;
+                            margin-top: 2px;
                         }
                         
-                        .print-btn:hover {
-                            background: #b8973a;
-                            transform: translateY(-2px);
-                            box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3);
+                        .barcode-text {
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: #1a1a1a;
+                            letter-spacing: 3px;
+                            font-family: 'Courier New', monospace;
+                            margin: 3mm 0;
+                            padding: 5px 20px;
+                            background: #f8f6f1;
+                            border-radius: 4px;
+                            display: inline-block;
+                            border: 1px solid #e8d5b5;
+                        }
+                        
+                        .print-date {
+                            font-size: 11px;
+                            color: #aaa;
+                            margin-top: 5mm;
                         }
                         
                         @media print {
@@ -437,153 +433,132 @@ const printQRAndBarcode = (barcode: string) => {
                                 padding: 0;
                             }
                             
-                            .wagera-card {
+                            .certificate-wrapper {
                                 box-shadow: none;
                                 border-radius: 0;
-                                padding: 10mm 8mm;
+                                padding: 12mm 10mm;
                                 width: 100%;
                                 min-height: 100vh;
-                                border: none;
                             }
                             
-                            .wagera-card::before,
-                            .wagera-card::after {
+                            .certificate-wrapper::before,
+                            .certificate-wrapper::after {
                                 display: none;
                             }
                             
-                            .print-btn {
+                            .no-print {
                                 display: none !important;
                             }
                             
-                            .qr-side {
+                            .qr-container {
+                                box-shadow: none;
                                 border: 1px solid #ddd;
-                                background: white;
                             }
                             
-                            .barcode-section {
+                            .barcode-container {
                                 border: 1px solid #ddd;
-                                background: white;
-                            }
-                            
-                            .info-side .product-id-big {
-                                background: #f5f2ec;
                             }
                         }
                         
-                        @media (max-width: 700px) {
-                            .top-section {
-                                flex-direction: column;
-                                gap: 5mm;
+                        @media (max-width: 600px) {
+                            .certificate-wrapper {
+                                padding: 10mm 8mm;
                             }
                             
-                            .info-side {
-                                align-items: center;
+                            .company-name {
+                                font-size: 24px;
                             }
                             
-                            .info-side .product-id-big {
-                                font-size: 22px;
+                            .qr-container svg {
+                                width: 150px;
+                                height: 150px;
                             }
                             
-                            .qr-side svg {
-                                width: 100px;
-                                height: 100px;
+                            .stone-details-grid {
+                                grid-template-columns: 1fr 1fr;
                             }
                             
-                            .logo-text {
-                                font-size: 28px;
-                                letter-spacing: 3px;
+                            .title-section h2 {
+                                font-size: 20px;
                             }
                             
-                            .sub-header {
-                                font-size: 10px;
-                                gap: 8px;
+                            .title-section h2::before,
+                            .title-section h2::after {
+                                width: 20px;
                             }
                             
-                            .footer-wagera {
-                                flex-direction: column;
-                                gap: 3px;
+                            .title-section h2::before {
+                                right: -30px;
+                            }
+                            
+                            .title-section h2::after {
+                                left: -30px;
                             }
                         }
                     </style>
                 </head>
                 <body>
-                    <div class="wagera-card">
-                        <!-- الهيدر - مثل الصورة -->
-                        <div class="header-wagera">
-                            <div class="logo-text">
-                                <span class="gold-star">✦</span>
-                                <span class="gold">WA</span>GERA
-                                <span class="gold-star">✦</span>
-                            </div>
-                            <div class="sub-header">
-                                <span>🏛️ Bethlehem-Palestine</span>
-                                <span class="divider-line">|</span>
-                                <span>📱 050-5574747</span>
-                                <span class="divider-line">|</span>
-                                <span>📧 alfawagra@yahoo.com</span>
-                                <span class="divider-line">|</span>
-                                <span>🌐 www.fwagerastones.com</span>
-                            </div>
-                        </div>
-                        
-                        <!-- المحتوى -->
-                        <div class="card-content">
-                            <div class="top-section">
-                                <!-- جهة اليمين: QR Code -->
-                                <div class="qr-side">
-                                    ${svgHTML}
-                                    <div class="qr-label-text">🔲 QR Code</div>
-                                </div>
-                                
-                                <!-- جهة اليسار: معلومات المنتج -->
-                                <div class="info-side">
-                                    <div class="product-title">📦 رقم المنتج</div>
-                                    <div class="product-id-big" style="direction: ltr; text-align: center;">
-                                        ${barcode}
-                                    </div>
-                                    <div class="product-sub">• Product ID •</div>
-                                </div>
-                            </div>
-                            
-                            <!-- الفاصل المزخرف -->
-                            <div class="divider-gold"></div>
-                            
-                            <!-- الباركود -->
-                            <div class="barcode-section">
-                                ${barcodeHTML}
-                                <div class="barcode-number" style="direction: ltr;">
-                                    ${barcode}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- الفوتر -->
-                        <div class="footer-wagera">
-                            <div class="brand">
+                    <div class="certificate-wrapper">
+                        <!-- Header -->
+                        <div class="header">
+                            <div class="company-name">
                                 <span>✦</span> ALFAWAGHRA <span>✦</span>
                             </div>
-                            <div style="font-size: 11px; color: #888;">
-                                جميع الحقوق محفوظة © ${new Date().getFullYear()}
+                            <div class="company-info">
+                                Bethlehem-Palestine | 📱 050-5574747<br>
+                                📧 al-fawaghra@hotmail.com | 🌐 www.alfawaghra.com
                             </div>
-                            <div class="date">
-                                📅 ${new Date().toLocaleString('ar-EG', { 
+                        </div>
+                        
+                        <!-- Title -->
+                        <div class="title-section">
+                            <h2>بطاقة المنتج</h2>
+                            <p style="color: #888; font-size: 14px; margin-top: 5px;">Product Identification Card</p>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="content">
+                            <!-- QR Code -->
+                            <div class="qr-container">
+                                ${svgHTML}
+                                <div class="qr-label">🔲 QR Code</div>
+                            </div>
+                            
+                            <div class="divider"></div>
+                            
+                            <!-- Barcode -->
+                            <div class="barcode-container">
+                                ${barcodeHTML}
+                            </div>
+                            
+                            <!-- Product ID -->
+                            <div class="product-id">
+                                <span class="product-id-label">📦 رقم المنتج</span>
+                                ${barcode}
+                            </div>
+                            
+                            <!-- Barcode Text -->
+                            <div class="barcode-text">
+                                ${barcode}
+                            </div>
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div class="footer">
+                            <div class="thanks">✦ شكراً لثقتكم بنا ✦</div>
+                            <div style="margin-top: 3px; font-size: 12px; color: #999;">
+                                جميع الحقوق محفوظة © ${new Date().getFullYear()} - شركة الفواغرة للحجر والرخام
+                            </div>
+                            <div class="print-date">
+                                تاريخ الطباعة: ${new Date().toLocaleString('ar-EG', { 
                                     year: 'numeric', 
                                     month: 'long', 
-                                    day: 'numeric'
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
                                 })}
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- زر الطباعة (يظهر فقط على الشاشة) -->
-                    <div style="text-align: center; margin-top: 15px; width: 100%;" class="no-print">
-                        <button onclick="window.print()" class="print-btn">
-                            🖨️ طباعة البطاقة
-                        </button>
-                        <br>
-                        <button onclick="window.close()" style="margin-top: 8px; padding: 8px 25px; background: #eee; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 14px; color: #666;">
-                            ✖ إغلاق
-                        </button>
                     </div>
                 </body>
             </html>
