@@ -82,254 +82,504 @@ function Inventory() {
         loadStones();
     }, []);
 
-    // ------- طباعة QR Code و Barcode معاً -------
-    const printQRAndBarcode = (barcode: string) => {
-        const printWindow = window.open("", "_blank", "width=500,height=600");
+// Inventory.tsx - تعديل دالة الطباعة
+const printQRAndBarcode = (barcode: string) => {
+    const printWindow = window.open("", "_blank", "width=800,height=900");
+    
+    if (!printWindow) {
+        alert("الرجاء السماح بالنوافذ المنبثقة (Popups) لهذا الموقع للسماح بالطباعة");
+        return;
+    }
+
+    const qrElement = document.getElementById(`qr-${barcode}`);
+    if (!qrElement) {
+        alert("لم يتم العثور على QR Code");
+        return;
+    }
+
+    const svgHTML = qrElement.innerHTML;
+
+    // إنشاء Barcode
+    const barcodeDiv = document.createElement('div');
+    barcodeDiv.id = `barcode-container-${barcode}`;
+    document.body.appendChild(barcodeDiv);
+    
+    try {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("id", `barcode-${barcode}`);
+        document.body.appendChild(svg);
         
-        if (!printWindow) {
-            alert("الرجاء السماح بالنوافذ المنبثقة (Popups) لهذا الموقع للسماح بالطباعة");
-            return;
-        }
-
-        // الحصول على عنصر QR
-        const qrElement = document.getElementById(`qr-${barcode}`);
-        if (!qrElement) {
-            alert("لم يتم العثور على QR Code");
-            return;
-        }
-
-        const svgHTML = qrElement.innerHTML;
-
-        // إنشاء Barcode باستخدام jsbarcode
-        const barcodeDiv = document.createElement('div');
-        barcodeDiv.id = `barcode-container-${barcode}`;
-        document.body.appendChild(barcodeDiv);
+        JsBarcode(`#barcode-${barcode}`, barcode, {
+            format: "CODE128",
+            width: 2.5,
+            height: 100,
+            displayValue: true,
+            fontSize: 22,
+            font: "monospace",
+            textAlign: "center",
+            textPosition: "bottom",
+            textMargin: 15,
+            margin: 15,
+            background: "#ffffff",
+            lineColor: "#000000",
+        });
         
-        try {
-            // إنشاء عنصر SVG للباركود
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("id", `barcode-${barcode}`);
-            document.body.appendChild(svg);
-            
-            // إنشاء الباركود
-            JsBarcode(`#barcode-${barcode}`, barcode, {
-                format: "CODE128",
-                width: 2,
-                height: 80,
-                displayValue: true,
-                fontSize: 20,
-                font: "monospace",
-                textAlign: "center",
-                textPosition: "bottom",
-                textMargin: 10,
-                margin: 10,
-            });
-            
-            // الحصول على SVG الناتج
-            const barcodeElement = document.getElementById(`barcode-${barcode}`);
-            const barcodeHTML = barcodeElement?.outerHTML || '';
-            
-            // تنظيف
-            document.body.removeChild(svg);
-            document.body.removeChild(barcodeDiv);
+        const barcodeElement = document.getElementById(`barcode-${barcode}`);
+        const barcodeHTML = barcodeElement?.outerHTML || '';
+        
+        document.body.removeChild(svg);
+        document.body.removeChild(barcodeDiv);
 
-            // إنشاء صفحة الطباعة
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>${barcode}</title>
-                        <style>
+        // إنشاء صفحة الطباعة بتصميم احترافي
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html dir="rtl">
+                <head>
+                    <title>${barcode}</title>
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        
+                        @page {
+                            size: A4;
+                            margin: 15mm;
+                        }
+                        
+                        body {
+                            font-family: 'Arial', 'Segoe UI', sans-serif;
+                            background: #f5f5f5;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh;
+                            padding: 20px;
+                        }
+                        
+                        .certificate-wrapper {
+                            background: white;
+                            width: 210mm;
+                            max-width: 100%;
+                            min-height: 297mm;
+                            padding: 15mm 12mm;
+                            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+                            border-radius: 8px;
+                            position: relative;
+                        }
+                        
+                        /* إطار ذهبي */
+                        .certificate-wrapper::before {
+                            content: '';
+                            position: absolute;
+                            top: 8mm;
+                            left: 8mm;
+                            right: 8mm;
+                            bottom: 8mm;
+                            border: 3px solid #c9a84c;
+                            border-radius: 4px;
+                            pointer-events: none;
+                        }
+                        
+                        /* خلفية مزخرفة */
+                        .certificate-wrapper::after {
+                            content: '';
+                            position: absolute;
+                            top: 10mm;
+                            left: 10mm;
+                            right: 10mm;
+                            bottom: 10mm;
+                            border: 1px solid #e8d5b5;
+                            border-radius: 2px;
+                            pointer-events: none;
+                        }
+                        
+                        .header {
+                            text-align: center;
+                            margin-bottom: 10mm;
+                            border-bottom: 3px double #c9a84c;
+                            padding-bottom: 8mm;
+                        }
+                        
+                        .company-name {
+                            font-size: 32px;
+                            font-weight: bold;
+                            color: #1a1a1a;
+                            letter-spacing: 3px;
+                            text-transform: uppercase;
+                            font-family: 'Times New Roman', serif;
+                            margin-bottom: 5px;
+                        }
+                        
+                        .company-name span {
+                            color: #c9a84c;
+                        }
+                        
+                        .company-info {
+                            font-size: 14px;
+                            color: #555;
+                            margin-top: 5px;
+                            line-height: 1.6;
+                        }
+                        
+                        .company-info a {
+                            color: #c9a84c;
+                            text-decoration: none;
+                        }
+                        
+                        .title-section {
+                            text-align: center;
+                            margin: 8mm 0 10mm 0;
+                        }
+                        
+                        .title-section h2 {
+                            font-size: 26px;
+                            color: #1a1a1a;
+                            font-weight: bold;
+                            letter-spacing: 2px;
+                            position: relative;
+                            display: inline-block;
+                            padding: 0 20px;
+                        }
+                        
+                        .title-section h2::before,
+                        .title-section h2::after {
+                            content: '';
+                            position: absolute;
+                            top: 50%;
+                            width: 40px;
+                            height: 2px;
+                            background: #c9a84c;
+                        }
+                        
+                        .title-section h2::before {
+                            right: -50px;
+                        }
+                        
+                        .title-section h2::after {
+                            left: -50px;
+                        }
+                        
+                        .content {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            padding: 5mm 0;
+                        }
+                        
+                        .qr-container {
+                            background: white;
+                            padding: 15px;
+                            border-radius: 12px;
+                            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                            margin-bottom: 10mm;
+                            border: 2px solid #f0ebe0;
+                            display: inline-block;
+                        }
+                        
+                        .qr-container svg {
+                            width: 200px;
+                            height: 200px;
+                            display: block;
+                            margin: 0 auto;
+                        }
+                        
+                        .qr-label {
+                            text-align: center;
+                            font-size: 12px;
+                            color: #888;
+                            margin-top: 5px;
+                            font-weight: bold;
+                            letter-spacing: 2px;
+                        }
+                        
+                        .divider {
+                            width: 60%;
+                            height: 2px;
+                            background: linear-gradient(to right, transparent, #c9a84c, transparent);
+                            margin: 8mm auto;
+                            position: relative;
+                        }
+                        
+                        .divider::after {
+                            content: '✦';
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            background: white;
+                            padding: 0 15px;
+                            color: #c9a84c;
+                            font-size: 18px;
+                        }
+                        
+                        .barcode-container {
+                            background: white;
+                            padding: 15px 20px;
+                            border-radius: 8px;
+                            border: 2px solid #f0ebe0;
+                            margin: 5mm 0 8mm 0;
+                            width: 100%;
+                            display: flex;
+                            justify-content: center;
+                        }
+                        
+                        .barcode-container svg {
+                            max-width: 350px;
+                            width: 100%;
+                            height: auto;
+                        }
+                        
+                        .product-id {
+                            text-align: center;
+                            font-size: 18px;
+                            font-weight: bold;
+                            color: #1a1a1a;
+                            letter-spacing: 3px;
+                            font-family: 'Courier New', monospace;
+                            background: #f8f6f1;
+                            padding: 8px 25px;
+                            border-radius: 25px;
+                            display: inline-block;
+                            margin: 5mm 0;
+                            border: 1px dashed #c9a84c;
+                        }
+                        
+                        .product-id-label {
+                            font-size: 12px;
+                            color: #888;
+                            font-weight: normal;
+                            letter-spacing: 1px;
+                            margin-left: 8px;
+                        }
+                        
+                        .footer {
+                            text-align: center;
+                            margin-top: 10mm;
+                            padding-top: 8mm;
+                            border-top: 2px solid #f0ebe0;
+                            font-size: 13px;
+                            color: #777;
+                        }
+                        
+                        .footer .thanks {
+                            font-size: 16px;
+                            color: #c9a84c;
+                            font-weight: bold;
+                            margin-bottom: 3px;
+                        }
+                        
+                        .stone-details-grid {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr 1fr;
+                            gap: 10px;
+                            margin: 5mm 0;
+                            width: 100%;
+                            max-width: 400px;
+                            background: #faf8f5;
+                            padding: 10px;
+                            border-radius: 8px;
+                        }
+                        
+                        .stone-detail-item {
+                            text-align: center;
+                            padding: 5px;
+                            border-left: 1px solid #f0ebe0;
+                        }
+                        
+                        .stone-detail-item:last-child {
+                            border-left: none;
+                        }
+                        
+                        .stone-detail-item .label {
+                            font-size: 10px;
+                            color: #999;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                        }
+                        
+                        .stone-detail-item .value {
+                            font-size: 16px;
+                            font-weight: bold;
+                            color: #1a1a1a;
+                            margin-top: 2px;
+                        }
+                        
+                        .barcode-text {
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: #1a1a1a;
+                            letter-spacing: 3px;
+                            font-family: 'Courier New', monospace;
+                            margin: 3mm 0;
+                            padding: 5px 20px;
+                            background: #f8f6f1;
+                            border-radius: 4px;
+                            display: inline-block;
+                            border: 1px solid #e8d5b5;
+                        }
+                        
+                        .print-date {
+                            font-size: 11px;
+                            color: #aaa;
+                            margin-top: 5mm;
+                        }
+                        
+                        @media print {
                             body {
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                justify-content: center;
-                                font-family: 'Arial', sans-serif;
-                                padding: 30px;
-                                margin: 0;
-                                min-height: 100vh;
                                 background: white;
+                                padding: 0;
                             }
-                            .container {
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                justify-content: center;
-                                padding: 20px;
-                                border: 2px solid #ddd;
-                                border-radius: 10px;
-                                background: white;
-                                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                            }
-                            .title {
-                                font-size: 24px;
-                                font-weight: bold;
-                                margin-bottom: 20px;
-                                color: #333;
-                            }
-                            .qr-section {
-                                margin-bottom: 30px;
-                                text-align: center;
-                            }
-                            .qr-section svg {
-                                width: 200px;
-                                height: 200px;
-                                display: block;
-                                margin: 0 auto;
-                            }
-                            .qr-label {
-                                margin-top: 10px;
-                                font-size: 14px;
-                                color: #666;
-                            }
-                            .barcode-section {
-                                margin-top: 20px;
-                                text-align: center;
-                                width: 100%;
-                            }
-                            .barcode-section svg {
-                                max-width: 400px;
-                                display: block;
-                                margin: 0 auto;
-                            }
-                            .barcode-label {
-                                margin-top: 5px;
-                                font-size: 14px;
-                                color: #666;
-                            }
-                            .barcode-text {
-                                font-size: 18px;
-                                font-weight: bold;
-                                margin-top: 10px;
-                                color: #333;
-                                letter-spacing: 2px;
-                            }
-                            .divider {
-                                width: 100%;
-                                height: 1px;
-                                background: #ddd;
-                                margin: 20px 0;
-                            }
-                            .stone-details {
-                                text-align: center;
-                                margin-top: 15px;
-                                font-size: 14px;
-                                color: #555;
-                            }
-                            @media print {
-                                body {
-                                    padding: 10px;
-                                }
-                                .container {
-                                    border: 1px solid #ccc;
-                                    box-shadow: none;
-                                }
-                                .no-print {
-                                    display: none !important;
-                                }
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <div class="title">📦 بطاقة المنتج</div>
                             
-                            <div class="qr-section">
+                            .certificate-wrapper {
+                                box-shadow: none;
+                                border-radius: 0;
+                                padding: 12mm 10mm;
+                                width: 100%;
+                                min-height: 100vh;
+                            }
+                            
+                            .certificate-wrapper::before,
+                            .certificate-wrapper::after {
+                                display: none;
+                            }
+                            
+                            .no-print {
+                                display: none !important;
+                            }
+                            
+                            .qr-container {
+                                box-shadow: none;
+                                border: 1px solid #ddd;
+                            }
+                            
+                            .barcode-container {
+                                border: 1px solid #ddd;
+                            }
+                        }
+                        
+                        @media (max-width: 600px) {
+                            .certificate-wrapper {
+                                padding: 10mm 8mm;
+                            }
+                            
+                            .company-name {
+                                font-size: 24px;
+                            }
+                            
+                            .qr-container svg {
+                                width: 150px;
+                                height: 150px;
+                            }
+                            
+                            .stone-details-grid {
+                                grid-template-columns: 1fr 1fr;
+                            }
+                            
+                            .title-section h2 {
+                                font-size: 20px;
+                            }
+                            
+                            .title-section h2::before,
+                            .title-section h2::after {
+                                width: 20px;
+                            }
+                            
+                            .title-section h2::before {
+                                right: -30px;
+                            }
+                            
+                            .title-section h2::after {
+                                left: -30px;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="certificate-wrapper">
+                        <!-- Header -->
+                        <div class="header">
+                            <div class="company-name">
+                                <span>✦</span> ALFAWAGHRA <span>✦</span>
+                            </div>
+                            <div class="company-info">
+                                Bethlehem-Palestine | 📱 050-5574747<br>
+                                📧 al-fawaghra@hotmail.com | 🌐 www.alfawaghra.com
+                            </div>
+                        </div>
+                        
+                        <!-- Title -->
+                        <div class="title-section">
+                            <h2>بطاقة المنتج</h2>
+                            <p style="color: #888; font-size: 14px; margin-top: 5px;">Product Identification Card</p>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="content">
+                            <!-- QR Code -->
+                            <div class="qr-container">
                                 ${svgHTML}
                                 <div class="qr-label">🔲 QR Code</div>
                             </div>
                             
                             <div class="divider"></div>
                             
-                            <div class="barcode-section">
+                            <!-- Barcode -->
+                            <div class="barcode-container">
                                 ${barcodeHTML}
-                                <div class="barcode-label">📊 Barcode</div>
                             </div>
                             
-                            <div class="barcode-text">${barcode}</div>
+                            <!-- Product ID -->
+                            <div class="product-id">
+                                <span class="product-id-label">📦 رقم المنتج</span>
+                                ${barcode}
+                            </div>
                             
-                            <div class="stone-details">
-                                <p>📦 الكود: <strong>${barcode}</strong></p>
-                                <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                                    تم الطباعة في: ${new Date().toLocaleString('ar')}
-                                </p>
+                            <!-- Barcode Text -->
+                            <div class="barcode-text">
+                                ${barcode}
                             </div>
                         </div>
-                    </body>
-                </html>
-            `);
-        } catch (error) {
-            console.error("Error generating barcode:", error);
-            alert("حدث خطأ أثناء إنشاء الباركود");
-            printWindow.close();
-            return;
-        }
-
-        printWindow.document.close();
-
-        printWindow.onload = () => {
-            // تأخير بسيط للتأكد من تحميل جميع العناصر
-            setTimeout(() => {
-                printWindow.focus();
-                printWindow.print();
-                // لا نغلق النافذة تلقائياً حتى يتمكن المستخدم من رؤية ما يطبعه
-                // printWindow.close();
-            }, 500);
-        };
-    };
-
-    // ------- طباعة QR Code فقط (الوظيفة القديمة المحسنة) -------
-    const printQRCodeOnly = (barcode: string) => {
-        const printWindow = window.open("", "_blank", "width=400,height=500");
-        if (!printWindow) {
-            alert("الرجاء السماح بالنوافذ المنبثقة (Popups) لهذا الموقع للسماح بالطباعة");
-            return;
-        }
-
-        const qrElement = document.getElementById(`qr-${barcode}`);
-        if (!qrElement) return;
-
-        const svgHTML = qrElement.innerHTML;
-
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>${barcode}</title>
-                    <style>
-                        body {
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
-                            justify-content: center;
-                            font-family: sans-serif;
-                            padding: 20px;
-                        }
-                        svg {
-                            width: 250px;
-                            height: 250px;
-                        }
-                        p {
-                            margin-top: 10px;
-                            font-size: 18px;
-                            font-weight: bold;
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${svgHTML}
-                    <p>${barcode}</p>
+                        
+                        <!-- Footer -->
+                        <div class="footer">
+                            <div class="thanks">✦ شكراً لثقتكم بنا ✦</div>
+                            <div style="margin-top: 3px; font-size: 12px; color: #999;">
+                                جميع الحقوق محفوظة © ${new Date().getFullYear()} - شركة الفواغرة للحجر والرخام
+                            </div>
+                            <div class="print-date">
+                                تاريخ الطباعة: ${new Date().toLocaleString('ar-EG', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </div>
+                        </div>
+                    </div>
                 </body>
             </html>
         `);
+    } catch (error) {
+        console.error("Error generating barcode:", error);
+        alert("حدث خطأ أثناء إنشاء الباركود");
+        printWindow.close();
+        return;
+    }
 
-        printWindow.document.close();
+    printWindow.document.close();
 
-        printWindow.onload = () => {
+    printWindow.onload = () => {
+        setTimeout(() => {
             printWindow.focus();
             printWindow.print();
-            printWindow.close();
-        };
+        }, 800);
     };
+};
+
 
     // ------- تعديل بيانات المشتاح العامة (باركود / حالة) -------
     const startEditStone = (stone: Stone) => {
