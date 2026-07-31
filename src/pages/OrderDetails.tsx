@@ -1,4 +1,3 @@
-// OrderDetails.tsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -57,7 +56,7 @@ function OrderDetails() {
         <div className="info-card">
           <h3>معلومات الطلبية</h3>
           <p>
-            <strong>الحالة:</strong> 
+            <strong>الحالة:</strong>
             <span className={`status-badge ${order.status?.toLowerCase()}`}>
               {order.status === "Open" ? "مفتوحة" : "مكتملة"}
             </span>
@@ -75,6 +74,9 @@ function OrderDetails() {
               <tr>
                 <th>#</th>
                 <th>نوع الحجر</th>
+                <th>الطول</th>
+                <th>العرض</th>
+                <th>السمك</th>
                 <th>الوحدة</th>
                 <th>الكمية المطلوبة</th>
                 <th>الكمية المتبقية</th>
@@ -86,6 +88,9 @@ function OrderDetails() {
                 <tr key={index}>
                   <td>{index + 1}</td>
                   <td>{item.stoneType}</td>
+                  <td>{item.length || "---"}</td>
+                  <td>{item.width || "---"}</td>
+                  <td>{item.thickness || "---"}</td>
                   <td>
                     {item.unit === "pieces" && "قطع"}
                     {item.unit === "linearMeter" && "متر طولي"}

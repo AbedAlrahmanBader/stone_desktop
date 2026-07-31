@@ -1,4 +1,3 @@
-// CustomerProfile.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -6,6 +5,15 @@ import api from "../api/axios";
 import ShipmentPrint from "../components/ShipmentPrint";
 
 import "../styles/customerProfile.css";
+
+interface NewOrderItem {
+  stoneType: string;
+  unit: string;
+  requiredQty: number;
+  length: number;
+  width: number;
+  thickness: number;
+}
 
 function CustomerProfile() {
   const { id } = useParams();
@@ -15,9 +23,9 @@ function CustomerProfile() {
   const [selectedShipment, setSelectedShipment] = useState<any>(null);
   const [loadingShipment, setLoadingShipment] = useState(false);
   const [showAddOrder, setShowAddOrder] = useState(false);
-  const [newOrder, setNewOrder] = useState({
+  const [newOrder, setNewOrder] = useState<{ orderNumber: string; items: NewOrderItem[] }>({
     orderNumber: "",
-    items: [{ stoneType: "", unit: "pieces", requiredQty: 0 }]
+    items: [{ stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0 }]
   });
   const [loading, setLoading] = useState(false);
 
@@ -54,9 +62,8 @@ function CustomerProfile() {
   const handleAddOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
-      // Filter out empty items
       const validItems = newOrder.items.filter(
         item => item.stoneType.trim() && item.requiredQty > 0
       );
@@ -74,15 +81,14 @@ function CustomerProfile() {
       };
 
       await api.post("/orders", orderData);
-      
-      // Reset form and refresh data
+
       setShowAddOrder(false);
       setNewOrder({
         orderNumber: "",
-        items: [{ stoneType: "", unit: "pieces", requiredQty: 0 }]
+        items: [{ stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0 }]
       });
       await loadCustomer();
-      
+
       alert("تم إضافة الطلبية بنجاح");
     } catch (error: any) {
       console.error(error);
@@ -95,7 +101,7 @@ function CustomerProfile() {
   const addOrderItem = () => {
     setNewOrder({
       ...newOrder,
-      items: [...newOrder.items, { stoneType: "", unit: "pieces", requiredQty: 0 }]
+      items: [...newOrder.items, { stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0 }]
     });
   };
 
@@ -108,7 +114,7 @@ function CustomerProfile() {
     setNewOrder({ ...newOrder, items: updatedItems });
   };
 
-  const updateOrderItem = (index: number, field: string, value: any) => {
+  const updateOrderItem = (index: number, field: keyof NewOrderItem, value: any) => {
     const updatedItems = newOrder.items.map((item, i) => {
       if (i === index) {
         return { ...item, [field]: value };
@@ -135,11 +141,10 @@ function CustomerProfile() {
         <p>📦 إجمالي الإرساليات: <strong>{data.count || 0}</strong></p>
       </div>
 
-      {/* Orders Section */}
       <div className="orders-section">
         <div className="section-header">
           <h2>📋 الطلبيات</h2>
-          <button 
+          <button
             className="btn-add-order"
             onClick={() => setShowAddOrder(true)}
           >
@@ -176,7 +181,7 @@ function CustomerProfile() {
                       : "---"}
                   </td>
                   <td>
-                    <button 
+                    <button
                       className="btn-view-order"
                       onClick={() => navigate(`/orders/${order.orderNumber}`)}
                     >
@@ -235,16 +240,15 @@ function CustomerProfile() {
         </table>
       )}
 
-      {/* Add Order Modal */}
       {showAddOrder && (
         <div className="modal-overlay" onClick={() => setShowAddOrder(false)}>
-          <div 
+          <div
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">
               <h2>إضافة طلبية جديدة</h2>
-              <button 
+              <button
                 className="modal-close"
                 onClick={() => setShowAddOrder(false)}
               >
@@ -285,6 +289,24 @@ function CustomerProfile() {
                     </select>
                     <input
                       type="number"
+                      placeholder="الطول (سم)"
+                      value={item.length || ""}
+                      onChange={(e) => updateOrderItem(index, "length", Number(e.target.value))}
+                    />
+                    <input
+                      type="number"
+                      placeholder="العرض (سم)"
+                      value={item.width || ""}
+                      onChange={(e) => updateOrderItem(index, "width", Number(e.target.value))}
+                    />
+                    <input
+                      type="number"
+                      placeholder="السمك (سم)"
+                      value={item.thickness || ""}
+                      onChange={(e) => updateOrderItem(index, "thickness", Number(e.target.value))}
+                    />
+                    <input
+                      type="number"
                       placeholder="الكمية"
                       value={item.requiredQty || ""}
                       onChange={(e) => updateOrderItem(index, "requiredQty", Number(e.target.value))}
@@ -312,8 +334,8 @@ function CustomerProfile() {
               </div>
 
               <div className="form-actions">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn-submit"
                   disabled={loading}
                 >

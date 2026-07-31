@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/axios";
 import "../styles/addStone.css";
 
@@ -9,6 +9,17 @@ interface StoneItemForm {
   thickness: string;
   linearMeter: string;
   pieces: string;
+}
+
+interface CustomerOption {
+  _id: string;
+  name: string;
+}
+
+interface OrderOption {
+  _id: string;
+  orderNumber: string;
+  status: string;
 }
 
 const emptyItem = (): StoneItemForm => ({
@@ -26,7 +37,6 @@ function calcItemPreview(item: StoneItemForm) {
   const pieces = Number(item.pieces) || 1;
   const enteredLinearMeter = Number(item.linearMeter) || 0;
 
-  // تحويل من سم إلى متر
   const lengthMeter = length / 100;
   const widthMeter = width / 100;
 
@@ -53,8 +63,54 @@ function calcItemPreview(item: StoneItemForm) {
 
 function AddStone() {
   const [barcode, setBarcode] = useState("");
-  const [orderNumber, setOrderNumber] = useState("");
   const [items, setItems] = useState<StoneItemForm[]>([emptyItem()]);
+
+  // --- عميل وطلبية ---
+  const [customers, setCustomers] = useState<CustomerOption[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [customerOrders, setCustomerOrders] = useState<OrderOption[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [orderNumber, setOrderNumber] = useState("");
+
+  // تحميل لستة العملاء عند فتح الصفحة
+  useEffect(() => {
+    const loadCustomers = async () => {
+      try {
+        const res = await api.get("/customers");
+        setCustomers(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    loadCustomers();
+  }, []);
+
+  // تحميل طلبيات العميل المختار
+  useEffect(() => {
+    if (!selectedCustomerId) {
+      setCustomerOrders([]);
+      setOrderNumber("");
+      return;
+    }
+
+    const loadCustomerOrders = async () => {
+      setLoadingOrders(true);
+      try {
+        const res = await api.get(`/customers/profile/${selectedCustomerId}`);
+        const orders: OrderOption[] = res.data?.orders || [];
+        // نعرض بس الطلبيات المفتوحة (اللي لسا ناقصها كمية)
+        setCustomerOrders(orders.filter((o) => o.status === "Open"));
+      } catch (error) {
+        console.error(error);
+        alert("تعذر تحميل طلبيات العميل");
+      } finally {
+        setLoadingOrders(false);
+      }
+    };
+
+    loadCustomerOrders();
+    setOrderNumber("");
+  }, [selectedCustomerId]);
 
   const updateItem = (
     index: number,
@@ -125,11 +181,12 @@ function AddStone() {
       alert("تم إضافة المشتاح بنجاح");
 
       setBarcode("");
+      setSelectedCustomerId("");
       setOrderNumber("");
+      setCustomerOrders([]);
       setItems([emptyItem()]);
     } catch (error: any) {
       console.log(error.response?.data || error);
-
       alert(error.response?.data?.message || "حدث خطأ أثناء الإضافة");
     }
   };
@@ -144,11 +201,40 @@ function AddStone() {
         onChange={(e) => setBarcode(e.target.value)}
       />
 
-      <input
-        placeholder="رقم الطلبية (اختياري - إذا هاد المشتاح جزء من طلبية عميل)"
-        value={orderNumber}
-        onChange={(e) => setOrderNumber(e.target.value)}
-      />
+      {/* اختيار العميل */}
+      <select
+        value={selectedCustomerId}
+        onChange={(e) => setSelectedCustomerId(e.target.value)}
+      >
+        <option value="">-- اختر العميل (اختياري) --</option>
+        {customers.map((c) => (
+          <option key={c._id} value={c._id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+
+      {/* اختيار الطلبية - يظهر بس إذا في عميل مختار */}
+      {selectedCustomerId && (
+        <select
+          value={orderNumber}
+          onChange={(e) => setOrderNumber(e.target.value)}
+          disabled={loadingOrders}
+        >
+          <option value="">
+            {loadingOrders
+              ? "جاري تحميل الطلبيات..."
+              : customerOrders.length === 0
+              ? "لا يوجد طلبيات مفتوحة لهذا العميل"
+              : "-- اختر الطلبية (اختياري) --"}
+          </option>
+          {customerOrders.map((o) => (
+            <option key={o._id} value={o.orderNumber}>
+              {o.orderNumber}
+            </option>
+          ))}
+        </select>
+      )}
 
       {items.map((item, index) => {
         const preview = previews[index];
