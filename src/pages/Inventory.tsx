@@ -3,6 +3,8 @@ import api from "../api/axios";
 import "../styles/inventory.css";
 import { QRCodeSVG } from "qrcode.react";
 import JsBarcode from "jsbarcode";
+import AAA from "../assets/AAA.jpg";
+
 
 interface StoneItem {
     _id: string;
@@ -60,9 +62,6 @@ const emptyItemForm: ItemEditForm = {
     pieces: "",
     linearMeter: "",
 };
-
-// 🖼️ حط هون مسار/رابط صورة اللوجو تبعتكم
-const LOGO_URL = "/logo.png"; // <-- بدّلها بمسار اللوجو الفعلي عندك
 
 function Inventory() {
     const [stones, setStones] = useState<Stone[]>([]);
@@ -307,8 +306,7 @@ function Inventory() {
                         <div class="letterhead">
                             <!-- Header: صورة اللوجو -->
                             <div class="header">
-                                <img src="${LOGO_URL}" alt="Al Fawaghra" />
-                            </div>
+<img src="${AAA}" alt="Al Fawaghra" />                            </div>
 
                             <!-- Content -->
                             <div class="content">
