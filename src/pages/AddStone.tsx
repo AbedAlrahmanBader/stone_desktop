@@ -53,6 +53,7 @@ function calcItemPreview(item: StoneItemForm) {
 
 function AddStone() {
   const [barcode, setBarcode] = useState("");
+  const [orderNumber, setOrderNumber] = useState("");
   const [items, setItems] = useState<StoneItemForm[]>([emptyItem()]);
 
   const updateItem = (
@@ -109,6 +110,7 @@ function AddStone() {
     try {
       await api.post("/stones", {
         barcode,
+        orderNumber: orderNumber || undefined,
         items: items.map((item) => ({
           stoneType: item.stoneType,
           length: Number(item.length) || 0,
@@ -123,6 +125,7 @@ function AddStone() {
       alert("تم إضافة المشتاح بنجاح");
 
       setBarcode("");
+      setOrderNumber("");
       setItems([emptyItem()]);
     } catch (error: any) {
       console.log(error.response?.data || error);
@@ -139,6 +142,12 @@ function AddStone() {
         placeholder="الباركود"
         value={barcode}
         onChange={(e) => setBarcode(e.target.value)}
+      />
+
+      <input
+        placeholder="رقم الطلبية (اختياري - إذا هاد المشتاح جزء من طلبية عميل)"
+        value={orderNumber}
+        onChange={(e) => setOrderNumber(e.target.value)}
       />
 
       {items.map((item, index) => {

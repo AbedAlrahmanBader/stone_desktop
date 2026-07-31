@@ -1,3 +1,4 @@
+// CustomerProfile.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -6,9 +7,7 @@ import ShipmentPrint from "../components/ShipmentPrint";
 
 import "../styles/customerProfile.css";
 
-
 function CustomerProfile() {
-
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -46,54 +45,27 @@ function CustomerProfile() {
     setSelectedShipment(null);
   };
 
-
   if (!data) {
-    return (
-      <h2>
-        جاري تحميل بيانات العميل...
-      </h2>
-    );
+    return <h2>جاري تحميل بيانات العميل...</h2>;
   }
-
 
   return (
     <div className="customer-profile">
-
-      <h1>
-        {data.customer?.name}
-      </h1>
+      <h1>{data.customer?.name}</h1>
 
       <div className="customer-info">
-
-        <h3>
-          معلومات العميل
-        </h3>
-
-        <p>
-          📞 الهاتف:{" "}
-          {data.customer?.phone || "---"}
-        </p>
-
-        <p>
-          📧 البريد:{" "}
-          {data.customer?.email || "---"}
-        </p>
-
-        <p>
-          📍 العنوان:{" "}
-          {data.customer?.address || "---"}
-        </p>
-
+        <h3>معلومات العميل</h3>
+        <p>📞 الهاتف: {data.customer?.phone || "---"}</p>
+        <p>📧 البريد: {data.customer?.email || "---"}</p>
+        <p>📍 العنوان: {data.customer?.address || "---"}</p>
+        <p>📦 الطلبات المتبقية: <strong>{data.remainingOrders || 0}</strong></p>
+        <p>📦 إجمالي الإرساليات: <strong>{data.count || 0}</strong></p>
       </div>
 
-      <h2>
-        🚚 الإرساليات
-      </h2>
+      <h2>🚚 الإرساليات</h2>
 
       {data.shipments?.length === 0 ? (
-        <h3>
-          لا يوجد إرساليات لهذا العميل
-        </h3>
+        <h3>لا يوجد إرساليات لهذا العميل</h3>
       ) : (
         <table>
           <thead>
@@ -149,9 +121,9 @@ function CustomerProfile() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
 
 export default CustomerProfile;
+
