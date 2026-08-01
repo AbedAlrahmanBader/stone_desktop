@@ -22,6 +22,17 @@ interface OrderOption {
   status: string;
 }
 
+interface OrderItemOption {
+  _id: string;
+  stoneType: string;
+  unit: string;
+  length: number;
+  width: number;
+  thickness: number;
+  requiredQty: number;
+  remainingQty: number;
+}
+
 const emptyItem = (): StoneItemForm => ({
   stoneType: "",
   length: "",
@@ -30,6 +41,13 @@ const emptyItem = (): StoneItemForm => ({
   linearMeter: "",
   pieces: "",
 });
+
+const unitLabel = (unit: string) => {
+  if (unit === "pieces") return "قطع";
+  if (unit === "linearMeter") return "متر طولي";
+  if (unit === "area") return "مساحة";
+  return unit;
+};
 
 function calcItemPreview(item: StoneItemForm) {
   const length = Number(item.length) || 0;
@@ -72,6 +90,10 @@ function AddStone() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
 
+  // --- أصناف الطلبية المختارة (لعرضها كقائمة اختيار لنوع الحجر) ---
+  const [orderItems, setOrderItems] = useState<OrderItemOption[]>([]);
+  const [loadingOrderItems, setLoadingOrderItems] = useState(false);
+
   // تحميل لستة العملاء عند فتح الصفحة
   useEffect(() => {
     const loadCustomers = async () => {
@@ -112,6 +134,31 @@ function AddStone() {
     setOrderNumber("");
   }, [selectedCustomerId]);
 
+  // تحميل أصناف الطلبية المختارة (لعرضها كقائمة اختيار نوع الحجر)
+  useEffect(() => {
+    if (!orderNumber) {
+      setOrderItems([]);
+      return;
+    }
+
+    const loadOrderItems = async () => {
+      setLoadingOrderItems(true);
+      try {
+        const res = await api.get(`/orders/number/${orderNumber}`);
+        const allItems: OrderItemOption[] = res.data?.items || [];
+        // بس الأصناف يلي لسا ناقصها كمية
+        setOrderItems(allItems.filter((it) => it.remainingQty > 0));
+      } catch (error) {
+        console.error(error);
+        setOrderItems([]);
+      } finally {
+        setLoadingOrderItems(false);
+      }
+    };
+
+    loadOrderItems();
+  }, [orderNumber]);
+
   const updateItem = (
     index: number,
     field: keyof StoneItemForm,
@@ -120,6 +167,27 @@ function AddStone() {
     setItems((prev) =>
       prev.map((item, i) =>
         i === index ? { ...item, [field]: value } : item
+      )
+    );
+  };
+
+  // اختيار صنف جاهز من الطلبية بيعبي نوع الحجر والأبعاد تلقائيًا
+  // (لازم تكون مطابقة تمامًا عشان الخصم من الطلبية يشتغل صح)
+  const applyOrderItem = (index: number, orderItemId: string) => {
+    const orderItem = orderItems.find((oi) => oi._id === orderItemId);
+    if (!orderItem) return;
+
+    setItems((prev) =>
+      prev.map((item, i) =>
+        i === index
+          ? {
+              ...item,
+              stoneType: orderItem.stoneType,
+              length: orderItem.length ? String(orderItem.length) : "",
+              width: orderItem.width ? String(orderItem.width) : "",
+              thickness: orderItem.thickness ? String(orderItem.thickness) : "",
+            }
+          : item
       )
     );
   };
@@ -184,6 +252,7 @@ function AddStone() {
       setSelectedCustomerId("");
       setOrderNumber("");
       setCustomerOrders([]);
+      setOrderItems([]);
       setItems([emptyItem()]);
     } catch (error: any) {
       console.log(error.response?.data || error);
@@ -254,6 +323,32 @@ function AddStone() {
                 </button>
               )}
             </div>
+
+            {/* قائمة أصناف الطلبية المختارة - تعبي نوع الحجر والأبعاد تلقائيًا */}
+            {orderNumber && (
+              <select
+                className="order-item-picker"
+                value=""
+                disabled={loadingOrderItems}
+                onChange={(e) => {
+                  if (e.target.value) applyOrderItem(index, e.target.value);
+                }}
+              >
+                <option value="">
+                  {loadingOrderItems
+                    ? "جاري تحميل أصناف الطلبية..."
+                    : orderItems.length === 0
+                    ? "لا يوجد أصناف متبقية بهذه الطلبية"
+                    : "-- اختر صنف من الطلبية (تعبئة تلقائية) --"}
+                </option>
+                {orderItems.map((oi) => (
+                  <option key={oi._id} value={oi._id}>
+                    {oi.stoneType} — {oi.length || "مفتوح"}×{oi.width}×
+                    {oi.thickness} — متبقي {oi.remainingQty} {unitLabel(oi.unit)}
+                  </option>
+                ))}
+              </select>
+            )}
 
             <input
               placeholder="نوع الحجر"
