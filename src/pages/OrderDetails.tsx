@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import JsBarcode from "jsbarcode";
 import "../styles/orderDetails.css";
 
 interface EditItemState {
@@ -302,7 +303,28 @@ function OrderDetails() {
           <div className="linked-stones-list">
             {stones.map((stone) => (
               <div key={stone._id} className="linked-stone-card">
-                <div className="linked-stone-barcode">{stone.barcode}</div>
+                <svg
+                  className="linked-stone-barcode-svg"
+                  ref={(el) => {
+                    if (!el) return;
+                    try {
+                      JsBarcode(el, stone.barcode, {
+                        format: "CODE128",
+                        width: 1.4,
+                        height: 40,
+                        displayValue: true,
+                        fontSize: 12,
+                        font: "monospace",
+                        textMargin: 3,
+                        margin: 4,
+                        background: "transparent",
+                        lineColor: "#000000",
+                      });
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
+                />
                 <span
                   className={`linked-stone-status ${
                     stone.status === "In Stock" ? "in-stock" : "shipped"
