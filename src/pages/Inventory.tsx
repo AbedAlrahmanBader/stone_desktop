@@ -146,13 +146,9 @@ function Inventory() {
             document.body.removeChild(barcodeDiv);
 
             // قسم العميل والطلبية - بيظهر بس إذا موجودين
-            const orderInfoHTML = (customerName || orderNumber) ? `
+            const orderInfoHTML = ( orderNumber) ? `
                 <div class="order-info">
-                    ${customerName ? `
-                    <div class="order-info-row">
-                        <span class="order-info-label">العميل</span>
-                        <span class="order-info-value">${customerName}</span>
-                    </div>` : ''}
+                  
                     ${orderNumber ? `
                     <div class="order-info-row">
                         <span class="order-info-label">رقم الطلبية</span>
