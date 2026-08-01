@@ -19,31 +19,6 @@ interface EditOrderItem extends NewOrderItem {
   _id?: string;
 }
 
-interface ShipmentStone {
-  _id?: string;
-  stoneType?: string;
-  length?: number;
-  width?: number;
-  thickness?: number;
-  linearMeter?: number;
-  area?: number;
-  pieces?: number;
-}
-
-interface ShipmentData {
-  _id?: string;
-  consignmentNumber?: string;
-  stones: ShipmentStone[];
-  status: string;
-  carNumber: string;
-  region: string;
-  orderNumber: string;
-  customer: string;
-  totalArea?: number;
-  totalLinearMeter?: number;
-  createdAt?: string;
-}
-
 function CustomerProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -65,19 +40,6 @@ function CustomerProfile() {
     items: []
   });
   const [editLoading, setEditLoading] = useState(false);
-
-  // ------- تعديل إرسالية -------
-  const [editingShipment, setEditingShipment] = useState<any>(null);
-  const [showEditShipment, setShowEditShipment] = useState(false);
-  const [editShipmentData, setEditShipmentData] = useState<ShipmentData>({
-    stones: [],
-    status: "",
-    carNumber: "",
-    region: "",
-    orderNumber: "",
-    customer: ""
-  });
-  const [editShipmentLoading, setEditShipmentLoading] = useState(false);
 
   const loadCustomer = async () => {
     try {
@@ -109,7 +71,6 @@ function CustomerProfile() {
     setSelectedShipment(null);
   };
 
-  // ------- إجراءات الطلبيات -------
   const handleAddOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -267,162 +228,10 @@ function CustomerProfile() {
     try {
       await api.delete(`/orders/${orderId}`);
       await loadCustomer();
-      alert("تم حذف الطلبية بنجاح");
     } catch (error: any) {
       console.error(error);
       alert(error.response?.data?.message || "حدث خطأ أثناء حذف الطلبية");
     }
-  };
-
-  // ------- إجراءات الإرساليات -------
-  const handleDeleteShipment = async (shipmentId: string) => {
-    const confirmed = window.confirm(
-      "متأكد إنك بدك تحذف هذه الإرسالية؟ هاد الإجراء ما بينرجع."
-    );
-    if (!confirmed) return;
-
-    try {
-      await api.delete(`/shipments/${shipmentId}`);
-      await loadCustomer();
-      alert("تم حذف الإرسالية بنجاح");
-    } catch (error: any) {
-      console.error(error);
-      alert(error.response?.data?.message || "حدث خطأ أثناء حذف الإرسالية");
-    }
-  };
-
-  const startEditShipment = async (shipmentId: string) => {
-    try {
-      const res = await api.get(`/shipments/${shipmentId}`);
-      setEditingShipment(res.data);
-      setEditShipmentData({
-        consignmentNumber: res.data.consignmentNumber || "",
-        stones: res.data.stones || [],
-        status: res.data.status || "",
-        carNumber: res.data.carNumber || "",
-        region: res.data.region || "",
-        orderNumber: res.data.orderNumber || "",
-        customer: res.data.customer || "",
-        totalArea: res.data.totalArea || 0,
-        totalLinearMeter: res.data.totalLinearMeter || 0
-      });
-      setShowEditShipment(true);
-    } catch (error) {
-      console.error(error);
-      alert("حدث خطأ أثناء تحميل بيانات الإرسالية");
-    }
-  };
-
-  const cancelEditShipment = () => {
-    setShowEditShipment(false);
-    setEditingShipment(null);
-    setEditShipmentData({
-      stones: [],
-      status: "",
-      carNumber: "",
-      region: "",
-      orderNumber: "",
-      customer: ""
-    });
-  };
-
-  const handleUpdateShipment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingShipment) return;
-
-    setEditShipmentLoading(true);
-
-    try {
-      // حساب المساحات والمتر الطولي تلقائياً
-      const updatedStones = editShipmentData.stones.map((stone: ShipmentStone) => {
-        const length = Number(stone.length) || 0;
-        const width = Number(stone.width) || 0;
-        const pieces = Number(stone.pieces) || 0;
-        const thickness = Number(stone.thickness) || 0;
-
-        // حساب المساحة
-        let area = Number(stone.area) || 0;
-        if (length > 0 && width > 0 && pieces > 0) {
-          area = (length * width * pieces) / 10000; // تحويل من سم² إلى م²
-        }
-
-        // حساب المتر الطولي
-        let linearMeter = Number(stone.linearMeter) || 0;
-        if (length > 0 && pieces > 0) {
-          linearMeter = (length * pieces) / 100; // تحويل من سم إلى متر
-        }
-
-        return {
-          ...stone,
-          area: area,
-          linearMeter: linearMeter
-        };
-      });
-
-      // حساب المجموع الكلي
-      const totalArea = updatedStones.reduce((sum: number, stone: ShipmentStone) => sum + (Number(stone.area) || 0), 0);
-      const totalLinearMeter = updatedStones.reduce((sum: number, stone: ShipmentStone) => sum + (Number(stone.linearMeter) || 0), 0);
-
-      const shipmentToUpdate = {
-        ...editShipmentData,
-        stones: updatedStones,
-        totalArea: totalArea,
-        totalLinearMeter: totalLinearMeter
-      };
-
-      await api.put(`/shipments/${editingShipment._id}`, shipmentToUpdate);
-      cancelEditShipment();
-      await loadCustomer();
-      alert("تم تعديل الإرسالية بنجاح");
-    } catch (error: any) {
-      console.error(error);
-      alert(error.response?.data?.message || "حدث خطأ أثناء تعديل الإرسالية");
-    } finally {
-      setEditShipmentLoading(false);
-    }
-  };
-
-  const addShipmentStone = () => {
-    setEditShipmentData({
-      ...editShipmentData,
-      stones: [
-        ...editShipmentData.stones,
-        {
-          stoneType: "",
-          length: 0,
-          width: 0,
-          thickness: 0,
-          linearMeter: 0,
-          area: 0,
-          pieces: 0
-        }
-      ]
-    });
-  };
-
-  const removeShipmentStone = (index: number) => {
-    if (editShipmentData.stones.length === 1) {
-      alert("لا يمكن حذف الحجر الوحيد");
-      return;
-    }
-    const updatedStones = editShipmentData.stones.filter((_, i) => i !== index);
-    setEditShipmentData({
-      ...editShipmentData,
-      stones: updatedStones
-    });
-  };
-
-  const updateShipmentStone = (index: number, field: string, value: any) => {
-    const updatedStones = editShipmentData.stones.map((stone: ShipmentStone, i: number) => {
-      if (i === index) {
-        return { ...stone, [field]: value };
-      }
-      return stone;
-    });
-    setEditShipmentData({
-      ...editShipmentData,
-      stones: updatedStones
-    });
   };
 
   if (!data) {
@@ -517,11 +326,10 @@ function CustomerProfile() {
           <thead>
             <tr>
               <th>التاريخ</th>
-              <th>رقم الإرسالية</th>
               <th>عدد القطع</th>
               <th>المساحة الإجمالية</th>
               <th>الحالة</th>
-              <th>الإجراءات</th>
+              <th>عرض</th>
             </tr>
           </thead>
 
@@ -533,29 +341,19 @@ function CustomerProfile() {
                     ? new Date(s.createdAt).toLocaleDateString("ar")
                     : "---"}
                 </td>
-                <td>{s.consignmentNumber || "---"}</td>
+
                 <td>{s.stones?.length ?? 0}</td>
+
                 <td>{s.totalArea ?? 0}</td>
+
                 <td>{s.status || "---"}</td>
+
                 <td>
                   <button
                     onClick={() => openShipment(s._id)}
                     disabled={loadingShipment}
-                    style={{ marginRight: '5px' }}
                   >
-                    عرض
-                  </button>
-                  <button
-                    onClick={() => startEditShipment(s._id)}
-                    style={{ marginRight: '5px', backgroundColor: '#4CAF50', color: 'white' }}
-                  >
-                    ✏️ تعديل
-                  </button>
-                  <button
-                    onClick={() => handleDeleteShipment(s._id)}
-                    style={{ backgroundColor: '#f44336', color: 'white' }}
-                  >
-                    🗑 حذف
+                    فتح
                   </button>
                 </td>
               </tr>
@@ -793,178 +591,6 @@ function CustomerProfile() {
         </div>
       )}
 
-      {/* مودال تعديل الإرسالية */}
-      {showEditShipment && (
-        <div className="modal-overlay" onClick={cancelEditShipment}>
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: '95%', maxHeight: '90vh', overflow: 'auto' }}
-          >
-            <div className="modal-header">
-              <h2>تعديل الإرسالية</h2>
-              <button
-                className="modal-close"
-                onClick={cancelEditShipment}
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleUpdateShipment}>
-              <div className="form-group">
-                <label>رقم الإرسالية</label>
-                <input
-                  type="text"
-                  value={editShipmentData.consignmentNumber || ""}
-                  onChange={(e) => setEditShipmentData({ ...editShipmentData, consignmentNumber: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>رقم السيارة</label>
-                <input
-                  type="text"
-                  value={editShipmentData.carNumber || ""}
-                  onChange={(e) => setEditShipmentData({ ...editShipmentData, carNumber: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>المنطقة</label>
-                <input
-                  type="text"
-                  value={editShipmentData.region || ""}
-                  onChange={(e) => setEditShipmentData({ ...editShipmentData, region: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>رقم الطلبية</label>
-                <input
-                  type="text"
-                  value={editShipmentData.orderNumber || ""}
-                  onChange={(e) => setEditShipmentData({ ...editShipmentData, orderNumber: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>اسم العميل</label>
-                <input
-                  type="text"
-                  value={editShipmentData.customer || ""}
-                  onChange={(e) => setEditShipmentData({ ...editShipmentData, customer: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>الحالة</label>
-                <select
-                  value={editShipmentData.status || ""}
-                  onChange={(e) => setEditShipmentData({ ...editShipmentData, status: e.target.value })}
-                >
-                  <option value="Ready">جاهز</option>
-                  <option value="In Progress">قيد التنفيذ</option>
-                  <option value="Shipped">تم الشحن</option>
-                  <option value="Delivered">تم التسليم</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>الأحجار</label>
-                {editShipmentData.stones?.map((stone: ShipmentStone, index: number) => (
-                  <div key={index} className="order-item-row" style={{ flexWrap: 'wrap', gap: '5px', padding: '10px', border: '1px solid #ddd', marginBottom: '10px', borderRadius: '5px' }}>
-                    <input
-                      type="text"
-                      placeholder="نوع الحجر"
-                      value={stone.stoneType || ""}
-                      onChange={(e) => updateShipmentStone(index, "stoneType", e.target.value)}
-                      style={{ minWidth: '120px' }}
-                    />
-                    <input
-                      type="number"
-                      placeholder="الطول (سم)"
-                      value={stone.length || ""}
-                      onChange={(e) => updateShipmentStone(index, "length", Number(e.target.value))}
-                      style={{ width: '80px' }}
-                    />
-                    <input
-                      type="number"
-                      placeholder="العرض (سم)"
-                      value={stone.width || ""}
-                      onChange={(e) => updateShipmentStone(index, "width", Number(e.target.value))}
-                      style={{ width: '80px' }}
-                    />
-                    <input
-                      type="number"
-                      placeholder="السمك (سم)"
-                      value={stone.thickness || ""}
-                      onChange={(e) => updateShipmentStone(index, "thickness", Number(e.target.value))}
-                      style={{ width: '80px' }}
-                    />
-                    <input
-                      type="number"
-                      placeholder="المتر الطولي"
-                      value={stone.linearMeter || ""}
-                      onChange={(e) => updateShipmentStone(index, "linearMeter", Number(e.target.value))}
-                      style={{ width: '80px' }}
-                    />
-                    <input
-                      type="number"
-                      placeholder="المساحة (م²)"
-                      value={stone.area || ""}
-                      onChange={(e) => updateShipmentStone(index, "area", Number(e.target.value))}
-                      style={{ width: '80px' }}
-                    />
-                    <input
-                      type="number"
-                      placeholder="القطع"
-                      value={stone.pieces || ""}
-                      onChange={(e) => updateShipmentStone(index, "pieces", Number(e.target.value))}
-                      style={{ width: '80px' }}
-                    />
-                    {editShipmentData.stones.length > 1 && (
-                      <button
-                        type="button"
-                        className="btn-remove-item"
-                        onClick={() => removeShipmentStone(index)}
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  className="btn-add-item"
-                  onClick={addShipmentStone}
-                >
-                  + إضافة حجر
-                </button>
-              </div>
-
-              <div className="form-actions">
-                <button
-                  type="submit"
-                  className="btn-submit"
-                  disabled={editShipmentLoading}
-                >
-                  {editShipmentLoading ? "جاري الحفظ..." : "حفظ التعديل"}
-                </button>
-                <button
-                  type="button"
-                  className="btn-cancel"
-                  onClick={cancelEditShipment}
-                >
-                  إلغاء
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* مودال عرض الإرسالية */}
       {selectedShipment && (
         <div className="shipment-modal-overlay" onClick={closeShipment}>
           <div
