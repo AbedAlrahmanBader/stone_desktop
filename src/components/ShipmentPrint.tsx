@@ -297,51 +297,56 @@ const soldTotals = stones.reduce<SoldTotals>(
 
                 <hr className="section-rule" />
 
-                <div className="certificate-details">
-                    <div className="detail-row">
-                       <span className="label-en">Date:</span>
-                        <span className="value">
-                            {shipment?.createdAt
-                                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
-                                : shipment?.date || "03/05/2026"}
-                        </span>
-                        <span className="label">:  التاريخ </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Mr.</span>
-                        <span className="value">&nbsp;</span>
-                        <span className="label">: المرسل اليه السيد  </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Leaving hour:</span>
-                        <span className="value">
-                            {shipment?.leavingHour ||
-                                (shipment?.createdAt
-                                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                      })
-                                    : "---")}
-                        </span>
-                        <span className="label"> : ساعة المغادرة </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Order No.</span>
-                        <span className="value">{shipment?.orderNumber}</span>
-                        <span className="label">:   رقم الطلبية </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Region:</span>
-                        <span className="value">{shipment?.region || "القدس"}</span>
-                        <span className="label">:  المنطقة </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Car No.</span>
-                        <span className="value">{shipment?.carNumber}</span>
-                        <span className="label">:    رقم السيارة </span>
-                    </div>
-                </div>
 
+<div className="certificate-details">
+    <div className="detail-row">
+        <span className="label-en">Date:</span>
+        <span className="value">
+            {shipment?.createdAt
+                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
+                : shipment?.date || "03/05/2026"}
+        </span>
+        <span className="label">:  التاريخ </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Mr.</span>
+        <span className="value">
+            {/* استخدام shipment.customer مباشرة */}
+            {shipment?.customer || "---"}
+        </span>
+        <span className="label">: المرسل اليه السيد  </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Leaving hour:</span>
+        <span className="value">
+            {shipment?.leavingHour ||
+                (shipment?.createdAt
+                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                      })
+                    : "---")}
+        </span>
+        <span className="label"> : ساعة المغادرة </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Order No.</span>
+        <span className="value">{shipment?.orderNumber}</span>
+        <span className="label">:   رقم الطلبية </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Region:</span>
+        <span className="value">{shipment?.region || "القدس"}</span>
+        <span className="label">:  المنطقة </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Car No.</span>
+        <span className="value">{shipment?.carNumber}</span>
+        <span className="label">:    رقم السيارة </span>
+    </div>
+</div>
+
+// ... باقي الكود
                 <table className="shipment-table">
                     <thead>
                         <tr>
