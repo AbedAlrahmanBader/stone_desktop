@@ -1,277 +1,361 @@
+/* =========================================================
+   إضافة مشتاح — هوية بصرية مستوحاة من ساحة الحجر وشريط القياس
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
 .add-stone {
+  --stone-ink: #211d1a;
+  --stone-800: #3d3630;
+  --stone-600: #6b6058;
+  --stone-300: #cabfad;
+  --stone-150: #e8e1d3;
+  --stone-100: #f1ece1;
+  --paper: #faf7f1;
+  --copper: #a85d2c;
+  --copper-dark: #8a4a20;
+  --slate: #3f5b63;
+  --moss: #35603a;
+  --moss-dark: #294a2d;
+  --clay: #a13a2e;
+  --clay-dark: #832e24;
 
-    background:white;
-    padding:30px;
-    border-radius:12px;
+  --font-display: 'Cairo', 'Segoe UI', sans-serif;
+  --font-body: 'IBM Plex Sans Arabic', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 
+  position: relative;
+  max-width: 640px;
+  margin: 0 auto;
+  background: var(--paper);
+  border: 1px solid var(--stone-150);
+  padding: 34px 30px 30px;
+  border-radius: 14px;
+  font-family: var(--font-body);
+  color: var(--stone-ink);
+  box-shadow: 0 1px 2px rgba(33, 29, 26, 0.04), 0 10px 30px -18px rgba(33, 29, 26, 0.25);
 }
 
+/* شريط القياس — العنصر المميز أعلى النموذج، بيرمز لشريط قياس الحجر */
+.add-stone::before {
+  content: "";
+  display: block;
+  height: 12px;
+  margin: -34px -30px 22px;
+  background-image: repeating-linear-gradient(
+    to left,
+    var(--stone-300) 0,
+    var(--stone-300) 1px,
+    transparent 1px,
+    transparent 8px
+  ),
+  repeating-linear-gradient(
+    to left,
+    var(--copper) 0,
+    var(--copper) 1.5px,
+    transparent 1.5px,
+    transparent 40px
+  );
+  border-radius: 14px 14px 0 0;
+  opacity: 0.9;
+}
 
 .add-stone h1 {
-
-    margin-bottom:25px;
-
+  margin: 0 0 26px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.2px;
+  color: var(--stone-ink);
 }
 
+.add-stone h1::after {
+  content: "";
+  display: block;
+  width: 46px;
+  height: 3px;
+  margin-top: 10px;
+  background: var(--copper);
+  border-radius: 2px;
+}
 
+/* ---------- الحقول والقوائم العلوية (باركود / عميل / طلبية) ---------- */
 
 .add-stone input {
-
-    display:block;
-
-    width:400px;
-
-    padding:12px;
-
-    margin-bottom:15px;
-
-    border:1px solid #ddd;
-
-    border-radius:8px;
-
-}
-
-
-
-.add-stone button {
-
-    background:#1b5e20;
-
-    color:white;
-
-    border:none;
-
-    padding:14px 30px;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
-}
-
-.calculated-preview {
-  background: #f5f5f5;
-  padding: 10px 15px;
-  border-radius: 8px;
-  margin: 10px 0;
-}
-
-.calculated-preview p {
-  margin: 5px 0;
-  font-size: 14px;
-}
-
-.add-stone button:hover {
-
-    opacity:.9;
-
-}
-
-/* بطاقة كل نوع حجر داخل المشتاح */
-.stone-item-card {
-  background: #fafafa;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 15px;
-}
-
-.stone-item-card input {
+  display: block;
   width: 100%;
+  max-width: 420px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--stone-300);
+  border-radius: 9px;
+  background: #fff;
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+  color: var(--stone-ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.stone-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+.add-stone input::placeholder {
+  font-family: var(--font-body);
+  color: var(--stone-600);
 }
 
-.stone-item-header h3 {
-  margin: 0;
-  font-size: 15px;
-  color: #37474f;
+.add-stone input:hover {
+  border-color: var(--stone-600);
 }
 
-.remove-item-btn {
-  background: #b71c1c;
-  color: white;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.add-item-btn {
-  background: #1565c0;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-bottom: 15px;
-}
-
-.totals-preview {
-  background: #e3f2fd;
-}
-.add-stone {
-
-    background:white;
-    padding:30px;
-    border-radius:12px;
-
-}
-
-
-.add-stone h1 {
-
-    margin-bottom:25px;
-
-}
-
-
-
-.add-stone input {
-
-    display:block;
-
-    width:400px;
-
-    padding:12px;
-
-    margin-bottom:15px;
-
-    border:1px solid #ddd;
-
-    border-radius:8px;
-
+.add-stone input:focus-visible,
+.add-stone select:focus-visible {
+  outline: none;
+  border-color: var(--copper);
+  box-shadow: 0 0 0 3px rgba(168, 93, 44, 0.16);
 }
 
 /* تنسيق قوائم الاختيار (العميل / الطلبية) بنفس شكل الـ input */
 .add-stone > select {
+  display: block;
+  width: 100%;
+  max-width: 446px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--stone-300);
+  border-radius: 9px;
+  background: #fff;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--stone-800);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
 
-    display:block;
-
-    width:426px;
-
-    padding:12px;
-
-    margin-bottom:15px;
-
-    border:1px solid #ddd;
-
-    border-radius:8px;
-
-    background:white;
-
-    cursor:pointer;
-
-    font-size:14px;
-
-    color:#333;
-
+.add-stone > select:hover:not(:disabled) {
+  border-color: var(--stone-600);
 }
 
 .add-stone > select:disabled {
-
-    background:#f5f5f5;
-
-    color:#999;
-
-    cursor:not-allowed;
-
+  background: var(--stone-100);
+  color: var(--stone-600);
+  cursor: not-allowed;
 }
 
-.add-stone > select:focus {
+/* ---------- قائمة اختيار صنف من الطلبية (تعبئة تلقائية) ---------- */
 
-    outline:none;
-
-    border-color:#1565c0;
-
+.order-item-picker {
+  display: block;
+  width: 100%;
+  padding: 11px 14px;
+  margin-bottom: 16px;
+  border: 1.5px dashed var(--slate);
+  border-radius: 9px;
+  background: #eef3f3;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--slate);
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-
-
-.add-stone button {
-
-    background:#1b5e20;
-
-    color:white;
-
-    border:none;
-
-    padding:14px 30px;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
+.order-item-picker:hover:not(:disabled) {
+  background: #e4ecec;
+  border-color: #2e454b;
 }
 
-.calculated-preview {
-  background: #f5f5f5;
-  padding: 10px 15px;
-  border-radius: 8px;
-  margin: 10px 0;
+.order-item-picker:disabled {
+  border-style: solid;
+  border-color: var(--stone-300);
+  background: var(--stone-100);
+  color: var(--stone-600);
+  cursor: not-allowed;
 }
 
-.calculated-preview p {
-  margin: 5px 0;
-  font-size: 14px;
-}
+/* ---------- بطاقة كل نوع حجر داخل المشتاح ---------- */
 
-.add-stone button:hover {
-
-    opacity:.9;
-
-}
-
-/* بطاقة كل نوع حجر داخل المشتاح */
 .stone-item-card {
-  background: #fafafa;
-  border: 1px solid #eee;
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--stone-150);
+  border-inline-start: 3px solid var(--copper);
   border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 15px;
+  padding: 18px 18px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 0 rgba(33, 29, 26, 0.03);
 }
 
 .stone-item-card input {
-  width: 100%;
+  max-width: none;
 }
 
 .stone-item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--stone-300);
 }
 
 .stone-item-header h3 {
   margin: 0;
-  font-size: 15px;
-  color: #37474f;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14.5px;
+  letter-spacing: 0.2px;
+  color: var(--stone-800);
 }
 
 .remove-item-btn {
-  background: #b71c1c;
-  color: white;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 6px;
+  background: transparent;
+  color: var(--clay);
+  border: 1px solid var(--clay);
+  padding: 5px 13px;
+  border-radius: 7px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.remove-item-btn:hover {
+  background: var(--clay);
+  color: #fff;
 }
 
 .add-item-btn {
-  background: #1565c0;
-  color: white;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  color: var(--slate);
+  border: 1.5px solid var(--slate);
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: 9px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  margin-bottom: 15px;
+  margin-bottom: 18px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.add-item-btn:hover {
+  background: var(--slate);
+  color: #fff;
+}
+
+/* ---------- معاينة الحسابات ---------- */
+
+.calculated-preview {
+  position: relative;
+  background: var(--stone-100);
+  border: 1px dashed var(--stone-300);
+  padding: 12px 16px;
+  border-radius: 9px;
+  margin: 12px 0 4px;
+}
+
+.calculated-preview p {
+  margin: 4px 0;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--stone-800);
+}
+
+.calculated-preview strong {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--stone-ink);
 }
 
 .totals-preview {
-  background: #e3f2fd;
+  background: #eaf1f0;
+  border: 1px solid #bcd3d0;
+  margin-top: 4px;
+  margin-bottom: 22px;
+}
+
+.totals-preview p {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--slate);
+}
+
+.totals-preview strong {
+  font-size: 15px;
+  color: #24393e;
+}
+
+/* ---------- زر الحفظ ---------- */
+
+.add-stone button {
+  background: var(--moss);
+  color: #fff;
+  border: none;
+  padding: 14px 34px;
+  border-radius: 9px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.add-stone button:hover {
+  background: var(--moss-dark);
+  opacity: 1;
+}
+
+.add-stone button:active {
+  transform: translateY(1px);
+}
+
+.add-stone button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(53, 96, 58, 0.28);
+}
+
+/* الأزرار الصغيرة (حذف/إضافة نوع) ما بتاخد نفس تنسيق زر الحفظ الكبير */
+.stone-item-header button,
+.add-item-btn {
+  font-family: var(--font-body);
+  letter-spacing: normal;
+}
+
+/* ---------- إتاحة الحركة ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .add-stone * {
+    transition: none !important;
+  }
+}
+
+/* ---------- استجابة الشاشات الصغيرة ---------- */
+
+@media (max-width: 640px) {
+  .add-stone {
+    padding: 26px 18px 22px;
+    border-radius: 10px;
+  }
+
+  .add-stone::before {
+    margin: -26px -18px 18px;
+  }
+
+  .add-stone input,
+  .add-stone > select {
+    max-width: 100%;
+  }
+
+  .add-stone h1 {
+    font-size: 19px;
+  }
+
+  .add-stone button {
+    width: 100%;
+    padding: 14px;
+  }
 }
