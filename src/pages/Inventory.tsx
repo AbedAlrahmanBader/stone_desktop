@@ -202,8 +202,8 @@ function Inventory() {
                             }
 
                             .header img {
-                                max-width: 70mm;
-                                max-height: 20mm;
+                                width: 80mm;
+                                height:30mm;
                                 object-fit: contain;
                             }
 
