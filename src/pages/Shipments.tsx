@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../api/axios";
 import "../styles/shipments.css";
 
@@ -29,6 +29,12 @@ function Shipments() {
     const [editCustomer, setEditCustomer] = useState("");
 
     const [editStatus, setEditStatus] = useState("");
+
+    // --- فلاتر البحث ---
+    const [filterCustomer, setFilterCustomer] = useState("");
+    const [filterStatus, setFilterStatus] = useState("All");
+    const [filterDateFrom, setFilterDateFrom] = useState("");
+    const [filterDateTo, setFilterDateTo] = useState("");
 
 
     const loadShipments = async () => {
@@ -134,6 +140,58 @@ function Shipments() {
 
     };
 
+    // إعادة تعيين كل الفلاتر
+    const resetFilters = () => {
+
+        setFilterCustomer("");
+        setFilterStatus("All");
+        setFilterDateFrom("");
+        setFilterDateTo("");
+
+    };
+
+    // قائمة حالات الإرسالية الموجودة فعليًا (لتعبئة قائمة الفلتر تلقائيًا)
+    const availableStatuses = useMemo(() => {
+
+        const set = new Set(shipments.map((s) => s.status));
+        return Array.from(set);
+
+    }, [shipments]);
+
+    // الإرساليات بعد تطبيق الفلاتر
+    const filteredShipments = useMemo(() => {
+
+        return shipments.filter((shipment) => {
+
+            const matchCustomer = shipment.customer
+                ?.toLowerCase()
+                .includes(filterCustomer.trim().toLowerCase());
+
+            const matchStatus =
+                filterStatus === "All" || shipment.status === filterStatus;
+
+            const shipmentDate = new Date(shipment.createdAt);
+
+            let matchFrom = true;
+            if (filterDateFrom) {
+                const fromDate = new Date(filterDateFrom);
+                fromDate.setHours(0, 0, 0, 0);
+                matchFrom = shipmentDate >= fromDate;
+            }
+
+            let matchTo = true;
+            if (filterDateTo) {
+                const toDate = new Date(filterDateTo);
+                toDate.setHours(23, 59, 59, 999);
+                matchTo = shipmentDate <= toDate;
+            }
+
+            return matchCustomer && matchStatus && matchFrom && matchTo;
+
+        });
+
+    }, [shipments, filterCustomer, filterStatus, filterDateFrom, filterDateTo]);
+
 
     return (
 
@@ -142,6 +200,65 @@ function Shipments() {
             <h1>
                 الإرساليات
             </h1>
+
+            {/* شريط الفلاتر */}
+            <div className="shipments-filters">
+
+                <div className="filter-field">
+                    <label>بحث بالعميل</label>
+                    <input
+                        placeholder="اسم العميل..."
+                        value={filterCustomer}
+                        onChange={(e) => setFilterCustomer(e.target.value)}
+                    />
+                </div>
+
+                <div className="filter-field">
+                    <label>الحالة</label>
+                    <select
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                    >
+                        <option value="All">الكل</option>
+                        {availableStatuses.map((status) => (
+                            <option key={status} value={status}>
+                                {status}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="filter-field">
+                    <label>من تاريخ</label>
+                    <input
+                        type="date"
+                        value={filterDateFrom}
+                        onChange={(e) => setFilterDateFrom(e.target.value)}
+                    />
+                </div>
+
+                <div className="filter-field">
+                    <label>إلى تاريخ</label>
+                    <input
+                        type="date"
+                        value={filterDateTo}
+                        onChange={(e) => setFilterDateTo(e.target.value)}
+                    />
+                </div>
+
+                <button
+                    type="button"
+                    className="btn-reset-filters"
+                    onClick={resetFilters}
+                >
+                    ✕ إعادة تعيين
+                </button>
+
+            </div>
+
+            <div className="filters-summary">
+                عرض {filteredShipments.length} من أصل {shipments.length} إرسالية
+            </div>
 
             <table>
 
@@ -166,7 +283,17 @@ function Shipments() {
 
                 {
 
-                    shipments.map((shipment) => (
+                    filteredShipments.length === 0 ? (
+
+                        <tr>
+                            <td colSpan={8} className="no-results">
+                                لا يوجد إرساليات مطابقة لهذا البحث
+                            </td>
+                        </tr>
+
+                    ) : (
+
+                    filteredShipments.map((shipment) => (
 
                         <tr key={shipment._id}>
 
@@ -293,6 +420,8 @@ function Shipments() {
                         </tr>
 
                     ))
+
+                    )
 
                 }
 

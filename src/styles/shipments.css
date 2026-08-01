@@ -43,3 +43,114 @@
     cursor:pointer;
 
 }
+
+/* ---------- شريط الفلاتر ---------- */
+
+.shipments-filters {
+
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    gap:16px;
+    background:#f4f7f4;
+    border:1px solid #dfe7df;
+    border-radius:10px;
+    padding:16px 18px;
+    margin-bottom:14px;
+
+}
+
+.filter-field {
+
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+
+}
+
+.filter-field label {
+
+    font-size:12.5px;
+    font-weight:bold;
+    color:#33513a;
+
+}
+
+.filter-field input,
+.filter-field select {
+
+    padding:9px 12px;
+    border:1px solid #cdd8cd;
+    border-radius:7px;
+    font-size:13.5px;
+    color:#222;
+    background:white;
+    min-width:150px;
+
+}
+
+.filter-field input:focus,
+.filter-field select:focus {
+
+    outline:none;
+    border-color:#1b5e20;
+    box-shadow:0 0 0 3px rgba(27,94,32,0.12);
+
+}
+
+.btn-reset-filters {
+
+    background:white;
+    color:#b71c1c;
+    border:1px solid #b71c1c;
+    padding:9px 18px;
+    border-radius:7px;
+    cursor:pointer;
+    font-size:13.5px;
+    font-weight:bold;
+    height:38px;
+    transition:background 0.2s, color 0.2s;
+
+}
+
+.btn-reset-filters:hover {
+
+    background:#b71c1c;
+    color:white;
+
+}
+
+.filters-summary {
+
+    font-size:13px;
+    color:#666;
+    margin-bottom:10px;
+
+}
+
+.no-results {
+
+    padding:24px !important;
+    color:#888;
+    font-style:italic;
+
+}
+
+/* استجابة الشاشات الصغيرة */
+@media (max-width: 768px) {
+
+    .shipments-filters {
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .filter-field input,
+    .filter-field select {
+        min-width:0;
+    }
+
+    .btn-reset-filters {
+        width:100%;
+    }
+
+}
