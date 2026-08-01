@@ -1,3 +1,4 @@
+// CustomerProfile.tsx - الجزء المتعلق بالطلب
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -27,16 +28,26 @@ function CustomerProfile() {
   const [selectedShipment, setSelectedShipment] = useState<any>(null);
   const [loadingShipment, setLoadingShipment] = useState(false);
   const [showAddOrder, setShowAddOrder] = useState(false);
-  const [newOrder, setNewOrder] = useState<{ orderNumber: string; items: NewOrderItem[] }>({
+  const [newOrder, setNewOrder] = useState<{ 
+    orderNumber: string; 
+    description: string;
+    items: NewOrderItem[] 
+  }>({
     orderNumber: "",
+    description: "",
     items: [{ stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0 }]
   });
   const [loading, setLoading] = useState(false);
 
   // ------- تعديل طلبية موجودة -------
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
-  const [editOrder, setEditOrder] = useState<{ orderNumber: string; items: EditOrderItem[] }>({
+  const [editOrder, setEditOrder] = useState<{ 
+    orderNumber: string; 
+    description: string;
+    items: EditOrderItem[] 
+  }>({
     orderNumber: "",
+    description: "",
     items: []
   });
   const [editLoading, setEditLoading] = useState(false);
@@ -88,6 +99,7 @@ function CustomerProfile() {
 
       const orderData = {
         orderNumber: newOrder.orderNumber,
+        description: newOrder.description,
         customer: id,
         items: validItems
       };
@@ -97,6 +109,7 @@ function CustomerProfile() {
       setShowAddOrder(false);
       setNewOrder({
         orderNumber: "",
+        description: "",
         items: [{ stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0 }]
       });
       await loadCustomer();
@@ -141,6 +154,7 @@ function CustomerProfile() {
     setEditingOrderId(order._id);
     setEditOrder({
       orderNumber: order.orderNumber,
+      description: order.description || "",
       items: (order.items || []).map((item: any) => ({
         _id: item._id,
         stoneType: item.stoneType,
@@ -155,7 +169,7 @@ function CustomerProfile() {
 
   const cancelEditOrder = () => {
     setEditingOrderId(null);
-    setEditOrder({ orderNumber: "", items: [] });
+    setEditOrder({ orderNumber: "", description: "", items: [] });
   };
 
   const addEditOrderItem = () => {
@@ -204,6 +218,7 @@ function CustomerProfile() {
 
       await api.put(`/orders/${editingOrderId}`, {
         orderNumber: editOrder.orderNumber,
+        description: editOrder.description,
         items: validItems
       });
 
@@ -269,6 +284,7 @@ function CustomerProfile() {
             <thead>
               <tr>
                 <th>رقم الطلبية</th>
+                <th>الوصف</th>
                 <th>عدد الأصناف</th>
                 <th>الحالة</th>
                 <th>تاريخ الإنشاء</th>
@@ -279,6 +295,7 @@ function CustomerProfile() {
               {data.orders?.map((order: any) => (
                 <tr key={order._id}>
                   <td>{order.orderNumber}</td>
+                  <td>{order.description || "---"}</td>
                   <td>{order.items?.length || 0}</td>
                   <td>
                     <span className={`order-status ${order.status?.toLowerCase()}`}>
@@ -388,6 +405,17 @@ function CustomerProfile() {
                   onChange={(e) => setNewOrder({ ...newOrder, orderNumber: e.target.value })}
                   required
                   placeholder="مثال: ORD-2024-001"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>وصف الطلبية</label>
+                <textarea
+                  value={newOrder.description}
+                  onChange={(e) => setNewOrder({ ...newOrder, description: e.target.value })}
+                  placeholder="أدخل وصفاً للطلبية (اختياري)"
+                  rows={3}
+                  style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
                 />
               </div>
 
@@ -502,6 +530,17 @@ function CustomerProfile() {
                   value={editOrder.orderNumber}
                   onChange={(e) => setEditOrder({ ...editOrder, orderNumber: e.target.value })}
                   required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>وصف الطلبية</label>
+                <textarea
+                  value={editOrder.description}
+                  onChange={(e) => setEditOrder({ ...editOrder, description: e.target.value })}
+                  placeholder="أدخل وصفاً للطلبية (اختياري)"
+                  rows={3}
+                  style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
                 />
               </div>
 

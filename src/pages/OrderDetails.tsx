@@ -1,3 +1,4 @@
+// OrderDetails.tsx - الجزء المتعلق بالوصف
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -158,6 +159,11 @@ function OrderDetails() {
               {order.status === "Open" ? "مفتوحة" : "مكتملة"}
             </span>
           </p>
+          {order.description && (
+            <p>
+              <strong>الوصف:</strong> {order.description}
+            </p>
+          )}
           <p><strong>تاريخ الإنشاء:</strong> {new Date(order.createdAt).toLocaleDateString("ar")}</p>
           <p><strong>آخر تحديث:</strong> {new Date(order.updatedAt).toLocaleDateString("ar")}</p>
         </div>
