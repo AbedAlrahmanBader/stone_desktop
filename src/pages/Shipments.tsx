@@ -221,17 +221,25 @@ function Shipments() {
 
 
     // طباعة كل الإرساليات المفلترة دفعة وحدة
-    const printAllFiltered = () => {
+  const printAllFiltered = () => {
 
-        if (filteredShipments.length === 0) {
-            alert("لا يوجد إرساليات لطباعتها");
-            return;
-        }
+    if (filteredShipments.length === 0) {
+        alert("لا يوجد إرساليات للطباعة");
+        return;
+    }
 
-        setSelected(null);
-        setPrintBatch(filteredShipments);
+    setSelected(null);
+    setPrintBatch(filteredShipments);
 
-    };
+    setTimeout(() => {
+        window.print();
+
+        setTimeout(() => {
+            setPrintBatch([]);
+        }, 500);
+
+    }, 200);
+};
 
 
     return (
