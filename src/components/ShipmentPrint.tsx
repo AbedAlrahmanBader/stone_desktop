@@ -346,7 +346,6 @@ const soldTotals = stones.reduce<SoldTotals>(
     </div>
 </div>
 
-// ... باقي الكود
                 <table className="shipment-table">
                     <thead>
                         <tr>
