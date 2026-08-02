@@ -1,4 +1,4 @@
-// OrderDetails.tsx
+// OrderDetails.tsx - الكود الكامل المحسن
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -29,7 +29,6 @@ function OrderDetails() {
   const navigate = useNavigate();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const printRef = useRef<HTMLDivElement>(null);
 
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<EditItemState | null>(null);
@@ -165,35 +164,62 @@ function OrderDetails() {
       </div>
 
       {/* محتوى الطباعة */}
-      <div ref={printRef} className="print-content">
+      <div className="print-content" id="print-area">
         {/* رأس الطباعة */}
         <div className="print-header">
-          <h1>تفاصيل الطلبية #{order.orderNumber}</h1>
-          <p className="print-date">تاريخ الطباعة: {new Date().toLocaleDateString("ar-SA")}</p>
-          <hr className="print-divider" />
+          <div className="print-header-content">
+            <h1>تفاصيل الطلبية</h1>
+            <h2>رقم الطلبية: #{order.orderNumber}</h2>
+            <p className="print-date">تاريخ الطباعة: {new Date().toLocaleDateString("ar-SA")}</p>
+          </div>
         </div>
 
-        {/* معلومات العميل والطلب - تظهر في الطباعة */}
+        {/* معلومات العميل والطلب */}
         <div className="print-info-grid">
           <div className="print-info-section">
             <h3>معلومات العميل</h3>
-            <p><strong>الاسم:</strong> {order.customer?.name}</p>
-            <p><strong>الهاتف:</strong> {order.customer?.phone || "---"}</p>
-            <p><strong>البريد:</strong> {order.customer?.email || "---"}</p>
+            <table className="print-info-table">
+              <tbody>
+                <tr>
+                  <td><strong>الاسم:</strong></td>
+                  <td>{order.customer?.name}</td>
+                </tr>
+                <tr>
+                  <td><strong>الهاتف:</strong></td>
+                  <td>{order.customer?.phone || "---"}</td>
+                </tr>
+                <tr>
+                  <td><strong>البريد:</strong></td>
+                  <td>{order.customer?.email || "---"}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <div className="print-info-section">
             <h3>معلومات الطلبية</h3>
-            <p>
-              <strong>الحالة:</strong>
-              <span className={`status-badge ${order.status?.toLowerCase()}`}>
-                {order.status === "Open" ? "مفتوحة" : "مكتملة"}
-              </span>
-            </p>
-            {order.description && (
-              <p><strong>الوصف:</strong> {order.description}</p>
-            )}
-            <p><strong>تاريخ الإنشاء:</strong> {new Date(order.createdAt).toLocaleDateString("ar-SA")}</p>
+            <table className="print-info-table">
+              <tbody>
+                <tr>
+                  <td><strong>الحالة:</strong></td>
+                  <td>
+                    <span className={`status-badge ${order.status?.toLowerCase()}`}>
+                      {order.status === "Open" ? "مفتوحة" : "مكتملة"}
+                    </span>
+                  </td>
+                </tr>
+                {order.description && (
+                  <tr>
+                    <td><strong>الوصف:</strong></td>
+                    <td>{order.description}</td>
+                  </tr>
+                )}
+                <tr>
+                  <td><strong>تاريخ الإنشاء:</strong></td>
+                  <td>{new Date(order.createdAt).toLocaleDateString("ar-SA")}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -203,15 +229,15 @@ function OrderDetails() {
           <table className="print-items-table">
             <thead>
               <tr>
-                <th>#</th>
-                <th>نوع الحجر</th>
-                <th>الطول</th>
-                <th>العرض</th>
-                <th>السمك</th>
-                <th>الوحدة</th>
-                <th>الكمية المطلوبة</th>
-                <th>الكمية المتبقية</th>
-                <th>الحالة</th>
+                <th style={{width: '5%'}}>#</th>
+                <th style={{width: '15%'}}>نوع الحجر</th>
+                <th style={{width: '8%'}}>الطول</th>
+                <th style={{width: '8%'}}>العرض</th>
+                <th style={{width: '8%'}}>السمك</th>
+                <th style={{width: '10%'}}>الوحدة</th>
+                <th style={{width: '12%'}}>الكمية المطلوبة</th>
+                <th style={{width: '12%'}}>الكمية المتبقية</th>
+                <th style={{width: '12%'}}>الحالة</th>
               </tr>
             </thead>
             <tbody>
@@ -578,8 +604,9 @@ function OrderDetails() {
       <style>{`
         /* تنسيقات الطباعة */
         @media print {
-          /* إخفاء كل عناصر الشاشة */
+          /* إخفاء عناصر الشاشة */
           .no-print,
+          .screen-only,
           .screen-only .no-print,
           .order-header,
           .btn-print,
@@ -601,24 +628,26 @@ function OrderDetails() {
           .print-header {
             text-align: center;
             margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #333;
           }
 
-          .print-header h1 {
-            margin: 0 0 5px 0;
-            font-size: 22px;
+          .print-header-content h1 {
+            margin: 0;
+            font-size: 24px;
             color: #000;
           }
 
-          .print-date {
-            margin: 0;
-            font-size: 12px;
-            color: #555;
+          .print-header-content h2 {
+            margin: 5px 0;
+            font-size: 18px;
+            color: #333;
           }
 
-          .print-divider {
-            border: none;
-            border-top: 2px solid #333;
-            margin: 15px 0;
+          .print-date {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            color: #666;
           }
 
           /* شبكة المعلومات للطباعة */
@@ -630,26 +659,39 @@ function OrderDetails() {
           }
 
           .print-info-section {
-            padding: 10px;
+            padding: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
             background: #f9f9f9;
           }
 
           .print-info-section h3 {
-            margin: 0 0 10px 0;
+            margin: 0 0 12px 0;
             font-size: 16px;
             border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
+            padding-bottom: 8px;
+            color: #333;
           }
 
-          .print-info-section p {
-            margin: 5px 0;
+          .print-info-table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          .print-info-table td {
+            padding: 4px 8px;
             font-size: 13px;
+            border: none;
           }
 
-          .print-info-section strong {
+          .print-info-table td:first-child {
+            width: 40%;
             font-weight: bold;
+            color: #555;
+          }
+
+          .print-info-table td:last-child {
+            width: 60%;
           }
 
           /* جدول الأصناف للطباعة */
@@ -658,8 +700,9 @@ function OrderDetails() {
           }
 
           .print-items-section h3 {
-            margin: 0 0 10px 0;
+            margin: 0 0 12px 0;
             font-size: 16px;
+            color: #333;
           }
 
           .print-items-table {
@@ -669,18 +712,19 @@ function OrderDetails() {
           }
 
           .print-items-table th {
-            background: #333;
-            color: white;
-            padding: 8px;
+            background: #333 !important;
+            color: white !important;
+            padding: 8px 6px;
             text-align: center;
             border: 1px solid #000;
             font-weight: bold;
           }
 
           .print-items-table td {
-            padding: 6px 8px;
+            padding: 6px;
             text-align: center;
             border: 1px solid #999;
+            color: #333;
           }
 
           .print-items-table tr:nth-child(even) {
@@ -696,13 +740,13 @@ function OrderDetails() {
           }
 
           .print-items-table .item-status.completed {
-            background: #d4edda;
-            color: #155724;
+            background: #d4edda !important;
+            color: #155724 !important;
           }
 
           .print-items-table .item-status.pending {
-            background: #fff3cd;
-            color: #856404;
+            background: #fff3cd !important;
+            color: #856404 !important;
           }
 
           .print-items-table .status-badge {
@@ -730,8 +774,9 @@ function OrderDetails() {
           }
 
           .print-summary h3 {
-            margin: 0 0 10px 0;
+            margin: 0 0 12px 0;
             font-size: 16px;
+            color: #333;
           }
 
           .print-summary-grid {
@@ -742,7 +787,7 @@ function OrderDetails() {
 
           .print-stat {
             background: #f5f5f5;
-            padding: 10px;
+            padding: 12px;
             border-radius: 5px;
             text-align: center;
             border: 1px solid #ddd;
@@ -752,7 +797,7 @@ function OrderDetails() {
             display: block;
             font-size: 11px;
             color: #666;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
           }
 
           .print-stat-value {
@@ -776,8 +821,9 @@ function OrderDetails() {
           }
 
           .print-stones-section h3 {
-            margin: 0 0 10px 0;
+            margin: 0 0 12px 0;
             font-size: 16px;
+            color: #333;
           }
 
           .print-stones-grid {
@@ -834,14 +880,10 @@ function OrderDetails() {
             color: #666;
           }
 
-          /* إخفاء محتوى الشاشة */
-          .screen-only {
-            display: none !important;
-          }
-
-          /* إظهار محتوى الطباعة */
-          .print-content {
-            display: block !important;
+          /* إعدادات الصفحة */
+          @page {
+            size: A4;
+            margin: 15mm;
           }
 
           /* منع تكسر الصفحات */
@@ -852,10 +894,15 @@ function OrderDetails() {
             page-break-inside: avoid;
           }
 
-          /* إعدادات الصفحة */
-          @page {
-            size: A4;
-            margin: 15mm;
+          /* تنسيق الجدول للطباعة */
+          .print-items-table {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          .print-items-table th {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
         }
 
