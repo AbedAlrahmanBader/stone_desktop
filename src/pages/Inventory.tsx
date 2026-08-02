@@ -168,7 +168,7 @@ const printQRAndBarcode = (
             day: 'numeric'
         });
 
-        printWindow.document.write(`
+      printWindow.document.write(`
             <!DOCTYPE html>
             <html dir="rtl">
                 <head>
@@ -192,7 +192,7 @@ const printQRAndBarcode = (
                             background: #f0f0f0;
                             display: flex;
                             justify-content: center;
-                            align-items: center;
+                            align-items: flex-start; /* تم التغيير من center إلى flex-start */
                             min-height: 100vh;
                             padding: 5px;
                         }
@@ -201,13 +201,14 @@ const printQRAndBarcode = (
                             background: white;
                             width: 105mm;
                             height: 148mm;
-                            padding: 6mm 5mm 5mm 5mm;
+                            padding: 26mm 5mm 5mm 5mm; /* تم التغيير من 6mm إلى 26mm */
                             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
                             display: flex;
                             flex-direction: column;
                             border-radius: 4px;
                             position: relative;
                             overflow: hidden;
+                            margin-top: 0; /* تم الإضافة */
                         }
 
                         /* خلفية مزخرفة خفيفة */
@@ -221,17 +222,6 @@ const printQRAndBarcode = (
                             background: radial-gradient(circle at 80% 20%, rgba(200,180,160,0.03) 0%, transparent 70%);
                             pointer-events: none;
                         }
-
-                        /* الهيدر: اللوجو + خط فاصل */
-                        .header {
-                            text-align: center;
-                            padding-bottom: 0;
-                            border-bottom: 2px solid #1a1a1a;
-                            position: relative;
-                            z-index: 1;
-                        }
-
-                 
 
                         /* المحتوى الرئيسي */
                         .content {
@@ -323,7 +313,8 @@ const printQRAndBarcode = (
                         .order-info-value {
                             color: #1a1a1a;
                             font-weight: bold;
-                            font-size: 12px;
+                            font-size: 20px; /* تم التغيير من 12px إلى 20px */
+                            letter-spacing: 1px; /* تم الإضافة */
                         }
 
                         /* الفوتر */
@@ -399,9 +390,9 @@ const printQRAndBarcode = (
                                 border-radius: 0;
                                 width: 105mm;
                                 height: 148mm;
-padding: 26mm 5mm 5mm 5mm;
-margin-top: 0;
-}
+                                padding: 26mm 5mm 5mm 5mm;
+                                margin-top: 0;
+                            }
 
                             .print-card::before {
                                 display: none;
@@ -427,7 +418,6 @@ margin-top: 0;
                         <!-- علامة مائية -->
                         <div class="watermark">${barcode}</div>
 
-
                         <!-- Content -->
                         <div class="content">
                             <div class="qr-wrapper">
@@ -444,10 +434,6 @@ margin-top: 0;
 
                             ${(customerName || orderNumber) ? orderInfoHTML : ''}
                         </div>
-
-                   
-
-                      
                     </div>
                 </body>
             </html>
