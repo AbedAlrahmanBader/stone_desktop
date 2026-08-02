@@ -168,7 +168,7 @@ const printQRAndBarcode = (
             day: 'numeric'
         });
 
-      printWindow.document.write(`
+    printWindow.document.write(`
             <!DOCTYPE html>
             <html dir="rtl">
                 <head>
@@ -192,7 +192,7 @@ const printQRAndBarcode = (
                             background: #f0f0f0;
                             display: flex;
                             justify-content: center;
-                            align-items: flex-start; /* تم التغيير من center إلى flex-start */
+                            align-items: center;
                             min-height: 100vh;
                             padding: 5px;
                         }
@@ -201,14 +201,13 @@ const printQRAndBarcode = (
                             background: white;
                             width: 105mm;
                             height: 148mm;
-                            padding: 26mm 5mm 5mm 5mm; /* تم التغيير من 6mm إلى 26mm */
+                            padding: 5mm 5mm 5mm 5mm; /* تم التغيير إلى 5mm للجميع */
                             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
                             display: flex;
                             flex-direction: column;
                             border-radius: 4px;
                             position: relative;
                             overflow: hidden;
-                            margin-top: 0; /* تم الإضافة */
                         }
 
                         /* خلفية مزخرفة خفيفة */
@@ -230,7 +229,7 @@ const printQRAndBarcode = (
                             flex-direction: column;
                             align-items: center;
                             justify-content: center;
-                            padding: 4mm 0;
+                            padding: 2mm 0;
                             position: relative;
                             z-index: 1;
                             gap: 3mm;
@@ -313,8 +312,8 @@ const printQRAndBarcode = (
                         .order-info-value {
                             color: #1a1a1a;
                             font-weight: bold;
-                            font-size: 20px; /* تم التغيير من 12px إلى 20px */
-                            letter-spacing: 1px; /* تم الإضافة */
+                            font-size: 20px; /* رقم الطلبية كبير */
+                            letter-spacing: 1px;
                         }
 
                         /* الفوتر */
@@ -390,8 +389,7 @@ const printQRAndBarcode = (
                                 border-radius: 0;
                                 width: 105mm;
                                 height: 148mm;
-                                padding: 26mm 5mm 5mm 5mm;
-                                margin-top: 0;
+                                padding: 5mm 5mm 5mm 5mm; /* نفس التعديل في الطباعة */
                             }
 
                             .print-card::before {
