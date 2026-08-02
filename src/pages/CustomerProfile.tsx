@@ -14,6 +14,7 @@ interface NewOrderItem {
   length: number;
   width: number;
   thickness: number;
+  details: string;
 }
 
 interface EditOrderItem extends NewOrderItem {
@@ -35,7 +36,7 @@ function CustomerProfile() {
   }>({
     orderNumber: "",
     description: "",
-    items: [{ stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0 }]
+    items: [{ stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0, details: "" }]
   });
   const [loading, setLoading] = useState(false);
 
@@ -110,7 +111,7 @@ function CustomerProfile() {
       setNewOrder({
         orderNumber: "",
         description: "",
-        items: [{ stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0 }]
+        items: [{ stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0, details: "" }]
       });
       await loadCustomer();
 
@@ -126,7 +127,7 @@ function CustomerProfile() {
   const addOrderItem = () => {
     setNewOrder({
       ...newOrder,
-      items: [...newOrder.items, { stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0 }]
+      items: [...newOrder.items, { stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0, details: "" }]
     });
   };
 
@@ -163,6 +164,7 @@ function CustomerProfile() {
         length: item.length || 0,
         width: item.width || 0,
         thickness: item.thickness || 0,
+        details: item.details || "",
       }))
     });
   };
@@ -175,7 +177,7 @@ function CustomerProfile() {
   const addEditOrderItem = () => {
     setEditOrder({
       ...editOrder,
-      items: [...editOrder.items, { stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0 }]
+      items: [...editOrder.items, { stoneType: "", unit: "pieces", requiredQty: 0, length: 0, width: 0, thickness: 0, details: "" }]
     });
   };
 
@@ -464,6 +466,12 @@ function CustomerProfile() {
                       required
                       min="1"
                     />
+                    <input
+                      type="text"
+                      placeholder="تفاصيل الصنف (اختياري)"
+                      value={item.details}
+                      onChange={(e) => updateOrderItem(index, "details", e.target.value)}
+                    />
                     {newOrder.items.length > 1 && (
                       <button
                         type="button"
@@ -588,6 +596,12 @@ function CustomerProfile() {
                       onChange={(e) => updateEditOrderItem(index, "requiredQty", Number(e.target.value))}
                       required
                       min="1"
+                    />
+                    <input
+                      type="text"
+                      placeholder="تفاصيل الصنف (اختياري)"
+                      value={item.details}
+                      onChange={(e) => updateEditOrderItem(index, "details", e.target.value)}
                     />
                     {editOrder.items.length > 1 && (
                       <button

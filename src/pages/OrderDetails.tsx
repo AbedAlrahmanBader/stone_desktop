@@ -12,6 +12,7 @@ interface EditItemState {
   width: number;
   thickness: number;
   requiredQty: number;
+  details: string;
 }
 
 interface OrderStone {
@@ -79,6 +80,7 @@ function OrderDetails() {
       width: item.width || 0,
       thickness: item.thickness || 0,
       requiredQty: item.requiredQty,
+      details: item.details || "",
     });
   };
 
@@ -209,6 +211,7 @@ function OrderDetails() {
                 <th>الوحدة</th>
                 <th>الكمية المطلوبة</th>
                 <th>الكمية المتبقية (الناقص)</th>
+                <th>تفاصيل الصنف</th>
                 <th>الحالة</th>
                 <th className="no-print">الإجراءات</th>
               </tr>
@@ -268,6 +271,14 @@ function OrderDetails() {
                         />
                       </td>
                       <td>{item.remainingQty}</td>
+                      <td>
+                        <input
+                          type="text"
+                          placeholder="تفاصيل إضافية..."
+                          value={editItem.details}
+                          onChange={(e) => setEditItem({ ...editItem, details: e.target.value })}
+                        />
+                      </td>
                       <td>---</td>
                       <td className="no-print">
                         <button
@@ -301,6 +312,7 @@ function OrderDetails() {
                     <td className={item.remainingQty > 0 ? "remaining-highlight" : ""}>
                       {item.remainingQty}
                     </td>
+                    <td className="item-details-cell">{item.details || "---"}</td>
                     <td>
                       <span className={`item-status ${item.remainingQty === 0 ? "completed" : "pending"}`}>
                         {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
