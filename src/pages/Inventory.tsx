@@ -201,7 +201,7 @@ const printQRAndBarcode = (
                             background: white;
                             width: 105mm;
                             height: 148mm;
-                            padding: 6mm 5mm 5mm 5mm;
+padding: 26mm 5mm 5mm 5mm;
                             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
                             display: flex;
                             flex-direction: column;
@@ -243,7 +243,7 @@ const printQRAndBarcode = (
                             flex: 1;
                             display: flex;
                             flex-direction: column;
-                            align-items: center;
+align-items: flex-start;
                             justify-content: center;
                             padding: 4mm 0;
                             position: relative;
@@ -329,7 +329,7 @@ const printQRAndBarcode = (
                         .order-info-value {
                             color: #1a1a1a;
                             font-weight: bold;
-                            font-size: 11px;
+                            font-size: 20px;
                         }
 
                         /* الفوتر */
