@@ -123,6 +123,10 @@ function OrderDetails() {
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   if (loading) {
     return <div className="loading">جاري تحميل بيانات الطلبية...</div>;
   }
@@ -131,16 +135,38 @@ function OrderDetails() {
     return <div className="not-found">الطلبية غير موجودة</div>;
   }
 
+  // حساب الكمية الناقصة (المتبقية) والمكتملة لكل صنف
+  const totalRequired = order.items.reduce(
+    (sum: number, item: any) => sum + (item.requiredQty || 0),
+    0
+  );
+  const totalRemaining = order.items.reduce(
+    (sum: number, item: any) => sum + (item.remainingQty || 0),
+    0
+  );
+  const totalCompleted = totalRequired - totalRemaining;
+
   return (
     <div className="order-details">
-      <div className="order-header">
+      <div className="order-header no-print">
         <div className="order-title">
           <h1>تفاصيل الطلبية</h1>
           <span className="order-number">#{order.orderNumber}</span>
         </div>
-        <button className="btn-back" onClick={() => navigate(-1)}>
-          ← رجوع
-        </button>
+        <div className="order-header-actions">
+          <button className="btn-print" onClick={handlePrint}>
+            🖨 طباعة
+          </button>
+          <button className="btn-back" onClick={() => navigate(-1)}>
+            ← رجوع
+          </button>
+        </div>
+      </div>
+
+      {/* رأس مخصص للطباعة فقط */}
+      <div className="print-only-header">
+        <h1>تفاصيل الطلبية #{order.orderNumber}</h1>
+        <p className="print-date">تاريخ الطباعة: {new Date().toLocaleDateString("ar")}</p>
       </div>
 
       <div className="order-info-grid">
@@ -182,9 +208,9 @@ function OrderDetails() {
                 <th>السمك</th>
                 <th>الوحدة</th>
                 <th>الكمية المطلوبة</th>
-                <th>الكمية المتبقية</th>
+                <th>الكمية المتبقية (الناقص)</th>
                 <th>الحالة</th>
-                <th>الإجراءات</th>
+                <th className="no-print">الإجراءات</th>
               </tr>
             </thead>
             <tbody>
@@ -243,7 +269,7 @@ function OrderDetails() {
                       </td>
                       <td>{item.remainingQty}</td>
                       <td>---</td>
-                      <td>
+                      <td className="no-print">
                         <button
                           className="btn-save-item"
                           onClick={() => saveEditItem(item._id)}
@@ -272,13 +298,15 @@ function OrderDetails() {
                       {item.unit === "area" && "مساحة"}
                     </td>
                     <td>{item.requiredQty}</td>
-                    <td>{item.remainingQty}</td>
+                    <td className={item.remainingQty > 0 ? "remaining-highlight" : ""}>
+                      {item.remainingQty}
+                    </td>
                     <td>
                       <span className={`item-status ${item.remainingQty === 0 ? "completed" : "pending"}`}>
                         {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
                       </span>
                     </td>
-                    <td>
+                    <td className="no-print">
                       <button className="btn-edit-item" onClick={() => startEditItem(item)}>
                         ✏️
                       </button>
@@ -298,7 +326,7 @@ function OrderDetails() {
         </div>
       </div>
 
-      <div className="linked-stones-section">
+      <div className="linked-stones-section no-print">
         <h2>🏷️ المشاتيح المرتبطة</h2>
 
         {loadingStones ? (
@@ -369,8 +397,72 @@ function OrderDetails() {
               {order.items.filter((item: any) => item.remainingQty > 0).length}
             </span>
           </div>
+          <div className="stat-item">
+            <span className="stat-label">إجمالي الكمية المطلوبة</span>
+            <span className="stat-value">{totalRequired}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">إجمالي المنجز</span>
+            <span className="stat-value success">{totalCompleted}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">إجمالي الناقص</span>
+            <span className="stat-value warning">{totalRemaining}</span>
+          </div>
         </div>
       </div>
+
+      {/* تنسيق خاص بالطباعة: إخفاء كل شي غير ضروري وتحسين شكل الجدول */}
+      <style>{`
+        .print-only-header {
+          display: none;
+        }
+
+        @media print {
+          .no-print {
+            display: none !important;
+          }
+
+          .print-only-header {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+          }
+
+          .print-only-header h1 {
+            margin: 0;
+          }
+
+          .print-date {
+            color: #555;
+            font-size: 12px;
+          }
+
+          .order-details {
+            padding: 0;
+          }
+
+          .order-items-table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          .order-items-table th,
+          .order-items-table td {
+            border: 1px solid #999;
+            padding: 6px 8px;
+          }
+
+          .remaining-highlight {
+            font-weight: bold;
+          }
+
+          .order-summary {
+            page-break-inside: avoid;
+            margin-top: 20px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
