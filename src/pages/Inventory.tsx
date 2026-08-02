@@ -432,10 +432,6 @@ const printQRAndBarcode = (
                         <!-- علامة مائية -->
                         <div class="watermark">${barcode}</div>
 
-                        <!-- Header -->
-                        <div class="header">
-                            <img src="${AAA}" alt="Al Fawaghra Stones" />
-                        </div>
 
                         <!-- Content -->
                         <div class="content">
@@ -454,19 +450,7 @@ const printQRAndBarcode = (
                             ${(customerName || orderNumber) ? orderInfoHTML : ''}
                         </div>
 
-                        <!-- Footer -->
-                        <div class="footer">
-                            <div class="company-name">AL FAWAGHRA STONES</div>
-                            <div class="contact-info">
-                                <span>📍 بيت لحم - فلسطين</span>
-                                <span class="separator">|</span>
-                                <span>📱 0505574747</span>
-                                <span class="separator">|</span>
-                                <span>✉️ alfawagra@yahoo.com</span>
-                                <span class="separator">|</span>
-                                <span>🌐 www.fwagerastones.com</span>
-                            </div>
-                        </div>
+                   
 
                         <div class="print-date">
                             تاريخ الطباعة: ${dateStr}
