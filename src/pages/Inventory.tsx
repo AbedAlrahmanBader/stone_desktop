@@ -432,7 +432,10 @@ const printQRAndBarcode = (
                                 ${barcodeHTML}
                             </div>
 
-                         
+                            <!-- رقم المنتج -->
+                            <div class="product-id">
+                                ${barcode}
+                            </div>
                         </div>
                     </div>
                 </body>
