@@ -153,43 +153,4 @@
         width:100%;
     }
 
-    /* =======================
-   Print All Shipments
-=======================*/
-
-.print-batch-container{
-    display:none;
-}
-
-@media print {
-
-    @page{
-        size:A4 portrait;
-        margin:10mm;
-    }
-
-    body{
-        margin:0;
-        padding:0;
-    }
-
-    .shipments>*{
-        display:none !important;
-    }
-
-    .print-batch-container{
-        display:block !important;
-    }
-
-    .print-batch-item{
-        page-break-after:always;
-        break-after:page;
-    }
-
-    .print-batch-item:last-child{
-        page-break-after:auto;
-        break-after:auto;
-    }
-}
-
 }
