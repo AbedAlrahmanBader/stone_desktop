@@ -151,11 +151,7 @@ const printQRAndBarcode = (
         // تنسيق معلومات العميل والطلب
         const orderInfoHTML = `
             <div class="order-info">
-                ${customerName ? `
-                <div class="order-info-row">
-                    <span class="order-info-label">العميل</span>
-                    <span class="order-info-value">${customerName}</span>
-                </div>` : ''}
+               
                 ${orderNumber ? `
                 <div class="order-info-row">
                     <span class="order-info-label">رقم الطلبية</span>
