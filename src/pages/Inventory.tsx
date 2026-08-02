@@ -93,7 +93,7 @@ function Inventory() {
         loadStones();
     }, []);
 
-    // Inventory.tsx - دالة الطباعة (بتصميم الورقة الرسمية - لوجو صورة)
+    // Inventory.tsx - دالة الطباعة (بتصميم الورقة الرسمية - لوجو صورة - مقاس A6 للطابعة الحرارية)
     const printQRAndBarcode = (
         barcode: string,
         customerName?: string,
@@ -169,8 +169,9 @@ function Inventory() {
                                 box-sizing: border-box;
                             }
 
+                            /* مقاس A6 (105mm x 148mm) عشان الطابعة الحرارية */
                             @page {
-                                size: 100mm 150mm;
+                                size: 105mm 148mm;
                                 margin: 0;
                             }
 
@@ -180,15 +181,15 @@ function Inventory() {
                                 display: flex;
                                 justify-content: center;
                                 align-items: center;
-                                width: 100mm;
-                                height: 150mm;
+                                width: 105mm;
+                                height: 148mm;
                             }
 
                             .letterhead {
                                 background: white;
-                                width: 100mm;
-                                height: 150mm;
-                                padding: 6mm 6mm;
+                                width: 105mm;
+                                height: 148mm;
+                                padding: 5mm 5mm;
                                 box-shadow: 0 4px 15px rgba(0,0,0,0.1);
                                 display: flex;
                                 flex-direction: column;
@@ -203,7 +204,7 @@ function Inventory() {
 
                             .header img {
                                 width: 80mm;
-                                height:30mm;
+                                height: 28mm;
                                 object-fit: contain;
                             }
 
@@ -222,8 +223,8 @@ function Inventory() {
                             }
 
                             .qr-container svg {
-                                width: 100px;
-                                height: 100px;
+                                width: 95px;
+                                height: 95px;
                                 display: block;
                                 margin: 0 auto;
                             }
@@ -288,8 +289,8 @@ function Inventory() {
                             @media print {
                                 body {
                                     background: white;
-                                    width: 100mm;
-                                    height: 150mm;
+                                    width: 105mm;
+                                    height: 148mm;
                                 }
 
                                 .letterhead {
