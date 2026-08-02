@@ -168,7 +168,7 @@ const printQRAndBarcode = (
             day: 'numeric'
         });
 
-    printWindow.document.write(`
+ printWindow.document.write(`
             <!DOCTYPE html>
             <html dir="rtl">
                 <head>
@@ -201,7 +201,7 @@ const printQRAndBarcode = (
                             background: white;
                             width: 105mm;
                             height: 148mm;
-                            padding: 5mm 5mm 5mm 5mm; /* تم التغيير إلى 5mm للجميع */
+                            padding: 5mm 5mm 5mm 5mm;
                             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
                             display: flex;
                             flex-direction: column;
@@ -233,6 +233,43 @@ const printQRAndBarcode = (
                             position: relative;
                             z-index: 1;
                             gap: 3mm;
+                        }
+
+                        /* معلومات العميل والطلب - في الأعلى */
+                        .order-info {
+                            width: 100%;
+                            padding: 2mm 3mm;
+                            background: #fafafa;
+                            border-radius: 6px;
+                            border: 1px solid #e8e8e8;
+                            margin-bottom: 2mm; /* مسافة تحت رقم الطلبية */
+                        }
+
+                        .order-info-row {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            font-size: 10px;
+                            padding: 1mm 0;
+                        }
+
+                        .order-info-row:not(:last-child) {
+                            border-bottom: 1px dashed #e8e8e8;
+                        }
+
+                        .order-info-label {
+                            color: #888;
+                            font-weight: 600;
+                            font-size: 9px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+
+                        .order-info-value {
+                            color: #1a1a1a;
+                            font-weight: bold;
+                            font-size: 20px; /* رقم الطلبية كبير */
+                            letter-spacing: 1px;
                         }
 
                         /* حاوية الـ QR */
@@ -278,42 +315,6 @@ const printQRAndBarcode = (
                             padding: 1mm 4mm;
                             border-radius: 4px;
                             border: 1px dashed #ccc;
-                        }
-
-                        /* معلومات العميل والطلب */
-                        .order-info {
-                            width: 100%;
-                            padding: 2mm 3mm;
-                            background: #fafafa;
-                            border-radius: 6px;
-                            border: 1px solid #e8e8e8;
-                        }
-
-                        .order-info-row {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            font-size: 10px;
-                            padding: 1mm 0;
-                        }
-
-                        .order-info-row:not(:last-child) {
-                            border-bottom: 1px dashed #e8e8e8;
-                        }
-
-                        .order-info-label {
-                            color: #888;
-                            font-weight: 600;
-                            font-size: 9px;
-                            text-transform: uppercase;
-                            letter-spacing: 0.5px;
-                        }
-
-                        .order-info-value {
-                            color: #1a1a1a;
-                            font-weight: bold;
-                            font-size: 20px; /* رقم الطلبية كبير */
-                            letter-spacing: 1px;
                         }
 
                         /* الفوتر */
@@ -389,7 +390,7 @@ const printQRAndBarcode = (
                                 border-radius: 0;
                                 width: 105mm;
                                 height: 148mm;
-                                padding: 5mm 5mm 5mm 5mm; /* نفس التعديل في الطباعة */
+                                padding: 5mm 5mm 5mm 5mm;
                             }
 
                             .print-card::before {
@@ -418,19 +419,23 @@ const printQRAndBarcode = (
 
                         <!-- Content -->
                         <div class="content">
+                            <!-- رقم الطلبية في الأعلى -->
+                            ${(customerName || orderNumber) ? orderInfoHTML : ''}
+
+                            <!-- QR Code -->
                             <div class="qr-wrapper">
                                 ${svgHTML}
                             </div>
 
+                            <!-- Barcode -->
                             <div class="barcode-wrapper">
                                 ${barcodeHTML}
                             </div>
 
+                            <!-- رقم المنتج -->
                             <div class="product-id">
                                 ${barcode}
                             </div>
-
-                            ${(customerName || orderNumber) ? orderInfoHTML : ''}
                         </div>
                     </div>
                 </body>
