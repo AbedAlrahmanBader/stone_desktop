@@ -1,4 +1,4 @@
-// OrderDetails.tsx
+// OrderDetails.tsx - الجزء المعدل للطباعة
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -164,191 +164,191 @@ function OrderDetails() {
       </div>
 
       {/* ====== محتوى الطباعة ====== */}
-      <div className="print-container">
-        <div className="print-content">
-          {/* رأس الطباعة */}
-          <div className="print-header">
-            <h1>تفاصيل الطلبية</h1>
-            <h2>رقم الطلبية: #{order.orderNumber}</h2>
-            <p className="print-date">تاريخ الطباعة: {new Date().toLocaleDateString("ar-SA")}</p>
-            <hr className="print-divider" />
-          </div>
+      <div className="print-only">
+        {/* رأس الطباعة */}
+        <div className="print-header">
+          <h1>تفاصيل الطلبية</h1>
+          <h2>رقم الطلبية: #{order.orderNumber}</h2>
+          <p className="print-date">تاريخ الطباعة: {new Date().toLocaleDateString("ar-SA")}</p>
+          <hr className="print-divider" />
+        </div>
 
-          {/* معلومات العميل والطلب */}
-          <div className="print-info-grid">
-            <div className="print-info-section">
-              <h3>معلومات العميل</h3>
-              <div className="print-info-row">
-                <span className="print-label">الاسم:</span>
-                <span className="print-value">{order.customer?.name}</span>
-              </div>
-              <div className="print-info-row">
-                <span className="print-label">الهاتف:</span>
-                <span className="print-value">{order.customer?.phone || "---"}</span>
-              </div>
-              <div className="print-info-row">
-                <span className="print-label">البريد:</span>
-                <span className="print-value">{order.customer?.email || "---"}</span>
-              </div>
+        {/* معلومات العميل والطلب */}
+        <div className="print-info-grid">
+          <div className="print-info-section">
+            <h3>معلومات العميل</h3>
+            <div className="print-info-row">
+              <span className="print-label">الاسم:</span>
+              <span className="print-value">{order.customer?.name}</span>
             </div>
-
-            <div className="print-info-section">
-              <h3>معلومات الطلبية</h3>
-              <div className="print-info-row">
-                <span className="print-label">الحالة:</span>
-                <span className="print-value">
-                  <span className={`status-badge ${order.status?.toLowerCase()}`}>
-                    {order.status === "Open" ? "مفتوحة" : "مكتملة"}
-                  </span>
-                </span>
-              </div>
-              {order.description && (
-                <div className="print-info-row">
-                  <span className="print-label">الوصف:</span>
-                  <span className="print-value">{order.description}</span>
-                </div>
-              )}
-              <div className="print-info-row">
-                <span className="print-label">تاريخ الإنشاء:</span>
-                <span className="print-value">{new Date(order.createdAt).toLocaleDateString("ar-SA")}</span>
-              </div>
+            <div className="print-info-row">
+              <span className="print-label">الهاتف:</span>
+              <span className="print-value">{order.customer?.phone || "---"}</span>
+            </div>
+            <div className="print-info-row">
+              <span className="print-label">البريد:</span>
+              <span className="print-value">{order.customer?.email || "---"}</span>
             </div>
           </div>
 
-          {/* جدول الأصناف */}
-          <div className="print-items-section">
-            <h3>قائمة الأصناف</h3>
-            <table className="print-items-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>نوع الحجر</th>
-                  <th>الطول</th>
-                  <th>العرض</th>
-                  <th>السمك</th>
-                  <th>الوحدة</th>
-                  <th>الكمية المطلوبة</th>
-                  <th>الكمية المتبقية</th>
-                  <th>الحالة</th>
-                </tr>
-              </thead>
-              <tbody>
-                {order.items && order.items.length > 0 ? (
-                  order.items.map((item: any, index: number) => (
-                    <tr key={item._id || index}>
-                      <td>{index + 1}</td>
-                      <td>{item.stoneType}</td>
-                      <td>{item.length || "---"}</td>
-                      <td>{item.width || "---"}</td>
-                      <td>{item.thickness || "---"}</td>
-                      <td>
-                        {item.unit === "pieces" && "قطع"}
-                        {item.unit === "linearMeter" && "متر طولي"}
-                        {item.unit === "area" && "مساحة"}
-                      </td>
-                      <td>{item.requiredQty}</td>
-                      <td>{item.remainingQty}</td>
-                      <td>
-                        <span className={`item-status ${item.remainingQty === 0 ? "completed" : "pending"}`}>
-                          {item.remainingQty === 0 ? "مكتمل" : "قيد التنفيذ"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={9} style={{textAlign: 'center'}}>لا توجد أصناف</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* ملخص الطلبية */}
-          <div className="print-summary">
-            <h3>ملخص الطلبية</h3>
-            <div className="print-summary-grid">
-              <div className="print-stat">
-                <span className="print-stat-label">إجمالي الأصناف</span>
-                <span className="print-stat-value">{order.items?.length || 0}</span>
-              </div>
-              <div className="print-stat">
-                <span className="print-stat-label">المكتملة</span>
-                <span className="print-stat-value success">
-                  {order.items?.filter((item: any) => item.remainingQty === 0).length || 0}
+          <div className="print-info-section">
+            <h3>معلومات الطلبية</h3>
+            <div className="print-info-row">
+              <span className="print-label">الحالة:</span>
+              <span className="print-value">
+                <span className={`status-badge ${order.status?.toLowerCase()}`}>
+                  {order.status === "Open" ? "مفتوحة" : "مكتملة"}
                 </span>
+              </span>
+            </div>
+            {order.description && (
+              <div className="print-info-row">
+                <span className="print-label">الوصف:</span>
+                <span className="print-value">{order.description}</span>
               </div>
-              <div className="print-stat">
-                <span className="print-stat-label">قيد التنفيذ</span>
-                <span className="print-stat-value warning">
-                  {order.items?.filter((item: any) => item.remainingQty > 0).length || 0}
-                </span>
-              </div>
-              <div className="print-stat">
-                <span className="print-stat-label">إجمالي الكمية</span>
-                <span className="print-stat-value">{totalRequired}</span>
-              </div>
-              <div className="print-stat">
-                <span className="print-stat-label">المنجز</span>
-                <span className="print-stat-value success">{totalCompleted}</span>
-              </div>
-              <div className="print-stat">
-                <span className="print-stat-label">الناقص</span>
-                <span className="print-stat-value warning">{totalRemaining}</span>
-              </div>
+            )}
+            <div className="print-info-row">
+              <span className="print-label">تاريخ الإنشاء:</span>
+              <span className="print-value">{new Date(order.createdAt).toLocaleDateString("ar-SA")}</span>
             </div>
           </div>
+        </div>
 
-          {/* المشاتيح */}
-          {stones && stones.length > 0 && (
-            <div className="print-stones-section">
-              <h3>🏷️ المشاتيح المرتبطة</h3>
-              <div className="print-stones-grid">
-                {stones.map((stone) => (
-                  <div key={stone._id} className="print-stone-card">
-                    <svg
-                      className="print-barcode-svg"
-                      ref={(el) => {
-                        if (!el) return;
-                        try {
-                          JsBarcode(el, stone.barcode, {
-                            format: "CODE128",
-                            width: 1.2,
-                            height: 35,
-                            displayValue: true,
-                            fontSize: 10,
-                            font: "monospace",
-                            textMargin: 2,
-                            margin: 2,
-                            background: "transparent",
-                            lineColor: "#000000",
-                          });
-                        } catch (err) {
-                          console.error(err);
-                        }
-                      }}
-                    />
-                    <div className="print-stone-info">
-                      <span className={`stone-status ${stone.status === "In Stock" ? "in-stock" : "shipped"}`}>
-                        {stone.status === "In Stock" ? "متوفر" : "مشحون"}
+        {/* ====== جدول الأصناف للطباعة ====== */}
+        <div className="print-items-section">
+          <h3>قائمة الأصناف</h3>
+          <table className="print-items-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>نوع الحجر</th>
+                <th>الطول</th>
+                <th>العرض</th>
+                <th>السمك</th>
+                <th>الوحدة</th>
+                <th>الكمية المطلوبة</th>
+                <th>الكمية المتبقية</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.items && order.items.length > 0 ? (
+                order.items.map((item: any, index: number) => (
+                  <tr key={item._id || index}>
+                    <td>{index + 1}</td>
+                    <td>{item.stoneType}</td>
+                    <td>{item.length || "---"}</td>
+                    <td>{item.width || "---"}</td>
+                    <td>{item.thickness || "---"}</td>
+                    <td>
+                      {item.unit === "pieces" && "قطع"}
+                      {item.unit === "linearMeter" && "متر طولي"}
+                      {item.unit === "area" && "مساحة"}
+                    </td>
+                    <td>{item.requiredQty}</td>
+                    <td>{item.remainingQty}</td>
+                    <td>
+                      <span className={`item-status ${item.remainingQty === 0 ? "completed" : "pending"}`}>
+                        {item.remainingQty === 0 ? "مكتمل" : "قيد التنفيذ"}
                       </span>
-                      <div className="stone-types">
-                        {stone.items.map((it) => it.stoneType).join("، ")}
-                      </div>
-                      <div className="stone-totals">
-                        {stone.totalLinearMeter?.toFixed(2)} م.ط ، {stone.totalArea?.toFixed(2)} م²
-                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={9} style={{textAlign: 'center', padding: '20px'}}>
+                    لا توجد أصناف
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* ملخص الطلبية */}
+        <div className="print-summary">
+          <h3>ملخص الطلبية</h3>
+          <div className="print-summary-grid">
+            <div className="print-stat">
+              <span className="print-stat-label">إجمالي الأصناف</span>
+              <span className="print-stat-value">{order.items?.length || 0}</span>
+            </div>
+            <div className="print-stat">
+              <span className="print-stat-label">المكتملة</span>
+              <span className="print-stat-value success">
+                {order.items?.filter((item: any) => item.remainingQty === 0).length || 0}
+              </span>
+            </div>
+            <div className="print-stat">
+              <span className="print-stat-label">قيد التنفيذ</span>
+              <span className="print-stat-value warning">
+                {order.items?.filter((item: any) => item.remainingQty > 0).length || 0}
+              </span>
+            </div>
+            <div className="print-stat">
+              <span className="print-stat-label">إجمالي الكمية</span>
+              <span className="print-stat-value">{totalRequired}</span>
+            </div>
+            <div className="print-stat">
+              <span className="print-stat-label">المنجز</span>
+              <span className="print-stat-value success">{totalCompleted}</span>
+            </div>
+            <div className="print-stat">
+              <span className="print-stat-label">الناقص</span>
+              <span className="print-stat-value warning">{totalRemaining}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* المشاتيح */}
+        {stones && stones.length > 0 && (
+          <div className="print-stones-section">
+            <h3>🏷️ المشاتيح المرتبطة</h3>
+            <div className="print-stones-grid">
+              {stones.map((stone) => (
+                <div key={stone._id} className="print-stone-card">
+                  <svg
+                    className="print-barcode-svg"
+                    ref={(el) => {
+                      if (!el) return;
+                      try {
+                        JsBarcode(el, stone.barcode, {
+                          format: "CODE128",
+                          width: 1.2,
+                          height: 35,
+                          displayValue: true,
+                          fontSize: 10,
+                          font: "monospace",
+                          textMargin: 2,
+                          margin: 2,
+                          background: "transparent",
+                          lineColor: "#000000",
+                        });
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }}
+                  />
+                  <div className="print-stone-info">
+                    <span className={`stone-status ${stone.status === "In Stock" ? "in-stock" : "shipped"}`}>
+                      {stone.status === "In Stock" ? "متوفر" : "مشحون"}
+                    </span>
+                    <div className="stone-types">
+                      {stone.items.map((it) => it.stoneType).join("، ")}
+                    </div>
+                    <div className="stone-totals">
+                      {stone.totalLinearMeter?.toFixed(2)} م.ط ، {stone.totalArea?.toFixed(2)} م²
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* ====== محتوى الشاشة ====== */}
-      <div className="screen-only">
+      <div className="screen-content">
         <div className="order-info-grid no-print">
           <div className="info-card">
             <h3>معلومات العميل</h3>
@@ -602,15 +602,15 @@ function OrderDetails() {
 
       <style>{`
         /* ====== تنسيقات الطباعة ====== */
-        .print-container {
+        .print-only {
           display: none;
         }
 
         @media print {
           /* إخفاء عناصر الشاشة */
           .no-print,
-          .screen-only,
-          .screen-only .no-print,
+          .screen-content,
+          .screen-content .no-print,
           .order-header,
           .btn-print,
           .btn-back,
@@ -620,11 +620,7 @@ function OrderDetails() {
           }
 
           /* إظهار محتوى الطباعة */
-          .print-container {
-            display: block !important;
-          }
-
-          .print-content {
+          .print-only {
             display: block !important;
             padding: 20px;
             font-family: Arial, sans-serif;
@@ -703,9 +699,10 @@ function OrderDetails() {
             color: #333;
           }
 
-          /* جدول الأصناف */
+          /* ====== جدول الأصناف للطباعة ====== */
           .print-items-section {
             margin-bottom: 25px;
+            page-break-inside: avoid;
           }
 
           .print-items-section h3 {
@@ -723,14 +720,14 @@ function OrderDetails() {
           .print-items-table th {
             background: #333 !important;
             color: white !important;
-            padding: 8px 6px;
+            padding: 10px 8px;
             text-align: center;
             border: 1px solid #000;
             font-weight: bold;
           }
 
           .print-items-table td {
-            padding: 6px;
+            padding: 8px 6px;
             text-align: center;
             border: 1px solid #999;
             color: #333;
@@ -742,7 +739,7 @@ function OrderDetails() {
 
           .print-items-table .item-status {
             display: inline-block;
-            padding: 2px 10px;
+            padding: 4px 12px;
             border-radius: 12px;
             font-size: 11px;
             font-weight: bold;
@@ -756,24 +753,6 @@ function OrderDetails() {
           .print-items-table .item-status.pending {
             background: #fff3cd !important;
             color: #856404 !important;
-          }
-
-          .print-items-table .status-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-          }
-
-          .print-items-table .status-badge.open {
-            background: #fff3cd;
-            color: #856404;
-          }
-
-          .print-items-table .status-badge.completed {
-            background: #d4edda;
-            color: #155724;
           }
 
           /* ملخص الطباعة */
@@ -895,14 +874,6 @@ function OrderDetails() {
             margin: 15mm;
           }
 
-          /* منع تكسر الصفحات */
-          .print-info-grid,
-          .print-items-section,
-          .print-summary,
-          .print-stones-section {
-            page-break-inside: avoid;
-          }
-
           /* تنسيق الجدول */
           .print-items-table {
             -webkit-print-color-adjust: exact !important;
@@ -916,12 +887,12 @@ function OrderDetails() {
         }
 
         /* إخفاء محتوى الطباعة في الشاشة */
-        .print-container {
+        .print-only {
           display: none;
         }
 
         /* إظهار محتوى الشاشة */
-        .screen-only {
+        .screen-content {
           display: block;
         }
       `}</style>
