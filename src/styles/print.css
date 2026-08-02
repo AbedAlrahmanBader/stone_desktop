@@ -484,26 +484,6 @@
         size: A4;
         margin: 0;
     }
-/* إخفاء container الطباعة الجماعية في الوضع العادي */
-.print-batch-container {
-    display: none;
-}
 
-/* إظهاره فقط عند الطباعة */
-@media print {
-    .print-batch-container {
-        display: block !important;
-    }
-    
-    /* كل عنصر في صفحة منفصلة */
-    .print-batch-item {
-        page-break-after: always;
-    }
-    
-    /* آخر عنصر لا يحتاج صفحة جديدة */
-    .print-batch-item:last-child {
-        page-break-after: auto;
-    }
-}
 
 }
