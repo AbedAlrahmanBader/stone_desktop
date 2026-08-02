@@ -22,7 +22,11 @@ function Shipments() {
 
     const [shipments, setShipments] = useState<Shipment[]>([]);
 
+    // شحنة واحدة للطباعة الفردية (زر الطباعة بجانب كل سطر)
     const [selected, setSelected] = useState<Shipment | null>(null);
+
+    // مجموعة الإرساليات المطلوب طباعتها دفعة وحدة
+    const [printBatch, setPrintBatch] = useState<Shipment[]>([]);
 
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -31,7 +35,7 @@ function Shipments() {
     const [editStatus, setEditStatus] = useState("");
 
     // --- فلاتر البحث ---
-    const [filterCustomer, setFilterCustomer] = useState("");
+    const [filterCustomer, setFilterCustomer] = useState("All");
     const [filterStatus, setFilterStatus] = useState("All");
     const [filterDateFrom, setFilterDateFrom] = useState("");
     const [filterDateTo, setFilterDateTo] = useState("");
@@ -60,6 +64,22 @@ function Shipments() {
         loadShipments();
 
     }, []);
+
+
+    // لما تنجهز دفعة الطباعة، افتح نافذة الطباعة تلقائيًا
+    useEffect(() => {
+
+        if (printBatch.length > 0) {
+
+            const timer = setTimeout(() => {
+                window.print();
+            }, 200);
+
+            return () => clearTimeout(timer);
+
+        }
+
+    }, [printBatch]);
 
 
     // بدء تعديل إرسالية
@@ -143,12 +163,20 @@ function Shipments() {
     // إعادة تعيين كل الفلاتر
     const resetFilters = () => {
 
-        setFilterCustomer("");
+        setFilterCustomer("All");
         setFilterStatus("All");
         setFilterDateFrom("");
         setFilterDateTo("");
 
     };
+
+    // قائمة أسماء العملاء الموجودين فعليًا (لتعبئة قائمة فلتر العميل تلقائيًا)
+    const availableCustomers = useMemo(() => {
+
+        const set = new Set(shipments.map((s) => s.customer));
+        return Array.from(set).sort((a, b) => a.localeCompare(b));
+
+    }, [shipments]);
 
     // قائمة حالات الإرسالية الموجودة فعليًا (لتعبئة قائمة الفلتر تلقائيًا)
     const availableStatuses = useMemo(() => {
@@ -163,9 +191,8 @@ function Shipments() {
 
         return shipments.filter((shipment) => {
 
-            const matchCustomer = shipment.customer
-                ?.toLowerCase()
-                .includes(filterCustomer.trim().toLowerCase());
+            const matchCustomer =
+                filterCustomer === "All" || shipment.customer === filterCustomer;
 
             const matchStatus =
                 filterStatus === "All" || shipment.status === filterStatus;
@@ -193,6 +220,20 @@ function Shipments() {
     }, [shipments, filterCustomer, filterStatus, filterDateFrom, filterDateTo]);
 
 
+    // طباعة كل الإرساليات المفلترة دفعة وحدة
+    const printAllFiltered = () => {
+
+        if (filteredShipments.length === 0) {
+            alert("لا يوجد إرساليات لطباعتها");
+            return;
+        }
+
+        setSelected(null);
+        setPrintBatch(filteredShipments);
+
+    };
+
+
     return (
 
         <div className="shipments">
@@ -205,12 +246,18 @@ function Shipments() {
             <div className="shipments-filters">
 
                 <div className="filter-field">
-                    <label>بحث بالعميل</label>
-                    <input
-                        placeholder="اسم العميل..."
+                    <label>العميل</label>
+                    <select
                         value={filterCustomer}
                         onChange={(e) => setFilterCustomer(e.target.value)}
-                    />
+                    >
+                        <option value="All">الكل</option>
+                        {availableCustomers.map((customer) => (
+                            <option key={customer} value={customer}>
+                                {customer}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="filter-field">
@@ -252,6 +299,14 @@ function Shipments() {
                     onClick={resetFilters}
                 >
                     ✕ إعادة تعيين
+                </button>
+
+                <button
+                    type="button"
+                    className="btn-print-all"
+                    onClick={printAllFiltered}
+                >
+                    🖨 طباعة الكل ({filteredShipments.length})
                 </button>
 
             </div>
@@ -370,9 +425,10 @@ function Shipments() {
                             <td>
 
                                 <button
-                                    onClick={() =>
-                                        setSelected(shipment)
-                                    }
+                                    onClick={() => {
+                                        setPrintBatch([]);
+                                        setSelected(shipment);
+                                    }}
                                 >
 
                                     🖨 طباعة
@@ -443,6 +499,58 @@ function Shipments() {
 
                 )
 
+            }
+
+            {/* منطقة طباعة كل الإرساليات دفعة وحدة */}
+            {
+
+                printBatch.length > 0 && (
+
+                    <div className="print-batch-container">
+
+                        {
+                            printBatch.map((shipment, index) => (
+
+                                <div
+                                    key={shipment._id}
+                                    className="print-batch-item"
+                                    style={{
+                                        pageBreakAfter:
+                                            index < printBatch.length - 1
+                                                ? "always"
+                                                : "auto",
+                                    }}
+                                >
+
+                                    <ShipmentPrint shipment={shipment} />
+
+                                </div>
+
+                            ))
+                        }
+
+                    </div>
+
+                )
+
+            }
+
+            {/* عند الطباعة الجماعية، إخفِ كل شي غير منطقة الطباعة */}
+            {
+                printBatch.length > 0 && (
+
+                    <style>{`
+                        @media print {
+                            .shipments > *:not(.print-batch-container) {
+                                display: none !important;
+                            }
+                            .print-batch-container {
+                                display: block !important;
+                            }
+                        }
+                    `}</style>
+
+                )
             }
 
         </div>
