@@ -329,7 +329,7 @@ const printQRAndBarcode = (
                         .order-info-value {
                             color: #1a1a1a;
                             font-weight: bold;
-                            font-size: 20px;
+                            font-size: 12px;
                         }
 
                         /* الفوتر */
