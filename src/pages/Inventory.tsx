@@ -452,9 +452,7 @@ const printQRAndBarcode = (
 
                    
 
-                        <div class="print-date">
-                            تاريخ الطباعة: ${dateStr}
-                        </div>
+                      
                     </div>
                 </body>
             </html>
