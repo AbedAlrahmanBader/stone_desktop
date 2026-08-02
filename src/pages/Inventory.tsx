@@ -254,7 +254,7 @@ const printQRAndBarcode = (
                         /* حاوية الـ QR */
                         .qr-wrapper {
                             background: white;
-                        
+                            padding: 3mm;
                             border-radius: 8px;
                             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
                             border: 1px solid #eee;
@@ -404,8 +404,9 @@ const printQRAndBarcode = (
                                 border-radius: 0;
                                 width: 105mm;
                                 height: 148mm;
-                                padding: 6mm 5mm 5mm 5mm;
-                            }
+padding: 26mm 5mm 5mm 5mm;
+margin-top: 0;
+}
 
                             .print-card::before {
                                 display: none;
