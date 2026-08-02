@@ -225,18 +225,13 @@ const printQRAndBarcode = (
                         /* الهيدر: اللوجو + خط فاصل */
                         .header {
                             text-align: center;
-                            padding-bottom: 3mm;
+                            padding-bottom: 0;
                             border-bottom: 2px solid #1a1a1a;
                             position: relative;
                             z-index: 1;
                         }
 
-                        .header img {
-                            width: 85mm;
-                            height: 30mm;
-                            object-fit: contain;
-                            filter: brightness(1.05);
-                        }
+                 
 
                         /* المحتوى الرئيسي */
                         .content {
