@@ -254,7 +254,7 @@ const printQRAndBarcode = (
                         /* حاوية الـ QR */
                         .qr-wrapper {
                             background: white;
-                            padding: 3mm;
+                        
                             border-radius: 8px;
                             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
                             border: 1px solid #eee;
@@ -299,7 +299,6 @@ const printQRAndBarcode = (
                         /* معلومات العميل والطلب */
                         .order-info {
                             width: 100%;
-                            margin-top: 1mm;
                             padding: 2mm 3mm;
                             background: #fafafa;
                             border-radius: 6px;
