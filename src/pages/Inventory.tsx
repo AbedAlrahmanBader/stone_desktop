@@ -201,7 +201,7 @@ const printQRAndBarcode = (
                             background: white;
                             width: 105mm;
                             height: 148mm;
-padding: 26mm 5mm 5mm 5mm;
+                            padding: 6mm 5mm 5mm 5mm;
                             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
                             display: flex;
                             flex-direction: column;
