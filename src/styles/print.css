@@ -396,34 +396,8 @@
     font-style: italic;
 }
 
-/* ---------- Print media (وضع الطباعة الفردية) ---------- */
-
+/* ===== وضع الطباعة الفردية (إرسالية واحدة فقط) ===== */
 @media print {
-    .print-container {
-        background: #fff;
-        padding: 0;
-    }
-
-    .print-button {
-        display: none;
-    }
-
-    .print-page {
-        box-shadow: none;
-        width: auto;
-        min-height: auto;
-        height: 297mm;
-        padding: 8mm 10mm;
-    }
-
-    @page {
-        size: A4;
-        margin: 8mm;
-    }
-}
-
-@media print {
-
     /* إخفاء كل الصفحة */
     body * {
         visibility: hidden;
@@ -435,7 +409,7 @@
         visibility: visible;
     }
 
-    /* تثبيت الورقة في أعلى الصفحة (وضع "إرسالية واحدة") */
+    /* تثبيت الورقة في أعلى الصفحة فقط إذا كانت الطباعة فردية */
     .print-page {
         position: absolute;
         top: 0;
@@ -486,7 +460,6 @@
 
 /* ===== وضع الطباعة الجماعية (أكثر من إرسالية مع بعض) ===== */
 @media print {
-
     /* تعطيل التموضع المطلق يلي مصمم لإرسالية واحدة فقط،
        عشان كل إرسالية ترجع لتدفقها الطبيعي وينفصلوا عن بعض بصفحات */
     .print-batch-container .print-page {
@@ -499,6 +472,7 @@
         margin: 0 auto;
         padding: 10mm;
         page-break-inside: avoid;
+        visibility: visible !important;
     }
 
     .print-batch-container .print-container {
@@ -510,10 +484,16 @@
     .print-batch-item {
         width: 210mm;
         margin: 0 auto;
+        page-break-after: always;
     }
 
     /* آخر إرسالية بالدفعة ما لازم تعمل فصل صفحة بعدها */
     .print-batch-item:last-child {
         page-break-after: auto !important;
+    }
+
+    /* عند الطباعة الجماعية، نلغي visibility: hidden على body */
+    .print-batch-container * {
+        visibility: visible !important;
     }
 }

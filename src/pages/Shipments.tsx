@@ -556,11 +556,19 @@ function Shipments() {
                             }
                             .print-batch-container {
                                 display: block !important;
+                                width: 100%;
+                            }
+                            .print-batch-container * {
+                                visibility: visible !important;
+                            }
+                            body * {
+                                visibility: visible !important;
                             }
                         }
                     `}</style>
 
                 )
+
             }
 
         </div>
