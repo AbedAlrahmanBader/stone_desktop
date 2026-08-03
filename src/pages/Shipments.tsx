@@ -439,18 +439,7 @@ function Shipments() {
 
                             </td>
 
-                            <td>
-
-                                <button
-                    onClick={printAllFiltered}
-
-                                >
-
-                                    🖨 طباعة
-
-                                </button>
-
-                            </td>
+                          
 
                             <td>
 
