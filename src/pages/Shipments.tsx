@@ -442,10 +442,8 @@ function Shipments() {
                             <td>
 
                                 <button
-                                    onClick={() => {
-                                        setPrintBatch([]);
-                                        setSelected(shipment);
-                                    }}
+                    onClick={printAllFiltered}
+
                                 >
 
                                     🖨 طباعة
