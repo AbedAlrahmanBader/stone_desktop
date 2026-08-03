@@ -65,6 +65,7 @@ const emptyItemForm: ItemEditForm = {
 function Inventory() {
     const [stones, setStones] = useState<Stone[]>([]);
     const [search, setSearch] = useState("");
+    const [customerSearch, setCustomerSearch] = useState(""); // حالة جديدة للبحث باسم العميل
     const [status, setStatus] = useState("All");
 
     // تعديل بيانات المشتاح العامة (باركود / حالة)
@@ -617,12 +618,21 @@ const printQRAndBarcode = (
         }
     };
 
+    // تحديث دالة التصفية لتشمل البحث باسم العميل
     const filteredStones = stones.filter((stone) => {
-        const matchSearch = stone.barcode
+        // البحث بالباركود
+        const matchBarcode = stone.barcode
             .toLowerCase()
             .includes(search.toLowerCase());
+        
+        // البحث باسم العميل
+        const customerName = stone.order?.customer?.name?.toLowerCase() || "";
+        const matchCustomer = customerSearch === "" || customerName.includes(customerSearch.toLowerCase());
+        
+        // فلتر الحالة
         const matchStatus = status === "All" || stone.status === status;
-        return matchSearch && matchStatus;
+        
+        return matchBarcode && matchCustomer && matchStatus;
     });
 
     const newItemLengthIsZero = (Number(newItemForm.length) || 0) === 0;
@@ -637,6 +647,12 @@ const printQRAndBarcode = (
                     placeholder="بحث بالباركود..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                />
+                <input
+                    placeholder="بحث باسم العميل..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    className="customer-search-input"
                 />
                 <select
                     value={status}
