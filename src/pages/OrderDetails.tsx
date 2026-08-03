@@ -1,9 +1,36 @@
-// OrderDetails.tsx - بدون خاصية الطباعة
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import JsBarcode from "jsbarcode";
 import "../styles/orderDetails.css";
+
+// Interfaces
+interface OrderItem {
+  _id: string;
+  stoneType: string;
+  unit: string;
+  length?: number;
+  width?: number;
+  thickness?: number;
+  requiredQty: number;
+  remainingQty: number;
+  details?: string;
+}
+
+interface Order {
+  _id: string;
+  orderNumber: string;
+  status: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  customer: {
+    name: string;
+    phone?: string;
+    email?: string;
+  };
+  items: OrderItem[];
+}
 
 interface EditItemState {
   stoneType: string;
@@ -27,7 +54,7 @@ interface OrderStone {
 function OrderDetails() {
   const { orderNumber } = useParams();
   const navigate = useNavigate();
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -70,7 +97,7 @@ function OrderDetails() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderNumber]);
 
-  const startEditItem = (item: any) => {
+  const startEditItem = (item: OrderItem) => {
     setEditingItemId(item._id);
     setEditItem({
       stoneType: item.stoneType,
@@ -97,7 +124,7 @@ function OrderDetails() {
 
     setSavingItem(true);
     try {
-      const res = await api.put(`/orders/${order._id}/items/${itemId}`, editItem);
+      const res = await api.put(`/orders/${order?._id}/items/${itemId}`, editItem);
       setOrder(res.data);
       cancelEditItem();
     } catch (error: any) {
@@ -114,7 +141,7 @@ function OrderDetails() {
 
     setDeletingItemId(itemId);
     try {
-      const res = await api.delete(`/orders/${order._id}/items/${itemId}`);
+      const res = await api.delete(`/orders/${order?._id}/items/${itemId}`);
       setOrder(res.data);
     } catch (error: any) {
       console.error(error);
@@ -122,6 +149,10 @@ function OrderDetails() {
     } finally {
       setDeletingItemId(null);
     }
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   if (loading) {
@@ -133,11 +164,11 @@ function OrderDetails() {
   }
 
   const totalRequired = order.items.reduce(
-    (sum: number, item: any) => sum + (item.requiredQty || 0),
+    (sum: number, item: OrderItem) => sum + (item.requiredQty || 0),
     0
   );
   const totalRemaining = order.items.reduce(
-    (sum: number, item: any) => sum + (item.remainingQty || 0),
+    (sum: number, item: OrderItem) => sum + (item.remainingQty || 0),
     0
   );
   const totalCompleted = totalRequired - totalRemaining;
@@ -149,9 +180,14 @@ function OrderDetails() {
           <h1>تفاصيل الطلبية</h1>
           <span className="order-number-badge">#{order.orderNumber}</span>
         </div>
-        <button className="btn-back-action" onClick={() => navigate(-1)}>
-          ← رجوع
-        </button>
+        <div className="header-actions">
+          <button className="btn-print-action" onClick={handlePrint}>
+            🖨️ طباعة
+          </button>
+          <button className="btn-back-action" onClick={() => navigate(-1)}>
+            ← رجوع
+          </button>
+        </div>
       </div>
 
       <div className="info-grid-layout">
@@ -200,7 +236,7 @@ function OrderDetails() {
               </tr>
             </thead>
             <tbody>
-              {order.items.map((item: any, index: number) => {
+              {order.items.map((item: OrderItem, index: number) => {
                 const isEditing = editingItemId === item._id;
 
                 if (isEditing && editItem) {
@@ -383,13 +419,13 @@ function OrderDetails() {
           <div className="stat-item-box">
             <span className="stat-label-text">الأصناف المكتملة</span>
             <span className="stat-value-number success">
-              {order.items.filter((item: any) => item.remainingQty === 0).length}
+              {order.items.filter((item: OrderItem) => item.remainingQty === 0).length}
             </span>
           </div>
           <div className="stat-item-box">
             <span className="stat-label-text">الأصناف قيد التنفيذ</span>
             <span className="stat-value-number warning">
-              {order.items.filter((item: any) => item.remainingQty > 0).length}
+              {order.items.filter((item: OrderItem) => item.remainingQty > 0).length}
             </span>
           </div>
           <div className="stat-item-box">
@@ -404,6 +440,117 @@ function OrderDetails() {
             <span className="stat-label-text">إجمالي الناقص</span>
             <span className="stat-value-number warning">{totalRemaining}</span>
           </div>
+        </div>
+      </div>
+
+      {/* مكون الطباعة المخفي */}
+      <div className="print-content">
+        <div className="print-header">
+          <h1>تفاصيل الطلبية</h1>
+          <div className="print-order-number">رقم الطلبية: #{order.orderNumber}</div>
+          <div style={{ marginTop: '5px', fontSize: '14px', color: '#666' }}>
+            تاريخ الطباعة: {new Date().toLocaleDateString('ar')}
+          </div>
+        </div>
+
+        <div className="print-order-info">
+          <div className="info-group">
+            <strong>معلومات العميل</strong>
+            <p><strong>الاسم:</strong> {order.customer?.name}</p>
+            <p><strong>الهاتف:</strong> {order.customer?.phone || "---"}</p>
+            <p><strong>البريد:</strong> {order.customer?.email || "---"}</p>
+          </div>
+          <div className="info-group">
+            <strong>معلومات الطلبية</strong>
+            <p><strong>الحالة:</strong> {order.status === "Open" ? "مفتوحة" : "مكتملة"}</p>
+            {order.description && (
+              <p><strong>الوصف:</strong> {order.description}</p>
+            )}
+            <p><strong>تاريخ الإنشاء:</strong> {new Date(order.createdAt).toLocaleDateString("ar")}</p>
+          </div>
+        </div>
+
+        <div className="print-items-table">
+          <h3 style={{ marginBottom: '10px' }}>قائمة الأصناف</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>نوع الحجر</th>
+                <th>الطول</th>
+                <th>العرض</th>
+                <th>السمك</th>
+                <th>الوحدة</th>
+                <th>الكمية المطلوبة</th>
+                <th>الكمية المتبقية</th>
+                <th>تفاصيل</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.items.map((item: OrderItem, index: number) => (
+                <tr key={item._id}>
+                  <td>{index + 1}</td>
+                  <td>{item.stoneType}</td>
+                  <td>{item.length || "---"}</td>
+                  <td>{item.width || "---"}</td>
+                  <td>{item.thickness || "---"}</td>
+                  <td>
+                    {item.unit === "pieces" && "قطع"}
+                    {item.unit === "linearMeter" && "متر طولي"}
+                    {item.unit === "area" && "مساحة"}
+                  </td>
+                  <td>{item.requiredQty}</td>
+                  <td>{item.remainingQty}</td>
+                  <td>{item.details || "---"}</td>
+                  <td>
+                    {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="print-summary">
+          <h3 style={{ marginBottom: '10px' }}>ملخص الطلبية</h3>
+          <div className="summary-grid">
+            <div className="summary-item">
+              <div className="label">إجمالي الأصناف</div>
+              <div className="value">{order.items.length}</div>
+            </div>
+            <div className="summary-item">
+              <div className="label">الأصناف المكتملة</div>
+              <div className="value" style={{ color: '#28a745' }}>
+                {order.items.filter((item: OrderItem) => item.remainingQty === 0).length}
+              </div>
+            </div>
+            <div className="summary-item">
+              <div className="label">الأصناف قيد التنفيذ</div>
+              <div className="value" style={{ color: '#ffc107' }}>
+                {order.items.filter((item: OrderItem) => item.remainingQty > 0).length}
+              </div>
+            </div>
+            <div className="summary-item">
+              <div className="label">إجمالي الكمية المطلوبة</div>
+              <div className="value">{totalRequired}</div>
+            </div>
+            <div className="summary-item">
+              <div className="label">إجمالي المنجز</div>
+              <div className="value" style={{ color: '#28a745' }}>{totalCompleted}</div>
+            </div>
+            <div className="summary-item">
+              <div className="label">إجمالي الناقص</div>
+              <div className="value" style={{ color: '#dc3545' }}>{totalRemaining}</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="print-footer">
+          <p>تم الطباعة من نظام إدارة الطلبيات</p>
+          <p style={{ marginTop: '5px', fontSize: '10px' }}>
+            {new Date().toLocaleString('ar')}
+          </p>
         </div>
       </div>
     </div>

@@ -38,6 +38,32 @@
   font-weight: bold;
 }
 
+/* مجموعة أزرار الرأس */
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* زر الطباعة */
+.btn-print-action {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-print-action:hover {
+  background: #218838;
+}
+
 /* زر الرجوع */
 .btn-back-action {
   background: #6c757d;
@@ -392,6 +418,188 @@
   color: #666;
 }
 
+/* مكون الطباعة المخفي */
+.print-content {
+  display: none;
+}
+
+/* أنماط الطباعة */
+@media print {
+  /* إخفاء الأزرار وعناصر التحكم */
+  .btn-back-action,
+  .btn-print-action,
+  .btn-item-edit,
+  .btn-item-delete,
+  .btn-item-save,
+  .btn-item-cancel,
+  .no-print {
+    display: none !important;
+  }
+
+  /* إظهار محتوى الطباعة */
+  .print-content {
+    display: block !important;
+  }
+
+  /* إخفاء المحتوى العادي أثناء الطباعة */
+  .order-details-container .order-header-section,
+  .order-details-container .info-grid-layout,
+  .order-details-container .items-section-wrapper,
+  .order-details-container .linked-stones-section-wrapper,
+  .order-details-container .order-summary-section {
+    display: none !important;
+  }
+
+  /* إظهار محتوى الطباعة */
+  .print-content .print-header,
+  .print-content .print-order-info,
+  .print-content .print-items-table,
+  .print-content .print-summary {
+    display: block !important;
+  }
+
+  /* أنماط الطباعة */
+  .print-content {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    direction: rtl;
+  }
+
+  .print-content .print-header {
+    text-align: center;
+    border-bottom: 2px solid #333;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+
+  .print-content .print-header h1 {
+    margin: 0;
+    font-size: 24px;
+  }
+
+  .print-content .print-header .print-order-number {
+    font-size: 18px;
+    color: #555;
+  }
+
+  .print-content .print-order-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+
+  .print-content .print-order-info .info-group {
+    padding: 10px;
+  }
+
+  .print-content .print-order-info .info-group strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+  }
+
+  .print-content .print-order-info .info-group p {
+    margin: 5px 0;
+    color: #555;
+  }
+
+  .print-content .print-items-table {
+    margin: 20px 0;
+  }
+
+  .print-content .print-items-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .print-content .print-items-table th {
+    background: #333;
+    color: white;
+    padding: 10px;
+    text-align: right;
+    border: 1px solid #333;
+  }
+
+  .print-content .print-items-table td {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    text-align: right;
+  }
+
+  .print-content .print-items-table tr:nth-child(even) {
+    background: #f9f9f9;
+  }
+
+  .print-content .print-summary {
+    margin-top: 30px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+
+  .print-content .print-summary .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+
+  .print-content .print-summary .summary-item {
+    text-align: center;
+    padding: 10px;
+    background: white;
+    border-radius: 5px;
+  }
+
+  .print-content .print-summary .summary-item .label {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .print-content .print-summary .summary-item .value {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 5px;
+  }
+
+  .print-content .print-footer {
+    margin-top: 40px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    font-size: 12px;
+    color: #888;
+  }
+
+  /* تذييل الصفحة */
+  @page {
+    margin: 20mm;
+    size: A4;
+  }
+
+  /* منع تقسيم الجداول */
+  .print-content .print-items-table table {
+    page-break-inside: auto;
+  }
+
+  .print-content .print-items-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  .print-content .print-items-table thead {
+    display: table-header-group;
+  }
+
+  .print-content .print-items-table tfoot {
+    display: table-footer-group;
+  }
+}
+
 /* استجابة للشاشات الصغيرة */
 @media (max-width: 768px) {
   .info-grid-layout {
@@ -415,6 +623,11 @@
   .stones-grid-list {
     grid-template-columns: 1fr;
   }
+
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -433,5 +646,16 @@
   .items-data-table th,
   .items-data-table td {
     padding: 8px 6px;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-print-action,
+  .btn-back-action {
+    width: 100%;
+    justify-content: center;
   }
 }
