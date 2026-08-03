@@ -1,4 +1,4 @@
-// OrderDetails.tsx - تم تغيير جميع أسماء التنسيقات
+// OrderDetails.tsx - بدون خاصية الطباعة
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -124,10 +124,6 @@ function OrderDetails() {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   if (loading) {
     return <div className="loading-state">جاري تحميل بيانات الطلبية...</div>;
   }
@@ -147,25 +143,15 @@ function OrderDetails() {
   const totalCompleted = totalRequired - totalRemaining;
 
   return (
-    <div className="order-details-container" id="print-area-container">
-      <div className="order-header-section no-print-hidden">
+    <div className="order-details-container">
+      <div className="order-header-section">
         <div className="order-title-group">
           <h1>تفاصيل الطلبية</h1>
           <span className="order-number-badge">#{order.orderNumber}</span>
         </div>
-        <div className="order-actions-wrapper">
-          <button className="btn-print-action" onClick={handlePrint}>
-            🖨 طباعة
-          </button>
-          <button className="btn-back-action" onClick={() => navigate(-1)}>
-            ← رجوع
-          </button>
-        </div>
-      </div>
-
-      <div className="print-only-header-display">
-        <h1>تفاصيل الطلبية #{order.orderNumber}</h1>
-        <p className="print-date-info">تاريخ الطباعة: {new Date().toLocaleDateString("ar")}</p>
+        <button className="btn-back-action" onClick={() => navigate(-1)}>
+          ← رجوع
+        </button>
       </div>
 
       <div className="info-grid-layout">
@@ -210,7 +196,7 @@ function OrderDetails() {
                 <th>الكمية المتبقية (الناقص)</th>
                 <th>تفاصيل الصنف</th>
                 <th>الحالة</th>
-                <th className="no-print-hidden">الإجراءات</th>
+                <th>الإجراءات</th>
               </tr>
             </thead>
             <tbody>
@@ -277,7 +263,7 @@ function OrderDetails() {
                         />
                       </td>
                       <td>---</td>
-                      <td className="no-print-hidden">
+                      <td>
                         <button
                           className="btn-item-save"
                           onClick={() => saveEditItem(item._id)}
@@ -315,7 +301,7 @@ function OrderDetails() {
                         {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
                       </span>
                     </td>
-                    <td className="no-print-hidden">
+                    <td>
                       <button className="btn-item-edit" onClick={() => startEditItem(item)}>
                         ✏️
                       </button>
@@ -335,7 +321,7 @@ function OrderDetails() {
         </div>
       </div>
 
-      <div className="linked-stones-section-wrapper no-print-hidden">
+      <div className="linked-stones-section-wrapper">
         <h2>🏷️ المشاتيح المرتبطة</h2>
 
         {loadingStones ? (
