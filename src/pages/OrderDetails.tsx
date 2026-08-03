@@ -129,9 +129,9 @@ function OrderDetails() {
       return;
     }
 
-    const printContainer = document.querySelector('.print-order-container');
+    const printContainer = document.querySelector('.print-order-container1');
     if (printContainer) {
-      printContainer.classList.add('active');
+      printContainer.classList.add('active1');
     }
     
     setTimeout(() => {
@@ -140,17 +140,17 @@ function OrderDetails() {
     
     setTimeout(() => {
       if (printContainer) {
-        printContainer.classList.remove('active');
+        printContainer.classList.remove('active1');
       }
     }, 2000);
   };
 
   if (loading) {
-    return <div className="loading-state">جاري تحميل بيانات الطلبية...</div>;
+    return <div className="loading-state1">جاري تحميل بيانات الطلبية...</div>;
   }
 
   if (!order) {
-    return <div className="not-found-state">الطلبية غير موجودة</div>;
+    return <div className="not-found-state1">الطلبية غير موجودة</div>;
   }
 
   const totalRequired = order.items.reduce(
@@ -164,38 +164,38 @@ function OrderDetails() {
   const totalCompleted = totalRequired - totalRemaining;
 
   return (
-    <div className="order-details-container">
-      <div className="order-header-section">
-        <div className="order-title-group">
+    <div className="order-details-container1">
+      <div className="order-header-section1">
+        <div className="order-title-group1">
           <h1>تفاصيل الطلبية</h1>
-          <span className="order-number-badge">#{order.orderNumber}</span>
+          <span className="order-number-badge1">#{order.orderNumber}</span>
         </div>
-        <div className="header-actions">
+        <div className="header-actions1">
           <button 
-            className="btn-print-order" 
+            className="btn-print-order1" 
             onClick={handlePrintCurrentOrder}
           >
             📄 طباعة الطلبية
           </button>
-          <button className="btn-back-action" onClick={() => navigate(-1)}>
+          <button className="btn-back-action1" onClick={() => navigate(-1)}>
             ← رجوع
           </button>
         </div>
       </div>
 
-      <div className="info-grid-layout">
-        <div className="info-card-component">
+      <div className="info-grid-layout1">
+        <div className="info-card-component1">
           <h3>معلومات العميل</h3>
           <p><strong>الاسم:</strong> {order.customer?.name}</p>
           <p><strong>الهاتف:</strong> {order.customer?.phone || "---"}</p>
           <p><strong>البريد:</strong> {order.customer?.email || "---"}</p>
         </div>
 
-        <div className="info-card-component">
+        <div className="info-card-component1">
           <h3>معلومات الطلبية</h3>
           <p>
             <strong>الحالة:</strong>
-            <span className={`status-indicator ${order.status?.toLowerCase()}`}>
+            <span className={`status-indicator1 ${order.status?.toLowerCase()}`}>
               {order.status === "Open" ? "مفتوحة" : "مكتملة"}
             </span>
           </p>
@@ -209,10 +209,10 @@ function OrderDetails() {
         </div>
       </div>
 
-      <div className="items-section-wrapper">
+      <div className="items-section-wrapper1">
         <h2>الأصناف</h2>
-        <div className="table-scroll-wrapper">
-          <table className="items-data-table">
+        <div className="table-scroll-wrapper1">
+          <table className="items-data-table1">
             <thead>
               <tr>
                 <th>#</th>
@@ -294,13 +294,13 @@ function OrderDetails() {
                       <td>---</td>
                       <td>
                         <button
-                          className="btn-item-save"
+                          className="btn-item-save1"
                           onClick={() => saveEditItem(item._id)}
                           disabled={savingItem}
                         >
                           {savingItem ? "..." : "✔ حفظ"}
                         </button>
-                        <button className="btn-item-cancel" onClick={cancelEditItem}>
+                        <button className="btn-item-cancel1" onClick={cancelEditItem}>
                           ✕ إلغاء
                         </button>
                       </td>
@@ -321,21 +321,21 @@ function OrderDetails() {
                       {item.unit === "area" && "مساحة"}
                     </td>
                     <td>{item.requiredQty}</td>
-                    <td className={item.remainingQty > 0 ? "remaining-value-highlight" : ""}>
+                    <td className={item.remainingQty > 0 ? "remaining-value-highlight1" : ""}>
                       {item.remainingQty}
                     </td>
-                    <td className="item-details-text">{item.details || "---"}</td>
+                    <td className="item-details-text1">{item.details || "---"}</td>
                     <td>
-                      <span className={`item-status-badge ${item.remainingQty === 0 ? "completed" : "pending"}`}>
+                      <span className={`item-status-badge1 ${item.remainingQty === 0 ? "completed1" : "pending1"}`}>
                         {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
                       </span>
                     </td>
                     <td>
-                      <button className="btn-item-edit" onClick={() => startEditItem(item)}>
+                      <button className="btn-item-edit1" onClick={() => startEditItem(item)}>
                         ✏️
                       </button>
                       <button
-                        className="btn-item-delete"
+                        className="btn-item-delete1"
                         onClick={() => deleteItem(item._id)}
                         disabled={deletingItemId === item._id}
                       >
@@ -350,19 +350,19 @@ function OrderDetails() {
         </div>
       </div>
 
-      <div className="linked-stones-section-wrapper">
+      <div className="linked-stones-section-wrapper1">
         <h2>🏷️ المشاتيح المرتبطة</h2>
 
         {loadingStones ? (
-          <p className="stones-loading-message">جاري تحميل المشاتيح...</p>
+          <p className="stones-loading-message1">جاري تحميل المشاتيح...</p>
         ) : stones.length === 0 ? (
-          <p className="stones-empty-message">لا يوجد مشاتيح مرتبطة بهذه الطلبية بعد</p>
+          <p className="stones-empty-message1">لا يوجد مشاتيح مرتبطة بهذه الطلبية بعد</p>
         ) : (
-          <div className="stones-grid-list">
+          <div className="stones-grid-list1">
             {stones.map((stone) => (
-              <div key={stone._id} className="stone-card-item">
+              <div key={stone._id} className="stone-card-item1">
                 <svg
-                  className="stone-barcode-image"
+                  className="stone-barcode-image1"
                   ref={(el) => {
                     if (!el) return;
                     try {
@@ -384,16 +384,16 @@ function OrderDetails() {
                   }}
                 />
                 <span
-                  className={`stone-status-badge ${
-                    stone.status === "In Stock" ? "in-stock" : "shipped"
+                  className={`stone-status-badge1 ${
+                    stone.status === "In Stock" ? "in-stock1" : "shipped1"
                   }`}
                 >
                   {stone.status === "In Stock" ? "متوفر" : "مشحون"}
                 </span>
-                <div className="stone-types-list">
+                <div className="stone-types-list1">
                   {stone.items.map((it) => it.stoneType).join("، ")}
                 </div>
-                <div className="stone-totals-info">
+                <div className="stone-totals-info1">
                   {stone.totalLinearMeter?.toFixed(2)} م.ط ، {stone.totalArea?.toFixed(2)} م²
                 </div>
               </div>
@@ -402,56 +402,55 @@ function OrderDetails() {
         )}
       </div>
 
-      <div className="order-summary-section">
+      <div className="order-summary-section1">
         <h3>ملخص الطلبية</h3>
-        <div className="summary-stats-grid">
-          <div className="stat-item-box">
-            <span className="stat-label-text">إجمالي الأصناف</span>
-            <span className="stat-value-number">{order.items.length}</span>
+        <div className="summary-stats-grid1">
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">إجمالي الأصناف</span>
+            <span className="stat-value-number1">{order.items.length}</span>
           </div>
-          <div className="stat-item-box">
-            <span className="stat-label-text">الأصناف المكتملة</span>
-            <span className="stat-value-number success">
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">الأصناف المكتملة</span>
+            <span className="stat-value-number1 success1">
               {order.items.filter((item: any) => item.remainingQty === 0).length}
             </span>
           </div>
-          <div className="stat-item-box">
-            <span className="stat-label-text">الأصناف قيد التنفيذ</span>
-            <span className="stat-value-number warning">
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">الأصناف قيد التنفيذ</span>
+            <span className="stat-value-number1 warning1">
               {order.items.filter((item: any) => item.remainingQty > 0).length}
             </span>
           </div>
-          <div className="stat-item-box">
-            <span className="stat-label-text">إجمالي الكمية المطلوبة</span>
-            <span className="stat-value-number">{totalRequired}</span>
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">إجمالي الكمية المطلوبة</span>
+            <span className="stat-value-number1">{totalRequired}</span>
           </div>
-          <div className="stat-item-box">
-            <span className="stat-label-text">إجمالي المنجز</span>
-            <span className="stat-value-number success">{totalCompleted}</span>
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">إجمالي المنجز</span>
+            <span className="stat-value-number1 success1">{totalCompleted}</span>
           </div>
-          <div className="stat-item-box">
-            <span className="stat-label-text">إجمالي الناقص</span>
-            <span className="stat-value-number warning">{totalRemaining}</span>
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">إجمالي الناقص</span>
+            <span className="stat-value-number1 warning1">{totalRemaining}</span>
           </div>
         </div>
       </div>
 
       {/* حاوية طباعة الطلبية الحالية */}
-      <div className="print-order-container">
-        <div className="print-order-item">
-          <div className="print-page">
-            <div className="print-header">
+      <div className="print-order-container1">
+        <div className="print-order-item1">
+          <div className="print-page1">
+            <div className="print-header1">
               <h1>تفاصيل الطلبية</h1>
-              <div className="print-order-number">رقم الطلبية: #{order.orderNumber}</div>
-            
+              <div className="print-order-number1">رقم الطلبية: #{order.orderNumber}</div>
             </div>
 
-            <div className="print-order-info">
-              <div className="info-group">
+            <div className="print-order-info1">
+              <div className="info-group1">
                 <p><strong>الاسم:</strong> {order.customer?.name}</p>
                 <p><strong>الهاتف:</strong> {order.customer?.phone || "---"}</p>
               </div>
-              <div className="info-group">
+              <div className="info-group1">
                 <p><strong>الحالة:</strong> {order.status === "Open" ? "مفتوحة" : "مكتملة"}</p>
                 {order.description && (
                   <p><strong>الوصف:</strong> {order.description}</p>
@@ -459,7 +458,7 @@ function OrderDetails() {
               </div>
             </div>
 
-            <div className="print-items-table">
+            <div className="print-items-table1">
               <h3 style={{ marginBottom: '10px' }}>قائمة الأصناف</h3>
               <table>
                 <thead>
@@ -501,47 +500,45 @@ function OrderDetails() {
               </table>
             </div>
 
-            <div className="print-summary">
+            <div className="print-summary1">
               <h3 style={{ marginBottom: '10px' }}>ملخص الطلبية</h3>
-              <div className="summary-grid">
-                <div className="summary-item">
-                  <div className="label">إجمالي الأصناف</div>
-                  <div className="value">{order.items.length}</div>
+              <div className="summary-grid1">
+                <div className="summary-item1">
+                  <div className="label1">إجمالي الأصناف</div>
+                  <div className="value1">{order.items.length}</div>
                 </div>
-                <div className="summary-item">
-                  <div className="label">الأصناف المكتملة</div>
-                  <div className="value" style={{ color: '#28a745' }}>
+                <div className="summary-item1">
+                  <div className="label1">الأصناف المكتملة</div>
+                  <div className="value1" style={{ color: '#28a745' }}>
                     {order.items.filter((item: any) => item.remainingQty === 0).length}
                   </div>
                 </div>
-                <div className="summary-item">
-                  <div className="label">الأصناف قيد التنفيذ</div>
-                  <div className="value" style={{ color: '#ffc107' }}>
+                <div className="summary-item1">
+                  <div className="label1">الأصناف قيد التنفيذ</div>
+                  <div className="value1" style={{ color: '#ffc107' }}>
                     {order.items.filter((item: any) => item.remainingQty > 0).length}
                   </div>
                 </div>
-                <div className="summary-item">
-                  <div className="label">إجمالي الكمية المطلوبة</div>
-                  <div className="value">
+                <div className="summary-item1">
+                  <div className="label1">إجمالي الكمية المطلوبة</div>
+                  <div className="value1">
                     {order.items.reduce((sum: number, item: any) => sum + (item.requiredQty || 0), 0)}
                   </div>
                 </div>
-                <div className="summary-item">
-                  <div className="label">إجمالي المنجز</div>
-                  <div className="value" style={{ color: '#28a745' }}>
+                <div className="summary-item1">
+                  <div className="label1">إجمالي المنجز</div>
+                  <div className="value1" style={{ color: '#28a745' }}>
                     {order.items.reduce((sum: number, item: any) => sum + (item.requiredQty - item.remainingQty || 0), 0)}
                   </div>
                 </div>
-                <div className="summary-item">
-                  <div className="label">إجمالي الناقص</div>
-                  <div className="value" style={{ color: '#dc3545' }}>
+                <div className="summary-item1">
+                  <div className="label1">إجمالي الناقص</div>
+                  <div className="value1" style={{ color: '#dc3545' }}>
                     {order.items.reduce((sum: number, item: any) => sum + (item.remainingQty || 0), 0)}
                   </div>
                 </div>
               </div>
             </div>
-
-          
           </div>
         </div>
       </div>
