@@ -1,19 +1,12 @@
-/* orderDetails.css - نسخة معدلة بأسماء تنسيقات محسنة */
-
-/* ========================================
-   الحاوية الرئيسية - Main Container
-   ======================================== */
-.page-wrapper {
+/* orderDetails.css */
+.order-details {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   direction: rtl;
 }
 
-/* ========================================
-   رأس الصفحة - Page Header
-   ======================================== */
-.page-header {
+.order-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -24,18 +17,18 @@
   margin-bottom: 30px;
 }
 
-.header-title-wrapper {
+.order-title {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-.header-title-wrapper h1 {
+.order-title h1 {
   margin: 0;
   color: #333;
 }
 
-.order-id-tag {
+.order-number {
   background: #007bff;
   color: white;
   padding: 5px 15px;
@@ -44,10 +37,7 @@
   font-weight: bold;
 }
 
-/* ========================================
-   أزرار التحكم - Control Buttons
-   ======================================== */
-.control-btn-back {
+.btn-back {
   background: #6c757d;
   color: white;
   border: none;
@@ -58,11 +48,11 @@
   transition: background 0.3s;
 }
 
-.control-btn-back:hover {
+.btn-back:hover {
   background: #5a6268;
 }
 
-.control-btn-print {
+.btn-print {
   background: #28a745;
   color: white;
   border: none;
@@ -74,19 +64,16 @@
   margin-left: 10px;
 }
 
-.control-btn-print:hover {
+.btn-print:hover {
   background: #218838;
 }
 
-.header-controls-group {
+.order-header-actions {
   display: flex;
   align-items: center;
 }
 
-/* ========================================
-   بطاقات المعلومات - Info Cards
-   ======================================== */
-.info-cards-grid {
+.order-info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
@@ -117,9 +104,6 @@
   color: #333;
 }
 
-/* ========================================
-   شارة الحالة - Status Badge
-   ======================================== */
 .status-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -129,19 +113,16 @@
   margin-right: 8px;
 }
 
-.status-badge.type-open {
+.status-badge.open {
   background: #fff3cd;
   color: #856404;
 }
 
-.status-badge.type-completed {
+.status-badge.completed {
   background: #d4edda;
   color: #155724;
 }
 
-/* ========================================
-   قسم الأصناف - Items Section
-   ======================================== */
 .items-section {
   background: white;
   padding: 20px;
@@ -156,16 +137,16 @@
   color: #333;
 }
 
-.table-responsive-wrap {
+.table-responsive {
   overflow-x: auto;
 }
 
-.items-table {
+.order-items-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.items-table th {
+.order-items-table th {
   background: #f8f9fa;
   color: #333;
   padding: 12px;
@@ -174,18 +155,18 @@
   font-weight: bold;
 }
 
-.items-table td {
+.order-items-table td {
   padding: 12px;
   border-bottom: 1px solid #dee2e6;
   color: #555;
 }
 
-.items-table tr:hover {
+.order-items-table tr:hover {
   background: #f8f9fa;
 }
 
-.items-table td input,
-.items-table td select {
+.order-items-table td input,
+.order-items-table td select {
   width: 100%;
   min-width: 70px;
   padding: 6px 8px;
@@ -195,17 +176,14 @@
   color: #333;
 }
 
-.items-table td input:focus,
-.items-table td select:focus {
+.order-items-table td input:focus,
+.order-items-table td select:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
 }
 
-/* ========================================
-   حالة الصنف - Item Status
-   ======================================== */
-.item-status-tag {
+.item-status {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
@@ -213,35 +191,32 @@
   font-weight: bold;
 }
 
-.item-status-tag.state-completed {
+.item-status.completed {
   background: #d4edda;
   color: #155724;
 }
 
-.item-status-tag.state-pending {
+.item-status.pending {
   background: #fff3cd;
   color: #856404;
 }
 
-/* ========================================
-   القيم البارزة - Highlighted Values
-   ======================================== */
-.remaining-value {
+.remaining-highlight {
   font-weight: bold;
   color: #dc3545;
 }
 
-.item-notes-cell {
+.item-details-cell {
   max-width: 150px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ========================================
-   أزرار إدارة الأصناف - Item Action Buttons
-   ======================================== */
-.item-action-btn {
+.btn-edit-item,
+.btn-delete-item,
+.btn-save-item,
+.btn-cancel-item {
   border: none;
   border-radius: 5px;
   padding: 6px 12px;
@@ -252,43 +227,49 @@
   transition: opacity 0.2s;
 }
 
-.item-action-btn:last-child {
+.btn-edit-item:last-child,
+.btn-delete-item:last-child,
+.btn-save-item:last-child,
+.btn-cancel-item:last-child {
   margin-inline-end: 0;
 }
 
-.item-action-btn.action-edit {
+.btn-edit-item {
   background: #e7f1ff;
   color: #0056b3;
 }
 
-.item-action-btn.action-delete {
+.btn-delete-item {
   background: #f8d7da;
   color: #842029;
 }
 
-.item-action-btn.action-save {
+.btn-save-item {
   background: #28a745;
   color: white;
 }
 
-.item-action-btn.action-cancel {
+.btn-cancel-item {
   background: #e2e3e5;
   color: #383d41;
 }
 
-.item-action-btn:hover {
+.btn-edit-item:hover,
+.btn-delete-item:hover,
+.btn-save-item:hover,
+.btn-cancel-item:hover {
   opacity: 0.85;
 }
 
-.item-action-btn:disabled {
+.btn-edit-item:disabled,
+.btn-delete-item:disabled,
+.btn-save-item:disabled,
+.btn-cancel-item:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* ========================================
-   قسم المشاتيح المرتبطة - Linked Stones
-   ======================================== */
-.stones-section {
+.linked-stones-section {
   background: white;
   padding: 20px;
   border-radius: 8px;
@@ -296,26 +277,26 @@
   margin-bottom: 30px;
 }
 
-.stones-section h2 {
+.linked-stones-section h2 {
   margin-top: 0;
   margin-bottom: 20px;
   color: #333;
 }
 
-.stones-loading-text,
-.stones-empty-text {
+.stones-loading,
+.stones-empty {
   color: #888;
   font-size: 14px;
   margin: 0;
 }
 
-.stones-grid {
+.linked-stones-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 14px;
 }
 
-.stone-card {
+.linked-stone-card {
   background: #f8f9fa;
   border: 1px solid #dee2e6;
   border-radius: 8px;
@@ -323,18 +304,18 @@
   transition: box-shadow 0.2s;
 }
 
-.stone-card:hover {
+.linked-stone-card:hover {
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-.stone-barcode-svg {
+.linked-stone-barcode-svg {
   display: block;
   width: 100%;
   height: auto;
   margin-bottom: 8px;
 }
 
-.stone-status-tag {
+.linked-stone-status {
   display: inline-block;
   padding: 3px 10px;
   border-radius: 20px;
@@ -343,51 +324,48 @@
   margin-bottom: 10px;
 }
 
-.stone-status-tag.tag-in-stock {
+.linked-stone-status.in-stock {
   background: #d4edda;
   color: #155724;
 }
 
-.stone-status-tag.tag-shipped {
+.linked-stone-status.shipped {
   background: #cce5ff;
   color: #004085;
 }
 
-.stone-types-text {
+.linked-stone-types {
   font-size: 13px;
   color: #555;
   margin-bottom: 6px;
   line-height: 1.5;
 }
 
-.stone-measurements {
+.linked-stone-totals {
   font-size: 12px;
   color: #888;
 }
 
-/* ========================================
-   ملخص الطلبية - Order Summary
-   ======================================== */
-.summary-section {
+.order-summary {
   background: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.summary-section h3 {
+.order-summary h3 {
   margin-top: 0;
   margin-bottom: 20px;
   color: #333;
 }
 
-.summary-grid {
+.summary-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
-.summary-item {
+.stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -396,80 +374,73 @@
   border-radius: 8px;
 }
 
-.summary-label {
+.stat-label {
   font-size: 14px;
   color: #666;
   margin-bottom: 5px;
 }
 
-.summary-value {
+.stat-value {
   font-size: 24px;
   font-weight: bold;
   color: #333;
 }
 
-.summary-value.value-success {
+.stat-value.success {
   color: #28a745;
 }
 
-.summary-value.value-warning {
+.stat-value.warning {
   color: #ffc107;
 }
 
-/* ========================================
-   حالات التحميل والخطأ - Loading & Error
-   ======================================== */
-.loading-screen,
-.not-found-screen {
+.loading, .not-found {
   text-align: center;
   padding: 50px;
   font-size: 20px;
   color: #666;
 }
 
-/* ========================================
-   التجاوب مع الشاشات الصغيرة - Responsive
-   ======================================== */
 @media (max-width: 768px) {
-  .info-cards-grid {
+  .order-info-grid {
     grid-template-columns: 1fr;
   }
   
-  .summary-grid {
+  .summary-stats {
     grid-template-columns: 1fr;
   }
   
-  .page-header {
+  .order-header {
     flex-direction: column;
     gap: 15px;
   }
   
-  .header-title-wrapper {
+  .order-title {
     flex-direction: column;
     text-align: center;
   }
 
-  .stones-grid {
+  .linked-stones-list {
     grid-template-columns: 1fr;
   }
 
-  .header-controls-group {
+  .order-header-actions {
     flex-direction: column;
     gap: 10px;
     width: 100%;
   }
 
-  .control-btn-print,
-  .control-btn-back {
+  .btn-print, .btn-back {
     width: 100%;
   }
 
-  /* ========================================
-     أنماط الطباعة - Print Styles
-     ======================================== */
-  .print-header {
-    display: none;
-  }
+
+
+  /* ==========================
+   Print Styles
+========================== */
+.print-only-header {
+  display: none;
 }
 
 @media print {
@@ -491,12 +462,12 @@
     visibility: hidden;
   }
 
-  #print-area,
-  #print-area * {
+  #order-print-area,
+  #order-print-area * {
     visibility: visible;
   }
 
-  #print-area {
+  #order-print-area {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -505,11 +476,11 @@
     margin: 0;
   }
 
-  .hide-on-print {
+  .no-print {
     display: none !important;
   }
 
-  .print-header {
+  .print-only-header {
     display: block;
     text-align: center;
     margin-bottom: 20px;
@@ -517,7 +488,7 @@
     padding-bottom: 10px;
   }
 
-  .print-header h1 {
+  .print-only-header h1 {
     margin: 0;
     font-size: 24px;
   }
@@ -527,7 +498,7 @@
     font-size: 13px;
   }
 
-  .info-cards-grid {
+  .order-info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
@@ -536,7 +507,7 @@
 
   .info-card,
   .items-section,
-  .summary-section {
+  .order-summary {
     box-shadow: none;
     border: 1px solid #000;
     border-radius: 0;
@@ -544,29 +515,29 @@
     page-break-inside: avoid;
   }
 
-  .items-table {
+  .order-items-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
   }
 
-  .items-table th,
-  .items-table td {
+  .order-items-table th,
+  .order-items-table td {
     border: 1px solid #000;
     padding: 6px;
   }
 
-  .items-table th {
+  .order-items-table th {
     background: #eee !important;
   }
 
-  .summary-grid {
+  .summary-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
   }
 
-  .summary-item {
+  .stat-item {
     border: 1px solid #000;
     background: white;
   }
@@ -586,4 +557,5 @@
   tfoot {
     display: table-footer-group;
   }
+}
 }
