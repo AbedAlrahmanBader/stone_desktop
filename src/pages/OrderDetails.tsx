@@ -1,4 +1,4 @@
-// OrderDetails.tsx - تم تغيير جميع أسماء التنسيقات
+// OrderDetails.tsx - نسخة معدلة بأسماء التنسيقات الجديدة
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -129,11 +129,11 @@ function OrderDetails() {
   };
 
   if (loading) {
-    return <div className="loading-state">جاري تحميل بيانات الطلبية...</div>;
+    return <div className="loading-screen">جاري تحميل بيانات الطلبية...</div>;
   }
 
   if (!order) {
-    return <div className="not-found-state">الطلبية غير موجودة</div>;
+    return <div className="not-found-screen">الطلبية غير موجودة</div>;
   }
 
   const totalRequired = order.items.reduce(
@@ -147,40 +147,43 @@ function OrderDetails() {
   const totalCompleted = totalRequired - totalRemaining;
 
   return (
-    <div className="order-details-container" id="print-area-container">
-      <div className="order-header-section no-print-hidden">
-        <div className="order-title-group">
+    <div className="page-wrapper" id="print-area">
+      {/* رأس الصفحة - يظهر في الشاشة فقط */}
+      <div className="page-header hide-on-print">
+        <div className="header-title-wrapper">
           <h1>تفاصيل الطلبية</h1>
-          <span className="order-number-badge">#{order.orderNumber}</span>
+          <span className="order-id-tag">#{order.orderNumber}</span>
         </div>
-        <div className="order-actions-wrapper">
-          <button className="btn-print-action" onClick={handlePrint}>
+        <div className="header-controls-group">
+          <button className="control-btn-print" onClick={handlePrint}>
             🖨 طباعة
           </button>
-          <button className="btn-back-action" onClick={() => navigate(-1)}>
+          <button className="control-btn-back" onClick={() => navigate(-1)}>
             ← رجوع
           </button>
         </div>
       </div>
 
-      <div className="print-only-header-display">
+      {/* رأس مخصص للطباعة فقط */}
+      <div className="print-header">
         <h1>تفاصيل الطلبية #{order.orderNumber}</h1>
-        <p className="print-date-info">تاريخ الطباعة: {new Date().toLocaleDateString("ar")}</p>
+        <p className="print-date">تاريخ الطباعة: {new Date().toLocaleDateString("ar")}</p>
       </div>
 
-      <div className="info-grid-layout">
-        <div className="info-card-component">
+      {/* بطاقات المعلومات */}
+      <div className="info-cards-grid">
+        <div className="info-card">
           <h3>معلومات العميل</h3>
           <p><strong>الاسم:</strong> {order.customer?.name}</p>
           <p><strong>الهاتف:</strong> {order.customer?.phone || "---"}</p>
           <p><strong>البريد:</strong> {order.customer?.email || "---"}</p>
         </div>
 
-        <div className="info-card-component">
+        <div className="info-card">
           <h3>معلومات الطلبية</h3>
           <p>
             <strong>الحالة:</strong>
-            <span className={`status-indicator ${order.status?.toLowerCase()}`}>
+            <span className={`status-badge type-${order.status?.toLowerCase()}`}>
               {order.status === "Open" ? "مفتوحة" : "مكتملة"}
             </span>
           </p>
@@ -194,10 +197,11 @@ function OrderDetails() {
         </div>
       </div>
 
-      <div className="items-section-wrapper">
+      {/* قسم الأصناف */}
+      <div className="items-section">
         <h2>الأصناف</h2>
-        <div className="table-scroll-wrapper">
-          <table className="items-data-table">
+        <div className="table-responsive-wrap">
+          <table className="items-table">
             <thead>
               <tr>
                 <th>#</th>
@@ -210,7 +214,7 @@ function OrderDetails() {
                 <th>الكمية المتبقية (الناقص)</th>
                 <th>تفاصيل الصنف</th>
                 <th>الحالة</th>
-                <th className="no-print-hidden">الإجراءات</th>
+                <th className="hide-on-print">الإجراءات</th>
               </tr>
             </thead>
             <tbody>
@@ -277,15 +281,15 @@ function OrderDetails() {
                         />
                       </td>
                       <td>---</td>
-                      <td className="no-print-hidden">
+                      <td className="hide-on-print">
                         <button
-                          className="btn-item-save"
+                          className="item-action-btn action-save"
                           onClick={() => saveEditItem(item._id)}
                           disabled={savingItem}
                         >
                           {savingItem ? "..." : "✔ حفظ"}
                         </button>
-                        <button className="btn-item-cancel" onClick={cancelEditItem}>
+                        <button className="item-action-btn action-cancel" onClick={cancelEditItem}>
                           ✕ إلغاء
                         </button>
                       </td>
@@ -306,21 +310,21 @@ function OrderDetails() {
                       {item.unit === "area" && "مساحة"}
                     </td>
                     <td>{item.requiredQty}</td>
-                    <td className={item.remainingQty > 0 ? "remaining-value-highlight" : ""}>
+                    <td className={item.remainingQty > 0 ? "remaining-value" : ""}>
                       {item.remainingQty}
                     </td>
-                    <td className="item-details-text">{item.details || "---"}</td>
+                    <td className="item-notes-cell">{item.details || "---"}</td>
                     <td>
-                      <span className={`item-status-badge ${item.remainingQty === 0 ? "completed" : "pending"}`}>
+                      <span className={`item-status-tag state-${item.remainingQty === 0 ? "completed" : "pending"}`}>
                         {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
                       </span>
                     </td>
-                    <td className="no-print-hidden">
-                      <button className="btn-item-edit" onClick={() => startEditItem(item)}>
+                    <td className="hide-on-print">
+                      <button className="item-action-btn action-edit" onClick={() => startEditItem(item)}>
                         ✏️
                       </button>
                       <button
-                        className="btn-item-delete"
+                        className="item-action-btn action-delete"
                         onClick={() => deleteItem(item._id)}
                         disabled={deletingItemId === item._id}
                       >
@@ -335,19 +339,20 @@ function OrderDetails() {
         </div>
       </div>
 
-      <div className="linked-stones-section-wrapper no-print-hidden">
+      {/* قسم المشاتيح المرتبطة */}
+      <div className="stones-section hide-on-print">
         <h2>🏷️ المشاتيح المرتبطة</h2>
 
         {loadingStones ? (
-          <p className="stones-loading-message">جاري تحميل المشاتيح...</p>
+          <p className="stones-loading-text">جاري تحميل المشاتيح...</p>
         ) : stones.length === 0 ? (
-          <p className="stones-empty-message">لا يوجد مشاتيح مرتبطة بهذه الطلبية بعد</p>
+          <p className="stones-empty-text">لا يوجد مشاتيح مرتبطة بهذه الطلبية بعد</p>
         ) : (
-          <div className="stones-grid-list">
+          <div className="stones-grid">
             {stones.map((stone) => (
-              <div key={stone._id} className="stone-card-item">
+              <div key={stone._id} className="stone-card">
                 <svg
-                  className="stone-barcode-image"
+                  className="stone-barcode-svg"
                   ref={(el) => {
                     if (!el) return;
                     try {
@@ -369,16 +374,14 @@ function OrderDetails() {
                   }}
                 />
                 <span
-                  className={`stone-status-badge ${
-                    stone.status === "In Stock" ? "in-stock" : "shipped"
-                  }`}
+                  className={`stone-status-tag tag-${stone.status === "In Stock" ? "in-stock" : "shipped"}`}
                 >
                   {stone.status === "In Stock" ? "متوفر" : "مشحون"}
                 </span>
-                <div className="stone-types-list">
+                <div className="stone-types-text">
                   {stone.items.map((it) => it.stoneType).join("، ")}
                 </div>
-                <div className="stone-totals-info">
+                <div className="stone-measurements">
                   {stone.totalLinearMeter?.toFixed(2)} م.ط ، {stone.totalArea?.toFixed(2)} م²
                 </div>
               </div>
@@ -387,36 +390,37 @@ function OrderDetails() {
         )}
       </div>
 
-      <div className="order-summary-section">
+      {/* ملخص الطلبية */}
+      <div className="summary-section">
         <h3>ملخص الطلبية</h3>
-        <div className="summary-stats-grid">
-          <div className="stat-item-box">
-            <span className="stat-label-text">إجمالي الأصناف</span>
-            <span className="stat-value-number">{order.items.length}</span>
+        <div className="summary-grid">
+          <div className="summary-item">
+            <span className="summary-label">إجمالي الأصناف</span>
+            <span className="summary-value">{order.items.length}</span>
           </div>
-          <div className="stat-item-box">
-            <span className="stat-label-text">الأصناف المكتملة</span>
-            <span className="stat-value-number success">
+          <div className="summary-item">
+            <span className="summary-label">الأصناف المكتملة</span>
+            <span className="summary-value value-success">
               {order.items.filter((item: any) => item.remainingQty === 0).length}
             </span>
           </div>
-          <div className="stat-item-box">
-            <span className="stat-label-text">الأصناف قيد التنفيذ</span>
-            <span className="stat-value-number warning">
+          <div className="summary-item">
+            <span className="summary-label">الأصناف قيد التنفيذ</span>
+            <span className="summary-value value-warning">
               {order.items.filter((item: any) => item.remainingQty > 0).length}
             </span>
           </div>
-          <div className="stat-item-box">
-            <span className="stat-label-text">إجمالي الكمية المطلوبة</span>
-            <span className="stat-value-number">{totalRequired}</span>
+          <div className="summary-item">
+            <span className="summary-label">إجمالي الكمية المطلوبة</span>
+            <span className="summary-value">{totalRequired}</span>
           </div>
-          <div className="stat-item-box">
-            <span className="stat-label-text">إجمالي المنجز</span>
-            <span className="stat-value-number success">{totalCompleted}</span>
+          <div className="summary-item">
+            <span className="summary-label">إجمالي المنجز</span>
+            <span className="summary-value value-success">{totalCompleted}</span>
           </div>
-          <div className="stat-item-box">
-            <span className="stat-label-text">إجمالي الناقص</span>
-            <span className="stat-value-number warning">{totalRemaining}</span>
+          <div className="summary-item">
+            <span className="summary-label">إجمالي الناقص</span>
+            <span className="summary-value value-warning">{totalRemaining}</span>
           </div>
         </div>
       </div>
