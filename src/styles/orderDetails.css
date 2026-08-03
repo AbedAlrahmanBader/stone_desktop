@@ -38,6 +38,32 @@
   font-weight: bold;
 }
 
+/* مجموعة أزرار الرأس */
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* زر الطباعة الفردية */
+.btn-print-action {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-print-action:hover {
+  background: #218838;
+}
+
 /* زر الرجوع */
 .btn-back-action {
   background: #6c757d;
@@ -52,6 +78,25 @@
 
 .btn-back-action:hover {
   background: #5a6268;
+}
+
+/* زر طباعة الكل */
+.btn-print-all-orders {
+  background: #1b5e20;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-print-all-orders:hover {
+  background: #0d3b12;
 }
 
 /* شبكة المعلومات */
@@ -392,6 +437,237 @@
   color: #666;
 }
 
+/* ===== أنماط الطباعة ===== */
+
+/* مكون الطباعة المخفي */
+.print-content {
+  display: none;
+}
+
+/* ===== طباعة الطلبية الفردية ===== */
+@media print {
+  /* إخفاء كل شيء خارج الطلب */
+  body * {
+    visibility: hidden !important;
+  }
+  
+  /* إظهار الطلب فقط */
+  .order-details-container,
+  .order-details-container * {
+    visibility: visible !important;
+  }
+  
+  .order-details-container {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    padding: 20px !important;
+    background: white !important;
+    z-index: 9999 !important;
+  }
+  
+  /* إخفاء الأزرار */
+  .btn-print-action,
+  .btn-print-all-orders,
+  .btn-back-action,
+  .btn-item-edit,
+  .btn-item-delete,
+  .btn-item-save,
+  .btn-item-cancel,
+  .no-print {
+    display: none !important;
+  }
+  
+  /* إظهار محتوى الطباعة */
+  .print-content {
+    display: block !important;
+  }
+  
+  /* إخفاء المحتوى العادي أثناء الطباعة */
+  .order-details-container .order-header-section,
+  .order-details-container .info-grid-layout,
+  .order-details-container .items-section-wrapper,
+  .order-details-container .linked-stones-section-wrapper,
+  .order-details-container .order-summary-section {
+    display: none !important;
+  }
+  
+  /* إظهار محتوى الطباعة */
+  .print-content .print-header,
+  .print-content .print-order-info,
+  .print-content .print-items-table,
+  .print-content .print-summary {
+    display: block !important;
+  }
+  
+  /* أنماط الطباعة */
+  .print-content {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    direction: rtl;
+  }
+  
+  .print-content .print-header {
+    text-align: center;
+    border-bottom: 2px solid #333;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .print-content .print-header h1 {
+    margin: 0;
+    font-size: 24px;
+  }
+  
+  .print-content .print-order-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+  
+  .print-content .print-items-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  
+  .print-content .print-items-table th {
+    background: #333;
+    color: white;
+    padding: 10px;
+    text-align: right;
+    border: 1px solid #333;
+  }
+  
+  .print-content .print-items-table td {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    text-align: right;
+  }
+  
+  .print-content .print-summary .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+  
+  @page {
+    margin: 20mm;
+    size: A4;
+  }
+}
+
+/* ===== طباعة الطلبيات الجماعية ===== */
+
+/* حاوية الطباعة الجماعية */
+.print-batch-container {
+  display: none;
+  width: 100%;
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 0;
+  background: white;
+}
+
+.print-batch-container.active {
+  display: block;
+}
+
+.print-batch-item {
+  width: 100%;
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 0;
+  page-break-after: always;
+}
+
+.print-batch-item:last-child {
+  page-break-after: auto;
+}
+
+/* منع التداخل بين الطباعتين */
+body:not(.printing-batch) .print-batch-container {
+  display: none !important;
+}
+
+body.printing-batch .order-details-container .print-content {
+  display: none !important;
+}
+
+/* وضع الطباعة الجماعية */
+@media print {
+  body.printing-batch * {
+    visibility: hidden !important;
+  }
+  
+  body.printing-batch .print-batch-container,
+  body.printing-batch .print-batch-container * {
+    visibility: visible !important;
+  }
+  
+  body.printing-batch .print-batch-container {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    background: white !important;
+    z-index: 9999 !important;
+  }
+  
+  body.printing-batch .print-batch-item {
+    width: 210mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    page-break-after: always !important;
+    display: block !important;
+    background: white !important;
+  }
+  
+  body.printing-batch .print-batch-item:last-child {
+    page-break-after: auto !important;
+  }
+  
+  body.printing-batch .print-batch-item .print-page {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    height: auto !important;
+    margin: 0 auto !important;
+    padding: 10mm !important;
+    box-shadow: none !important;
+    background: white !important;
+    page-break-inside: avoid !important;
+    display: block !important;
+  }
+  
+  body.printing-batch .order-details-container {
+    display: none !important;
+  }
+  
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    background: white !important;
+  }
+  
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
+
 /* استجابة للشاشات الصغيرة */
 @media (max-width: 768px) {
   .info-grid-layout {
@@ -415,6 +691,11 @@
   .stones-grid-list {
     grid-template-columns: 1fr;
   }
+
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -433,5 +714,17 @@
   .items-data-table th,
   .items-data-table td {
     padding: 8px 6px;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-print-action,
+  .btn-print-all-orders,
+  .btn-back-action {
+    width: 100%;
+    justify-content: center;
   }
 }
