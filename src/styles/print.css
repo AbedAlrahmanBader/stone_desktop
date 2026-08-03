@@ -36,8 +36,6 @@
     font-size: 15px;
     line-height: 1.6;
     box-sizing: border-box;
-
-    /* بيسمح نثبت التواقيع بأسفل الصفحة دايمًا */
     display: flex;
     flex-direction: column;
 }
@@ -48,12 +46,10 @@
     outline: none;
 }
 
-/* إبراز العنصر اللي عم يتحرر حاليًا فقط، بدون ما يأثر على شكل الطباعة */
 .print-page[contenteditable="true"]:focus-within {
     box-shadow: 0 0 0 2px #1f6f43, 0 0 8px rgba(0, 0, 0, 0.25);
 }
 
-/* خطوط فاصلة خفيفة حول الخلايا وقت التحرير لتسهيل معرفة حدود كل حقل */
 .print-page[contenteditable="true"] td:hover,
 .print-page[contenteditable="true"] th:hover,
 .print-page[contenteditable="true"] .value:hover,
@@ -100,7 +96,6 @@
 }
 
 /* ---------- Header ---------- */
-
 .company-header {
     display: flex;
     flex-direction: column;
@@ -181,7 +176,6 @@
 }
 
 /* ---------- Title row ---------- */
-
 .title-row {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -227,7 +221,6 @@
 }
 
 /* ---------- Certificate details ---------- */
-
 .certificate-details {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -254,7 +247,6 @@
 }
 
 /* ---------- Main shipment table ---------- */
-
 .shipment-table {
     width: 100%;
     border-collapse: collapse;
@@ -278,8 +270,7 @@
     background: #f7f7f7;
 }
 
-/* ---------- Unit select (كمية مدخلة / كمية البيع) ---------- */
-
+/* ---------- Unit select ---------- */
 .unit-select {
     font-size: 12px;
     padding: 2px 4px;
@@ -290,7 +281,6 @@
 }
 
 /* ---------- Totals ---------- */
-
 .totals-section {
     border: 1px solid #111;
     border-top: none;
@@ -318,8 +308,7 @@
     font-weight: 700;
 }
 
-/* ---------- Summary section (by thickness) ---------- */
-
+/* ---------- Summary section ---------- */
 .summary-section {
     margin-top: 14px;
     display: flex;
@@ -369,7 +358,6 @@
 }
 
 /* ---------- Notes & signatures ---------- */
-
 .notes-section {
     margin-top: auto;
     padding-top: 20px;
@@ -396,8 +384,7 @@
     font-style: italic;
 }
 
-/* ---------- Print media (وضع الطباعة الفردية) ---------- */
-
+/* ---------- Print media ---------- */
 @media print {
     .print-container {
         background: #fff;
@@ -414,43 +401,6 @@
         min-height: auto;
         height: 297mm;
         padding: 8mm 10mm;
-    }
-
-    @page {
-        size: A4;
-        margin: 8mm;
-    }
-}
-
-@media print {
-
-    /* إخفاء كل الصفحة */
-    body * {
-        visibility: hidden;
-    }
-
-    /* إظهار ورقة الإرسالية فقط */
-    .print-page,
-    .print-page * {
-        visibility: visible;
-    }
-
-    /* تثبيت الورقة في أعلى الصفحة (وضع "إرسالية واحدة") */
-    .print-page {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 210mm;
-        height: 297mm;
-        margin: 0;
-        padding: 10mm;
-        box-shadow: none;
-        background: white;
-    }
-
-    /* إخفاء زر الطباعة */
-    .print-button {
-        display: none !important;
     }
 
     /* إخفاء أي تأثيرات تحرير عند الطباعة */
@@ -477,61 +427,8 @@
         display: inline !important;
     }
 
-    /* إعداد حجم الورقة */
     @page {
         size: A4;
         margin: 0;
-    }
-}
-
-/* ===== وضع الطباعة الجماعية (أكثر من إرسالية مع بعض) ===== */
-@media print {
-
-    /* تعطيل التموضع المطلق يلي مصمم لإرسالية واحدة فقط،
-       عشان كل إرسالية ترجع لتدفقها الطبيعي وينفصلوا عن بعض بصفحات */
-    .print-batch-container .print-page {
-        position: static !important;
-        top: auto !important;
-        left: auto !important;
-        width: 210mm;
-        height: auto;
-        min-height: 297mm;
-        margin: 0 auto;
-        padding: 10mm;
-        page-break-inside: avoid;
-    }
-
-    .print-batch-container .print-container {
-        min-height: 0;
-        padding: 0;
-        background: transparent;
-    }
-
-    .print-batch-item {
-        width: 210mm;
-        margin: 0 auto;
-    }
-
-    /* آخر إرسالية بالدفعة ما لازم تعمل فصل صفحة بعدها */
-    .print-batch-item:last-child {
-        page-break-after: auto !important;
-    }
-
-    /* --- إصلاح انزياح الإرساليات نحو الشمال أثناء الطباعة الجماعية --- */
-
-    html,
-    body {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* اجبار التوسيط الحقيقي بدل الاعتماد على تطابق العرض بالصدفة مع الأب */
-    .print-batch-container {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
     }
 }

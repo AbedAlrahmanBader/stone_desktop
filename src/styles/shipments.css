@@ -1,167 +1,237 @@
 .shipments {
-
-    background:white;
-    padding:30px;
-    border-radius:12px;
-
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
 }
-
 
 .shipments table {
-
-    width:100%;
-    border-collapse:collapse;
-
+    width: 100%;
+    border-collapse: collapse;
 }
-
 
 .shipments th {
-
-    background:#1b5e20;
-    color:white;
-    padding:15px;
-
+    background: #1b5e20;
+    color: white;
+    padding: 15px;
 }
-
 
 .shipments td {
-
-    padding:12px;
-    text-align:center;
-    border-bottom:1px solid #ddd;
-
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
 }
 
-
 .shipments button {
-
-    background:#1b5e20;
-    color:white;
-    border:none;
-    padding:8px 20px;
-    border-radius:6px;
-    cursor:pointer;
-
+    background: #1b5e20;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
 /* ---------- شريط الفلاتر ---------- */
-
 .shipments-filters {
-
-    display:flex;
-    flex-wrap:wrap;
-    align-items:flex-end;
-    gap:16px;
-    background:#f4f7f4;
-    border:1px solid #dfe7df;
-    border-radius:10px;
-    padding:16px 18px;
-    margin-bottom:14px;
-
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+    background: #f4f7f4;
+    border: 1px solid #dfe7df;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
 }
 
 .filter-field {
-
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .filter-field label {
-
-    font-size:12.5px;
-    font-weight:bold;
-    color:#33513a;
-
+    font-size: 12.5px;
+    font-weight: bold;
+    color: #33513a;
 }
 
 .filter-field input,
 .filter-field select {
-
-    padding:9px 12px;
-    border:1px solid #cdd8cd;
-    border-radius:7px;
-    font-size:13.5px;
-    color:#222;
-    background:white;
-    min-width:150px;
-
+    padding: 9px 12px;
+    border: 1px solid #cdd8cd;
+    border-radius: 7px;
+    font-size: 13.5px;
+    color: #222;
+    background: white;
+    min-width: 150px;
 }
 
 .filter-field input:focus,
 .filter-field select:focus {
-
-    outline:none;
-    border-color:#1b5e20;
-    box-shadow:0 0 0 3px rgba(27,94,32,0.12);
-
+    outline: none;
+    border-color: #1b5e20;
+    box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.12);
 }
 
 .btn-reset-filters {
-
-    background:white;
-    color:#b71c1c;
-    border:1px solid #b71c1c;
-    padding:9px 18px;
-    border-radius:7px;
-    cursor:pointer;
-    font-size:13.5px;
-    font-weight:bold;
-    height:38px;
-    transition:background 0.2s, color 0.2s;
-
+    background: white;
+    color: #b71c1c;
+    border: 1px solid #b71c1c;
+    padding: 9px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: bold;
+    height: 38px;
+    transition: background 0.2s, color 0.2s;
 }
 
 .btn-reset-filters:hover {
+    background: #b71c1c;
+    color: white;
+}
 
-    background:#b71c1c;
-    color:white;
+.btn-print-all {
+    background: #1b5e20 !important;
+    color: white !important;
+    border: none !important;
+    padding: 9px 18px !important;
+    border-radius: 7px !important;
+    cursor: pointer !important;
+    font-size: 13.5px !important;
+    font-weight: bold !important;
+    height: 38px !important;
+    transition: background 0.2s !important;
+}
 
+.btn-print-all:hover {
+    background: #0d3b12 !important;
 }
 
 .filters-summary {
-
-    font-size:13px;
-    color:#666;
-    margin-bottom:10px;
-
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 10px;
 }
 
 .no-results {
-
-    padding:24px !important;
-    color:#888;
-    font-style:italic;
-
+    padding: 24px !important;
+    color: #888;
+    font-style: italic;
 }
 
 /* استجابة الشاشات الصغيرة */
 @media (max-width: 768px) {
-
     .shipments-filters {
-        flex-direction:column;
-        align-items:stretch;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .filter-field input,
     .filter-field select {
-        min-width:0;
+        min-width: 0;
     }
 
     .btn-reset-filters {
-        width:100%;
+        width: 100%;
     }
-
 }
 
-/* ---------- إصلاح تموضع الطباعة الجماعية ---------- */
-@media print {
+/* ===== إصلاح الطباعة الجماعية ===== */
+.print-batch-container {
+    display: block;
+    width: 100%;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 0;
+    background: white;
+}
 
+.print-batch-item {
+    width: 100%;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 0;
+    page-break-after: always;
+}
+
+.print-batch-item:last-child {
+    page-break-after: auto;
+}
+
+/* ===== تنسيق الطباعة ===== */
+@media print {
+    /* إخفاء كل شيء خارج محتوى الطباعة */
+    body * {
+        visibility: hidden !important;
+    }
+    
+    /* إظهار منطقة الطباعة فقط */
+    .print-batch-container,
+    .print-batch-container * {
+        visibility: visible !important;
+    }
+    
+    /* جعل الحاوية تأخذ العرض الكامل وتتوسط المحتوى */
+    .print-batch-container {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+        background: white !important;
+        z-index: 9999 !important;
+    }
+    
+    .print-batch-item {
+        width: 210mm !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        page-break-after: always !important;
+        display: block !important;
+        background: white !important;
+    }
+    
+    .print-batch-item:last-child {
+        page-break-after: auto !important;
+    }
+    
+    /* تنسيق صفحة الطباعة داخل الباتش */
+    .print-batch-item .print-page {
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        width: 210mm !important;
+        min-height: 297mm !important;
+        height: auto !important;
+        margin: 0 auto !important;
+        padding: 10mm !important;
+        box-shadow: none !important;
+        background: white !important;
+        page-break-inside: avoid !important;
+        display: block !important;
+    }
+    
+    /* إصلاح أي انزياح جانبي */
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        background: white !important;
+    }
+    
+    /* إخفاء زر الطباعة */
+    .print-button {
+        display: none !important;
+    }
+
+    /* إصلاح تموضع الصفحة */
     .shipments {
         padding: 0 !important;
         border-radius: 0 !important;
         background: transparent !important;
     }
-
 }

@@ -22,7 +22,6 @@ interface StonePieceDoc {
     status?: string;
 }
 
-// صف مسطح جاهز للطباعة: نوع حجر واحد + باركود المشتاح يلي طلع منه
 interface Stone {
     barcode?: string;
     stoneType?: string;
@@ -55,17 +54,11 @@ const num = (v: any) => Number(v) || 0;
 const SOLD_UNITS = ["قطعة", "متر مربع", "متر طول"] as const;
 type SoldUnit = (typeof SOLD_UNITS)[number];
 
-// يفرد كل مشتاح (بأنواعه المتعددة) إلى صفوف مستقلة، صف لكل نوع حجر
 function flattenStones(stonePieces: StonePieceDoc[]): Stone[] {
-
     const rows: Stone[] = [];
-
     stonePieces.forEach((stone) => {
-
         const items = stone.items && stone.items.length > 0 ? stone.items : [];
-
         items.forEach((item) => {
-
             rows.push({
                 barcode: stone.barcode,
                 stoneType: item.stoneType,
@@ -77,20 +70,14 @@ function flattenStones(stonePieces: StonePieceDoc[]): Stone[] {
                 pieces: item.pieces,
                 status: stone.status,
             });
-
         });
-
     });
-
     return rows;
 }
 
-// دالة جديدة لتجميع الصفوف المتشابهة
 function groupSimilarStones(stones: Stone[]): Stone[] {
     const grouped: Stone[] = [];
-    
     stones.forEach((stone) => {
-        // البحث عن صف موجود بنفس الخصائص
         const existingIndex = grouped.findIndex((g) => 
             g.stoneType === stone.stoneType &&
             g.length === stone.length &&
@@ -99,21 +86,17 @@ function groupSimilarStones(stones: Stone[]): Stone[] {
         );
 
         if (existingIndex !== -1) {
-            // دمج الكميات في الصف الموجود
             const existing = grouped[existingIndex];
             existing.pieces = (existing.pieces || 0) + (stone.pieces || 0);
             existing.area = (existing.area || 0) + (stone.area || 0);
             existing.linearMeter = (existing.linearMeter || 0) + (stone.linearMeter || 0);
-            // دمج الباركودات (اختياري)
             if (stone.barcode && !existing.barcode?.includes(stone.barcode)) {
                 existing.barcode = existing.barcode ? `${existing.barcode}, ${stone.barcode}` : stone.barcode;
             }
         } else {
-            // إضافة صف جديد
             grouped.push({ ...stone });
         }
     });
-
     return grouped;
 }
 
@@ -123,11 +106,10 @@ function getSoldQuantity(s: Stone): { value: string; unit: SoldUnit } {
     return { value: String(num(s.pieces)), unit: "قطعة" };
 }
 
-// بيرجع القيمة المناسبة حسب الوحدة المختارة من المستخدم
 function getValueForUnit(s: Stone, unit: SoldUnit) {
     if (unit === "قطعة") return String(num(s.pieces));
     if (unit === "متر مربع") return num(s.area).toFixed(2);
-    return num(s.linearMeter).toFixed(2); // متر طول
+    return num(s.linearMeter).toFixed(2);
 }
 
 function getEnteredQuantity(s: Stone): { value: string; unit: SoldUnit } {
@@ -146,8 +128,6 @@ function ShipmentPrint({ shipment }: Props) {
         window.print();
     };
 
-    // shipment.stones جاي من الباك اند كمصفوفة مشاتيح كاملة (كل وحدة فيها items[])
-    // فبنفردها هون لصفوف طباعة، صف لكل نوع حجر
     let stones: Stone[] =
         shipment?.stones && shipment.stones.length > 0
             ? flattenStones(shipment.stones as StonePieceDoc[])
@@ -160,29 +140,27 @@ function ShipmentPrint({ shipment }: Props) {
                   { barcode: "STN-0006", stoneType: "سقف مسمسم/مطبة", length: 15, width: 25, thickness: 15, linearMeter: 0, area: 0, pieces: 17, status: "In Stock" },
               ];
 
-    // تجميع الصفوف المتشابهة
     stones = groupSimilarStones(stones);
 
-    // تخزين اختيار الوحدة لكل صف (لو المستخدم غيّر الوحدة يدويًا)
     const [soldUnitOverrides, setSoldUnitOverrides] = useState<Record<number, SoldUnit>>({});
     const [enteredUnitOverrides, setEnteredUnitOverrides] = useState<Record<number, SoldUnit>>({});
 
-   type SoldTotals = { pieces: number; sqm: number; linearM: number };
+    type SoldTotals = { pieces: number; sqm: number; linearM: number };
 
-const soldTotals = stones.reduce<SoldTotals>(
-    (acc, stone, index) => {
-        const autoSold = getSoldQuantity(stone);
-        const unit = soldUnitOverrides[index] ?? autoSold.unit;
-        const value = Number(getValueForUnit(stone, unit)) || 0;
+    const soldTotals = stones.reduce<SoldTotals>(
+        (acc, stone, index) => {
+            const autoSold = getSoldQuantity(stone);
+            const unit = soldUnitOverrides[index] ?? autoSold.unit;
+            const value = Number(getValueForUnit(stone, unit)) || 0;
 
-        if (unit === "قطعة") acc.pieces += value;
-        else if (unit === "متر مربع") acc.sqm += value;
-        else acc.linearM += value; // متر طول
+            if (unit === "قطعة") acc.pieces += value;
+            else if (unit === "متر مربع") acc.sqm += value;
+            else acc.linearM += value;
 
-        return acc;
-    },
-    { pieces: 0, sqm: 0, linearM: 0 }
-);
+            return acc;
+        },
+        { pieces: 0, sqm: 0, linearM: 0 }
+    );
 
     const soldTotalParts: string[] = [];
     if (soldTotals.sqm > 0) soldTotalParts.push(`${soldTotals.sqm.toFixed(2)} متر مربع`);
@@ -286,7 +264,7 @@ const soldTotals = stones.reduce<SoldTotals>(
                 <div className="title-row">
                     <div className="doc-number">
                         <span className="label-en">No.</span>
-<span className="doc-number-value">{shipment?.consignmentNumber ?? "---"}</span>
+                        <span className="doc-number-value">{shipment?.consignmentNumber ?? "---"}</span>
                         <span>: رقم</span>
                     </div>
                     <div className="certificate-title">
@@ -297,54 +275,52 @@ const soldTotals = stones.reduce<SoldTotals>(
 
                 <hr className="section-rule" />
 
-
-<div className="certificate-details">
-    <div className="detail-row">
-        <span className="label-en">Date:</span>
-        <span className="value">
-            {shipment?.createdAt
-                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
-                : shipment?.date || "03/05/2026"}
-        </span>
-        <span className="label">:  التاريخ </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Mr.</span>
-        <span className="value">
-            {/* استخدام shipment.customer مباشرة */}
-            {shipment?.customer || "---"}
-        </span>
-        <span className="label">: المرسل اليه السيد  </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Leaving hour:</span>
-        <span className="value">
-            {shipment?.leavingHour ||
-                (shipment?.createdAt
-                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                      })
-                    : "---")}
-        </span>
-        <span className="label"> : ساعة المغادرة </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Order No.</span>
-        <span className="value">{shipment?.orderNumber}</span>
-        <span className="label">:   رقم الطلبية </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Region:</span>
-        <span className="value">{shipment?.region || "القدس"}</span>
-        <span className="label">:  المنطقة </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Car No.</span>
-        <span className="value">{shipment?.carNumber}</span>
-        <span className="label">:    رقم السيارة </span>
-    </div>
-</div>
+                <div className="certificate-details">
+                    <div className="detail-row">
+                        <span className="label-en">Date:</span>
+                        <span className="value">
+                            {shipment?.createdAt
+                                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
+                                : shipment?.date || "03/05/2026"}
+                        </span>
+                        <span className="label">:  التاريخ </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Mr.</span>
+                        <span className="value">
+                            {shipment?.customer || "---"}
+                        </span>
+                        <span className="label">: المرسل اليه السيد  </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Leaving hour:</span>
+                        <span className="value">
+                            {shipment?.leavingHour ||
+                                (shipment?.createdAt
+                                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                      })
+                                    : "---")}
+                        </span>
+                        <span className="label"> : ساعة المغادرة </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Order No.</span>
+                        <span className="value">{shipment?.orderNumber}</span>
+                        <span className="label">:   رقم الطلبية </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Region:</span>
+                        <span className="value">{shipment?.region || "القدس"}</span>
+                        <span className="label">:  المنطقة </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Car No.</span>
+                        <span className="value">{shipment?.carNumber}</span>
+                        <span className="label">:    رقم السيارة </span>
+                    </div>
+                </div>
 
                 <table className="shipment-table">
                     <thead>
