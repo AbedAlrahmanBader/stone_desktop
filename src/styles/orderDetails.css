@@ -45,41 +45,6 @@
   align-items: center;
 }
 
-/* زر الطباعة الفردية */
-.btn-print-action {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btn-print-action:hover {
-  background: #218838;
-}
-
-/* زر الرجوع */
-.btn-back-action {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.btn-back-action:hover {
-  background: #5a6268;
-}
-
 /* زر طباعة الكل */
 .btn-print-all-orders {
   background: #1b5e20;
@@ -97,6 +62,27 @@
 
 .btn-print-all-orders:hover {
   background: #0d3b12;
+}
+
+.btn-print-all-orders:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* زر الرجوع */
+.btn-back-action {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.btn-back-action:hover {
+  background: #5a6268;
 }
 
 /* شبكة المعلومات */
@@ -437,131 +423,6 @@
   color: #666;
 }
 
-/* ===== أنماط الطباعة ===== */
-
-/* مكون الطباعة المخفي */
-.print-content {
-  display: none;
-}
-
-/* ===== طباعة الطلبية الفردية ===== */
-@media print {
-  /* إخفاء كل شيء خارج الطلب */
-  body * {
-    visibility: hidden !important;
-  }
-  
-  /* إظهار الطلب فقط */
-  .order-details-container,
-  .order-details-container * {
-    visibility: visible !important;
-  }
-  
-  .order-details-container {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    padding: 20px !important;
-    background: white !important;
-    z-index: 9999 !important;
-  }
-  
-  /* إخفاء الأزرار */
-  .btn-print-action,
-  .btn-print-all-orders,
-  .btn-back-action,
-  .btn-item-edit,
-  .btn-item-delete,
-  .btn-item-save,
-  .btn-item-cancel,
-  .no-print {
-    display: none !important;
-  }
-  
-  /* إظهار محتوى الطباعة */
-  .print-content {
-    display: block !important;
-  }
-  
-  /* إخفاء المحتوى العادي أثناء الطباعة */
-  .order-details-container .order-header-section,
-  .order-details-container .info-grid-layout,
-  .order-details-container .items-section-wrapper,
-  .order-details-container .linked-stones-section-wrapper,
-  .order-details-container .order-summary-section {
-    display: none !important;
-  }
-  
-  /* إظهار محتوى الطباعة */
-  .print-content .print-header,
-  .print-content .print-order-info,
-  .print-content .print-items-table,
-  .print-content .print-summary {
-    display: block !important;
-  }
-  
-  /* أنماط الطباعة */
-  .print-content {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    direction: rtl;
-  }
-  
-  .print-content .print-header {
-    text-align: center;
-    border-bottom: 2px solid #333;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-  }
-  
-  .print-content .print-header h1 {
-    margin: 0;
-    font-size: 24px;
-  }
-  
-  .print-content .print-order-info {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px;
-    padding: 15px;
-    background: #f9f9f9;
-    border-radius: 8px;
-  }
-  
-  .print-content .print-items-table table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-  
-  .print-content .print-items-table th {
-    background: #333;
-    color: white;
-    padding: 10px;
-    text-align: right;
-    border: 1px solid #333;
-  }
-  
-  .print-content .print-items-table td {
-    padding: 8px 10px;
-    border: 1px solid #ddd;
-    text-align: right;
-  }
-  
-  .print-content .print-summary .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-  }
-  
-  @page {
-    margin: 20mm;
-    size: A4;
-  }
-}
-
 /* ===== طباعة الطلبيات الجماعية ===== */
 
 /* حاوية الطباعة الجماعية */
@@ -590,27 +451,141 @@
   page-break-after: auto;
 }
 
-/* منع التداخل بين الطباعتين */
-body:not(.printing-batch) .print-batch-container {
-  display: none !important;
+/* أنماط الطباعة للصفحة */
+.print-page {
+  width: 100%;
+  min-height: 297mm;
+  background: #fff;
+  padding: 14mm 12mm;
+  font-family: "Arial", "Tahoma", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  box-sizing: border-box;
+  direction: rtl;
 }
 
-body.printing-batch .order-details-container .print-content {
-  display: none !important;
+.print-page .print-header {
+  text-align: center;
+  border-bottom: 2px solid #333;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
 }
 
-/* وضع الطباعة الجماعية */
+.print-page .print-header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #000;
+}
+
+.print-page .print-header .print-order-number {
+  font-size: 18px;
+  color: #555;
+  margin-top: 5px;
+}
+
+.print-page .print-order-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.print-page .print-order-info .info-group strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.print-page .print-order-info .info-group p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.print-page .print-items-table {
+  margin: 20px 0;
+}
+
+.print-page .print-items-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.print-page .print-items-table th {
+  background: #333;
+  color: white;
+  padding: 10px;
+  text-align: right;
+  border: 1px solid #333;
+}
+
+.print-page .print-items-table td {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  text-align: right;
+}
+
+.print-page .print-items-table tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.print-page .print-summary {
+  margin-top: 30px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.print-page .print-summary .summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.print-page .print-summary .summary-item {
+  text-align: center;
+  padding: 10px;
+  background: white;
+  border-radius: 5px;
+}
+
+.print-page .print-summary .summary-item .label {
+  font-size: 12px;
+  color: #666;
+}
+
+.print-page .print-summary .summary-item .value {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.print-page .print-footer {
+  margin-top: 40px;
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+  font-size: 12px;
+  color: #888;
+}
+
+/* وضع الطباعة */
 @media print {
-  body.printing-batch * {
+  /* إخفاء كل شيء خارج حاوية الطباعة */
+  body * {
     visibility: hidden !important;
   }
   
-  body.printing-batch .print-batch-container,
-  body.printing-batch .print-batch-container * {
+  /* إظهار حاوية الطباعة فقط */
+  .print-batch-container,
+  .print-batch-container * {
     visibility: visible !important;
   }
   
-  body.printing-batch .print-batch-container {
+  .print-batch-container {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
@@ -623,7 +598,7 @@ body.printing-batch .order-details-container .print-content {
     z-index: 9999 !important;
   }
   
-  body.printing-batch .print-batch-item {
+  .print-batch-item {
     width: 210mm !important;
     margin: 0 auto !important;
     padding: 0 !important;
@@ -632,11 +607,11 @@ body.printing-batch .order-details-container .print-content {
     background: white !important;
   }
   
-  body.printing-batch .print-batch-item:last-child {
+  .print-batch-item:last-child {
     page-break-after: auto !important;
   }
   
-  body.printing-batch .print-batch-item .print-page {
+  .print-batch-item .print-page {
     position: static !important;
     top: auto !important;
     left: auto !important;
@@ -651,7 +626,15 @@ body.printing-batch .order-details-container .print-content {
     display: block !important;
   }
   
-  body.printing-batch .order-details-container {
+  /* إخفاء الأزرار وعناصر التحكم */
+  .btn-print-all-orders,
+  .btn-back-action,
+  .btn-item-edit,
+  .btn-item-delete,
+  .btn-item-save,
+  .btn-item-cancel,
+  .order-header-section,
+  .no-print {
     display: none !important;
   }
   
@@ -721,7 +704,6 @@ body.printing-batch .order-details-container .print-content {
     width: 100%;
   }
 
-  .btn-print-action,
   .btn-print-all-orders,
   .btn-back-action {
     width: 100%;
