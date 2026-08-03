@@ -1,4 +1,4 @@
-// OrderDetails.tsx - الجزء المتعلق بالوصف
+// OrderDetails.tsx - تم تغيير جميع أسماء التنسيقات
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -35,7 +35,6 @@ function OrderDetails() {
   const [savingItem, setSavingItem] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
-  // المشاتيح المرتبطة بهذه الطلبية
   const [stones, setStones] = useState<OrderStone[]>([]);
   const [loadingStones, setLoadingStones] = useState(true);
 
@@ -130,14 +129,13 @@ function OrderDetails() {
   };
 
   if (loading) {
-    return <div className="loading">جاري تحميل بيانات الطلبية...</div>;
+    return <div className="loading-state">جاري تحميل بيانات الطلبية...</div>;
   }
 
   if (!order) {
-    return <div className="not-found">الطلبية غير موجودة</div>;
+    return <div className="not-found-state">الطلبية غير موجودة</div>;
   }
 
-  // حساب الكمية الناقصة (المتبقية) والمكتملة لكل صنف
   const totalRequired = order.items.reduce(
     (sum: number, item: any) => sum + (item.requiredQty || 0),
     0
@@ -149,42 +147,40 @@ function OrderDetails() {
   const totalCompleted = totalRequired - totalRemaining;
 
   return (
-    // id ثابت تستخدمه قواعد الطباعة بملف orderDetails.css لتحديد منطقة الطباعة بدقة
-    <div className="order-details" id="order-print-area">
-      <div className="order-header no-print">
-        <div className="order-title">
+    <div className="order-details-container" id="print-area-container">
+      <div className="order-header-section no-print-hidden">
+        <div className="order-title-group">
           <h1>تفاصيل الطلبية</h1>
-          <span className="order-number">#{order.orderNumber}</span>
+          <span className="order-number-badge">#{order.orderNumber}</span>
         </div>
-        <div className="order-header-actions">
-          <button className="btn-print" onClick={handlePrint}>
+        <div className="order-actions-wrapper">
+          <button className="btn-print-action" onClick={handlePrint}>
             🖨 طباعة
           </button>
-          <button className="btn-back" onClick={() => navigate(-1)}>
+          <button className="btn-back-action" onClick={() => navigate(-1)}>
             ← رجوع
           </button>
         </div>
       </div>
 
-      {/* رأس مخصص للطباعة فقط */}
-      <div className="print-only-header">
+      <div className="print-only-header-display">
         <h1>تفاصيل الطلبية #{order.orderNumber}</h1>
-        <p className="print-date">تاريخ الطباعة: {new Date().toLocaleDateString("ar")}</p>
+        <p className="print-date-info">تاريخ الطباعة: {new Date().toLocaleDateString("ar")}</p>
       </div>
 
-      <div className="order-info-grid">
-        <div className="info-card">
+      <div className="info-grid-layout">
+        <div className="info-card-component">
           <h3>معلومات العميل</h3>
           <p><strong>الاسم:</strong> {order.customer?.name}</p>
           <p><strong>الهاتف:</strong> {order.customer?.phone || "---"}</p>
           <p><strong>البريد:</strong> {order.customer?.email || "---"}</p>
         </div>
 
-        <div className="info-card">
+        <div className="info-card-component">
           <h3>معلومات الطلبية</h3>
           <p>
             <strong>الحالة:</strong>
-            <span className={`status-badge ${order.status?.toLowerCase()}`}>
+            <span className={`status-indicator ${order.status?.toLowerCase()}`}>
               {order.status === "Open" ? "مفتوحة" : "مكتملة"}
             </span>
           </p>
@@ -198,10 +194,10 @@ function OrderDetails() {
         </div>
       </div>
 
-      <div className="items-section">
+      <div className="items-section-wrapper">
         <h2>الأصناف</h2>
-        <div className="table-responsive">
-          <table className="order-items-table">
+        <div className="table-scroll-wrapper">
+          <table className="items-data-table">
             <thead>
               <tr>
                 <th>#</th>
@@ -214,7 +210,7 @@ function OrderDetails() {
                 <th>الكمية المتبقية (الناقص)</th>
                 <th>تفاصيل الصنف</th>
                 <th>الحالة</th>
-                <th className="no-print">الإجراءات</th>
+                <th className="no-print-hidden">الإجراءات</th>
               </tr>
             </thead>
             <tbody>
@@ -281,15 +277,15 @@ function OrderDetails() {
                         />
                       </td>
                       <td>---</td>
-                      <td className="no-print">
+                      <td className="no-print-hidden">
                         <button
-                          className="btn-save-item"
+                          className="btn-item-save"
                           onClick={() => saveEditItem(item._id)}
                           disabled={savingItem}
                         >
                           {savingItem ? "..." : "✔ حفظ"}
                         </button>
-                        <button className="btn-cancel-item" onClick={cancelEditItem}>
+                        <button className="btn-item-cancel" onClick={cancelEditItem}>
                           ✕ إلغاء
                         </button>
                       </td>
@@ -310,21 +306,21 @@ function OrderDetails() {
                       {item.unit === "area" && "مساحة"}
                     </td>
                     <td>{item.requiredQty}</td>
-                    <td className={item.remainingQty > 0 ? "remaining-highlight" : ""}>
+                    <td className={item.remainingQty > 0 ? "remaining-value-highlight" : ""}>
                       {item.remainingQty}
                     </td>
-                    <td className="item-details-cell">{item.details || "---"}</td>
+                    <td className="item-details-text">{item.details || "---"}</td>
                     <td>
-                      <span className={`item-status ${item.remainingQty === 0 ? "completed" : "pending"}`}>
+                      <span className={`item-status-badge ${item.remainingQty === 0 ? "completed" : "pending"}`}>
                         {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
                       </span>
                     </td>
-                    <td className="no-print">
-                      <button className="btn-edit-item" onClick={() => startEditItem(item)}>
+                    <td className="no-print-hidden">
+                      <button className="btn-item-edit" onClick={() => startEditItem(item)}>
                         ✏️
                       </button>
                       <button
-                        className="btn-delete-item"
+                        className="btn-item-delete"
                         onClick={() => deleteItem(item._id)}
                         disabled={deletingItemId === item._id}
                       >
@@ -339,19 +335,19 @@ function OrderDetails() {
         </div>
       </div>
 
-      <div className="linked-stones-section no-print">
+      <div className="linked-stones-section-wrapper no-print-hidden">
         <h2>🏷️ المشاتيح المرتبطة</h2>
 
         {loadingStones ? (
-          <p className="stones-loading">جاري تحميل المشاتيح...</p>
+          <p className="stones-loading-message">جاري تحميل المشاتيح...</p>
         ) : stones.length === 0 ? (
-          <p className="stones-empty">لا يوجد مشاتيح مرتبطة بهذه الطلبية بعد</p>
+          <p className="stones-empty-message">لا يوجد مشاتيح مرتبطة بهذه الطلبية بعد</p>
         ) : (
-          <div className="linked-stones-list">
+          <div className="stones-grid-list">
             {stones.map((stone) => (
-              <div key={stone._id} className="linked-stone-card">
+              <div key={stone._id} className="stone-card-item">
                 <svg
-                  className="linked-stone-barcode-svg"
+                  className="stone-barcode-image"
                   ref={(el) => {
                     if (!el) return;
                     try {
@@ -373,16 +369,16 @@ function OrderDetails() {
                   }}
                 />
                 <span
-                  className={`linked-stone-status ${
+                  className={`stone-status-badge ${
                     stone.status === "In Stock" ? "in-stock" : "shipped"
                   }`}
                 >
                   {stone.status === "In Stock" ? "متوفر" : "مشحون"}
                 </span>
-                <div className="linked-stone-types">
+                <div className="stone-types-list">
                   {stone.items.map((it) => it.stoneType).join("، ")}
                 </div>
-                <div className="linked-stone-totals">
+                <div className="stone-totals-info">
                   {stone.totalLinearMeter?.toFixed(2)} م.ط ، {stone.totalArea?.toFixed(2)} م²
                 </div>
               </div>
@@ -391,36 +387,36 @@ function OrderDetails() {
         )}
       </div>
 
-      <div className="order-summary">
+      <div className="order-summary-section">
         <h3>ملخص الطلبية</h3>
-        <div className="summary-stats">
-          <div className="stat-item">
-            <span className="stat-label">إجمالي الأصناف</span>
-            <span className="stat-value">{order.items.length}</span>
+        <div className="summary-stats-grid">
+          <div className="stat-item-box">
+            <span className="stat-label-text">إجمالي الأصناف</span>
+            <span className="stat-value-number">{order.items.length}</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">الأصناف المكتملة</span>
-            <span className="stat-value success">
+          <div className="stat-item-box">
+            <span className="stat-label-text">الأصناف المكتملة</span>
+            <span className="stat-value-number success">
               {order.items.filter((item: any) => item.remainingQty === 0).length}
             </span>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">الأصناف قيد التنفيذ</span>
-            <span className="stat-value warning">
+          <div className="stat-item-box">
+            <span className="stat-label-text">الأصناف قيد التنفيذ</span>
+            <span className="stat-value-number warning">
               {order.items.filter((item: any) => item.remainingQty > 0).length}
             </span>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">إجمالي الكمية المطلوبة</span>
-            <span className="stat-value">{totalRequired}</span>
+          <div className="stat-item-box">
+            <span className="stat-label-text">إجمالي الكمية المطلوبة</span>
+            <span className="stat-value-number">{totalRequired}</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">إجمالي المنجز</span>
-            <span className="stat-value success">{totalCompleted}</span>
+          <div className="stat-item-box">
+            <span className="stat-label-text">إجمالي المنجز</span>
+            <span className="stat-value-number success">{totalCompleted}</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">إجمالي الناقص</span>
-            <span className="stat-value warning">{totalRemaining}</span>
+          <div className="stat-item-box">
+            <span className="stat-label-text">إجمالي الناقص</span>
+            <span className="stat-value-number warning">{totalRemaining}</span>
           </div>
         </div>
       </div>
