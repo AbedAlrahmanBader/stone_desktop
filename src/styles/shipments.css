@@ -171,7 +171,16 @@
     .print-batch-container * {
         visibility: visible !important;
     }
-    
+       .single-print-container,
+    .single-print-container * {
+        visibility: visible !important;
+    }
+   .single-print-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
     /* جعل الحاوية تأخذ العرض الكامل وتتوسط المحتوى */
     .print-batch-container {
         position: absolute !important;
