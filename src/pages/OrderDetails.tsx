@@ -152,7 +152,12 @@ function OrderDetails() {
   };
 
   const handlePrint = () => {
+    document.body.classList.remove('printing-shipments');
+    document.body.classList.add('printing-order');
     window.print();
+    setTimeout(() => {
+      document.body.classList.remove('printing-order');
+    }, 1000);
   };
 
   if (loading) {
