@@ -28,8 +28,6 @@ function OrderDetails() {
   const navigate = useNavigate();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [allOrders, setAllOrders] = useState<any[]>([]);
-  const [loadingAllOrders, setLoadingAllOrders] = useState(false);
 
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<EditItemState | null>(null);
@@ -66,22 +64,8 @@ function OrderDetails() {
     }
   };
 
-  const loadAllOrders = async () => {
-    setLoadingAllOrders(true);
-    try {
-      const res = await api.get('/orders');
-      setAllOrders(res.data);
-    } catch (error) {
-      console.error(error);
-      alert("تعذر تحميل جميع الطلبيات");
-    } finally {
-      setLoadingAllOrders(false);
-    }
-  };
-
   useEffect(() => {
     loadOrder();
-    loadAllOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderNumber]);
 
@@ -139,15 +123,15 @@ function OrderDetails() {
     }
   };
 
-  const handlePrintAllOrders = () => {
-    if (allOrders.length === 0) {
-      alert("لا توجد طلبيات للطباعة");
+  const handlePrintCurrentOrder = () => {
+    if (!order) {
+      alert("لا توجد طلبية للطباعة");
       return;
     }
 
-    const batchContainer = document.querySelector('.print-batch-container');
-    if (batchContainer) {
-      batchContainer.classList.add('active');
+    const printContainer = document.querySelector('.print-order-container');
+    if (printContainer) {
+      printContainer.classList.add('active');
     }
     
     setTimeout(() => {
@@ -155,8 +139,8 @@ function OrderDetails() {
     }, 100);
     
     setTimeout(() => {
-      if (batchContainer) {
-        batchContainer.classList.remove('active');
+      if (printContainer) {
+        printContainer.classList.remove('active');
       }
     }, 2000);
   };
@@ -188,11 +172,10 @@ function OrderDetails() {
         </div>
         <div className="header-actions">
           <button 
-            className="btn-print-all-orders" 
-            onClick={handlePrintAllOrders}
-            disabled={loadingAllOrders || allOrders.length === 0}
+            className="btn-print-order" 
+            onClick={handlePrintCurrentOrder}
           >
-            {loadingAllOrders ? "جاري التحميل..." : "📄 طباعة جميع الطلبيات"}
+            📄 طباعة الطلبية
           </button>
           <button className="btn-back-action" onClick={() => navigate(-1)}>
             ← رجوع
@@ -453,127 +436,125 @@ function OrderDetails() {
         </div>
       </div>
 
-      {/* حاوية الطباعة الجماعية */}
-      <div className="print-batch-container">
-        {allOrders.map((orderItem: any) => (
-          <div key={orderItem._id} className="print-batch-item">
-            <div className="print-page">
-              <div className="print-header">
-                <h1>تفاصيل الطلبية</h1>
-                <div className="print-order-number">رقم الطلبية: #{orderItem.orderNumber}</div>
-                <div style={{ marginTop: '5px', fontSize: '14px', color: '#666' }}>
-                  تاريخ الطباعة: {new Date().toLocaleDateString('ar')}
-                </div>
-              </div>
-
-              <div className="print-order-info">
-                <div className="info-group">
-                  <strong>معلومات العميل</strong>
-                  <p><strong>الاسم:</strong> {orderItem.customer?.name}</p>
-                  <p><strong>الهاتف:</strong> {orderItem.customer?.phone || "---"}</p>
-                  <p><strong>البريد:</strong> {orderItem.customer?.email || "---"}</p>
-                </div>
-                <div className="info-group">
-                  <strong>معلومات الطلبية</strong>
-                  <p><strong>الحالة:</strong> {orderItem.status === "Open" ? "مفتوحة" : "مكتملة"}</p>
-                  {orderItem.description && (
-                    <p><strong>الوصف:</strong> {orderItem.description}</p>
-                  )}
-                  <p><strong>تاريخ الإنشاء:</strong> {new Date(orderItem.createdAt).toLocaleDateString("ar")}</p>
-                </div>
-              </div>
-
-              <div className="print-items-table">
-                <h3 style={{ marginBottom: '10px' }}>قائمة الأصناف</h3>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>نوع الحجر</th>
-                      <th>الطول</th>
-                      <th>العرض</th>
-                      <th>السمك</th>
-                      <th>الوحدة</th>
-                      <th>الكمية المطلوبة</th>
-                      <th>الكمية المتبقية</th>
-                      <th>تفاصيل</th>
-                      <th>الحالة</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orderItem.items.map((item: any, index: number) => (
-                      <tr key={item._id}>
-                        <td>{index + 1}</td>
-                        <td>{item.stoneType}</td>
-                        <td>{item.length || "---"}</td>
-                        <td>{item.width || "---"}</td>
-                        <td>{item.thickness || "---"}</td>
-                        <td>
-                          {item.unit === "pieces" && "قطع"}
-                          {item.unit === "linearMeter" && "متر طولي"}
-                          {item.unit === "area" && "مساحة"}
-                        </td>
-                        <td>{item.requiredQty}</td>
-                        <td>{item.remainingQty}</td>
-                        <td>{item.details || "---"}</td>
-                        <td>
-                          {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="print-summary">
-                <h3 style={{ marginBottom: '10px' }}>ملخص الطلبية</h3>
-                <div className="summary-grid">
-                  <div className="summary-item">
-                    <div className="label">إجمالي الأصناف</div>
-                    <div className="value">{orderItem.items.length}</div>
-                  </div>
-                  <div className="summary-item">
-                    <div className="label">الأصناف المكتملة</div>
-                    <div className="value" style={{ color: '#28a745' }}>
-                      {orderItem.items.filter((item: any) => item.remainingQty === 0).length}
-                    </div>
-                  </div>
-                  <div className="summary-item">
-                    <div className="label">الأصناف قيد التنفيذ</div>
-                    <div className="value" style={{ color: '#ffc107' }}>
-                      {orderItem.items.filter((item: any) => item.remainingQty > 0).length}
-                    </div>
-                  </div>
-                  <div className="summary-item">
-                    <div className="label">إجمالي الكمية المطلوبة</div>
-                    <div className="value">
-                      {orderItem.items.reduce((sum: number, item: any) => sum + (item.requiredQty || 0), 0)}
-                    </div>
-                  </div>
-                  <div className="summary-item">
-                    <div className="label">إجمالي المنجز</div>
-                    <div className="value" style={{ color: '#28a745' }}>
-                      {orderItem.items.reduce((sum: number, item: any) => sum + (item.requiredQty - item.remainingQty || 0), 0)}
-                    </div>
-                  </div>
-                  <div className="summary-item">
-                    <div className="label">إجمالي الناقص</div>
-                    <div className="value" style={{ color: '#dc3545' }}>
-                      {orderItem.items.reduce((sum: number, item: any) => sum + (item.remainingQty || 0), 0)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="print-footer">
-                <p>تم الطباعة من نظام إدارة الطلبيات</p>
-                <p style={{ marginTop: '5px', fontSize: '10px' }}>
-                  {new Date().toLocaleString('ar')}
-                </p>
+      {/* حاوية طباعة الطلبية الحالية */}
+      <div className="print-order-container">
+        <div className="print-order-item">
+          <div className="print-page">
+            <div className="print-header">
+              <h1>تفاصيل الطلبية</h1>
+              <div className="print-order-number">رقم الطلبية: #{order.orderNumber}</div>
+              <div style={{ marginTop: '5px', fontSize: '14px', color: '#666' }}>
+                تاريخ الطباعة: {new Date().toLocaleDateString('ar')}
               </div>
             </div>
+
+            <div className="print-order-info">
+              <div className="info-group">
+                <strong>معلومات العميل</strong>
+                <p><strong>الاسم:</strong> {order.customer?.name}</p>
+                <p><strong>الهاتف:</strong> {order.customer?.phone || "---"}</p>
+                <p><strong>البريد:</strong> {order.customer?.email || "---"}</p>
+              </div>
+              <div className="info-group">
+                <strong>معلومات الطلبية</strong>
+                <p><strong>الحالة:</strong> {order.status === "Open" ? "مفتوحة" : "مكتملة"}</p>
+                {order.description && (
+                  <p><strong>الوصف:</strong> {order.description}</p>
+                )}
+                <p><strong>تاريخ الإنشاء:</strong> {new Date(order.createdAt).toLocaleDateString("ar")}</p>
+              </div>
+            </div>
+
+            <div className="print-items-table">
+              <h3 style={{ marginBottom: '10px' }}>قائمة الأصناف</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>نوع الحجر</th>
+                    <th>الطول</th>
+                    <th>العرض</th>
+                    <th>السمك</th>
+                    <th>الوحدة</th>
+                    <th>الكمية المطلوبة</th>
+                    <th>الكمية المتبقية</th>
+                    <th>تفاصيل</th>
+                    <th>الحالة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {order.items.map((item: any, index: number) => (
+                    <tr key={item._id}>
+                      <td>{index + 1}</td>
+                      <td>{item.stoneType}</td>
+                      <td>{item.length || "---"}</td>
+                      <td>{item.width || "---"}</td>
+                      <td>{item.thickness || "---"}</td>
+                      <td>
+                        {item.unit === "pieces" && "قطع"}
+                        {item.unit === "linearMeter" && "متر طولي"}
+                        {item.unit === "area" && "مساحة"}
+                      </td>
+                      <td>{item.requiredQty}</td>
+                      <td>{item.remainingQty}</td>
+                      <td>{item.details || "---"}</td>
+                      <td>
+                        {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="print-summary">
+              <h3 style={{ marginBottom: '10px' }}>ملخص الطلبية</h3>
+              <div className="summary-grid">
+                <div className="summary-item">
+                  <div className="label">إجمالي الأصناف</div>
+                  <div className="value">{order.items.length}</div>
+                </div>
+                <div className="summary-item">
+                  <div className="label">الأصناف المكتملة</div>
+                  <div className="value" style={{ color: '#28a745' }}>
+                    {order.items.filter((item: any) => item.remainingQty === 0).length}
+                  </div>
+                </div>
+                <div className="summary-item">
+                  <div className="label">الأصناف قيد التنفيذ</div>
+                  <div className="value" style={{ color: '#ffc107' }}>
+                    {order.items.filter((item: any) => item.remainingQty > 0).length}
+                  </div>
+                </div>
+                <div className="summary-item">
+                  <div className="label">إجمالي الكمية المطلوبة</div>
+                  <div className="value">
+                    {order.items.reduce((sum: number, item: any) => sum + (item.requiredQty || 0), 0)}
+                  </div>
+                </div>
+                <div className="summary-item">
+                  <div className="label">إجمالي المنجز</div>
+                  <div className="value" style={{ color: '#28a745' }}>
+                    {order.items.reduce((sum: number, item: any) => sum + (item.requiredQty - item.remainingQty || 0), 0)}
+                  </div>
+                </div>
+                <div className="summary-item">
+                  <div className="label">إجمالي الناقص</div>
+                  <div className="value" style={{ color: '#dc3545' }}>
+                    {order.items.reduce((sum: number, item: any) => sum + (item.remainingQty || 0), 0)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="print-footer">
+              <p>تم الطباعة من نظام إدارة الطلبيات</p>
+              <p style={{ marginTop: '5px', fontSize: '10px' }}>
+                {new Date().toLocaleString('ar')}
+              </p>
+            </div>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
