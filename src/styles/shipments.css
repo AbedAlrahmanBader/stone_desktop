@@ -1,126 +1,150 @@
-/* إضافة إلى shipment.css */
-
-/* ===== أزرار الطباعة ===== */
-
-/* زر الطباعة الفردية */
-.btn-print-individual {
-    background: #1976d2 !important;
-    color: white !important;
-    border: none !important;
-    padding: 6px 12px !important;
-    border-radius: 4px !important;
-    cursor: pointer !important;
-    font-size: 12px !important;
-    transition: background 0.2s !important;
+.shipments {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
 }
 
-.btn-print-individual:hover {
-    background: #1559a8 !important;
+.shipments table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-/* زر إضافة للطباعة الجماعية */
-.btn-add-batch {
-    background: #4caf50 !important;
-    color: white !important;
-    border: none !important;
-    padding: 6px 12px !important;
-    border-radius: 4px !important;
-    cursor: pointer !important;
-    font-size: 12px !important;
-    transition: background 0.2s !important;
+.shipments th {
+    background: #1b5e20;
+    color: white;
+    padding: 15px;
 }
 
-.btn-add-batch:hover {
-    background: #388e3c !important;
+.shipments td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
 }
 
-/* زر إزالة من الطباعة الجماعية */
-.btn-remove-batch {
-    background: #ff9800 !important;
-    color: white !important;
-    border: none !important;
-    padding: 6px 12px !important;
-    border-radius: 4px !important;
-    cursor: pointer !important;
-    font-size: 12px !important;
-    transition: background 0.2s !important;
+.shipments button {
+    background: #1b5e20;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
-.btn-remove-batch:hover {
-    background: #e68900 !important;
-}
-
-/* ===== شريط التحكم بالطباعة الجماعية ===== */
-.batch-controls {
+/* ---------- شريط الفلاتر ---------- */
+.shipments-filters {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #e8f5e9;
-    border: 1px solid #a5d6a7;
-    border-radius: 8px;
-    padding: 10px 16px;
-    margin-bottom: 16px;
     flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+    background: #f4f7f4;
+    border: 1px solid #dfe7df;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
 }
 
-.batch-controls span {
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-field label {
+    font-size: 12.5px;
     font-weight: bold;
-    color: #2e7d32;
-    font-size: 14px;
+    color: #33513a;
 }
 
-.btn-print-batch {
+.filter-field input,
+.filter-field select {
+    padding: 9px 12px;
+    border: 1px solid #cdd8cd;
+    border-radius: 7px;
+    font-size: 13.5px;
+    color: #222;
+    background: white;
+    min-width: 150px;
+}
+
+.filter-field input:focus,
+.filter-field select:focus {
+    outline: none;
+    border-color: #1b5e20;
+    box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.12);
+}
+
+.btn-reset-filters {
+    background: white;
+    color: #b71c1c;
+    border: 1px solid #b71c1c;
+    padding: 9px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: bold;
+    height: 38px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-reset-filters:hover {
+    background: #b71c1c;
+    color: white;
+}
+
+.btn-print-all {
     background: #1b5e20 !important;
     color: white !important;
     border: none !important;
-    padding: 8px 18px !important;
-    border-radius: 6px !important;
+    padding: 9px 18px !important;
+    border-radius: 7px !important;
     cursor: pointer !important;
-    font-size: 13px !important;
+    font-size: 13.5px !important;
     font-weight: bold !important;
+    height: 38px !important;
     transition: background 0.2s !important;
 }
 
-.btn-print-batch:hover {
+.btn-print-all:hover {
     background: #0d3b12 !important;
 }
 
-.btn-clear-batch {
-    background: #dc3545 !important;
-    color: white !important;
-    border: none !important;
-    padding: 8px 18px !important;
-    border-radius: 6px !important;
-    cursor: pointer !important;
-    font-size: 13px !important;
-    font-weight: bold !important;
-    transition: background 0.2s !important;
+.filters-summary {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 10px;
 }
 
-.btn-clear-batch:hover {
-    background: #c82333 !important;
+.no-results {
+    padding: 24px !important;
+    color: #888;
+    font-style: italic;
 }
 
-/* ===== حاوية الطباعة الفردية ===== */
-.individual-print-container {
-    margin-top: 30px;
-    padding: 20px;
-    border: 2px solid #1976d2;
-    border-radius: 8px;
-    background: #f8f9fa;
+/* استجابة الشاشات الصغيرة */
+@media (max-width: 768px) {
+    .shipments-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-field input,
+    .filter-field select {
+        min-width: 0;
+    }
+
+    .btn-reset-filters {
+        width: 100%;
+    }
 }
 
-/* ===== تنسيق الطباعة الجماعية ===== */
+/* ===== إصلاح الطباعة الجماعية ===== */
 .print-batch-container {
     display: block;
     width: 100%;
     max-width: 210mm;
-    margin: 30px auto 0;
+    margin: 0 auto;
     padding: 0;
     background: white;
-    border: 2px solid #4caf50;
-    border-radius: 8px;
-    overflow: hidden;
 }
 
 .print-batch-item {
@@ -129,15 +153,13 @@
     margin: 0 auto;
     padding: 0;
     page-break-after: always;
-    border-bottom: 2px dashed #ccc;
 }
 
 .print-batch-item:last-child {
     page-break-after: auto;
-    border-bottom: none;
 }
 
-/* ===== تعديلات الطباعة ===== */
+/* ===== تنسيق الطباعة ===== */
 @media print {
     /* إخفاء كل شيء خارج محتوى الطباعة */
     body * {
@@ -162,8 +184,6 @@
         display: block !important;
         background: white !important;
         z-index: 9999 !important;
-        border: none !important;
-        border-radius: 0 !important;
     }
     
     .print-batch-item {
@@ -173,25 +193,10 @@
         page-break-after: always !important;
         display: block !important;
         background: white !important;
-        border: none !important;
     }
     
     .print-batch-item:last-child {
         page-break-after: auto !important;
-    }
-    
-    /* إخفاء أزرار الطباعة في المحتوى */
-    .print-batch-item .print-button {
-        display: none !important;
-    }
-    
-    /* إخفاء قوائم اختيار الوحدة وإظهار النص الثابت */
-    .unit-select {
-        display: none !important;
-    }
-    
-    .unit-print-label {
-        display: inline !important;
     }
     
     /* تنسيق صفحة الطباعة داخل الباتش */
@@ -218,38 +223,24 @@
         background: white !important;
     }
     
-    /* إخفاء عناصر التحكم في الطباعة الجماعية */
-    .batch-controls {
+    /* إخفاء زر الطباعة */
+    .print-button {
+        display: none !important;
+    }
+
+    /* إصلاح تموضع الصفحة */
+    .shipments {
+        padding: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+    }
+
+    /* إخفاء كل شيء في الصفحة الرئيسية أثناء الطباعة */
+    .shipments.printing-mode > *:not(.print-batch-container) {
         display: none !important;
     }
     
-    .individual-print-container {
-        display: none !important;
-    }
-}
-
-/* ===== استجابة الشاشات الصغيرة ===== */
-@media (max-width: 768px) {
-    .shipments-filters {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .filter-field input,
-    .filter-field select {
-        min-width: 0;
-    }
-
-    .btn-reset-filters {
-        width: 100%;
-    }
-    
-    .batch-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .batch-controls button {
-        width: 100%;
+    .shipments.printing-mode .print-batch-container {
+        display: block !important;
     }
 }
