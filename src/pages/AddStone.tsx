@@ -82,6 +82,7 @@ function calcItemPreview(item: StoneItemForm) {
 function AddStone() {
   const [barcode, setBarcode] = useState("");
   const [items, setItems] = useState<StoneItemForm[]>([emptyItem()]);
+  const [isAutoBarcode, setIsAutoBarcode] = useState(true);
 
   // --- عميل وطلبية ---
   const [customers, setCustomers] = useState<CustomerOption[]>([]);
@@ -93,6 +94,44 @@ function AddStone() {
   // --- أصناف الطلبية المختارة (لعرضها كقائمة اختيار لنوع الحجر) ---
   const [orderItems, setOrderItems] = useState<OrderItemOption[]>([]);
   const [loadingOrderItems, setLoadingOrderItems] = useState(false);
+
+  // دالة لجلب آخر باركود مستخدم وإنشاء باركود جديد
+  const generateNextBarcode = async () => {
+    try {
+      // جلب جميع المشاتيح وترتيبها تنازليًا حسب الباركود
+      const response = await api.get("/stones");
+      const stones = response.data;
+      
+      if (stones.length === 0) {
+        // إذا لم يوجد أي مشتاح، نبدأ من 10006
+        setBarcode("10006");
+        return;
+      }
+
+      // البحث عن أعلى باركود رقمي
+      const numericBarcodes = stones
+        .map((s: any) => Number(s.barcode))
+        .filter((num: number) => !isNaN(num));
+      
+      if (numericBarcodes.length === 0) {
+        setBarcode("10006");
+        return;
+      }
+
+      const maxBarcode = Math.max(...numericBarcodes);
+      const nextBarcode = maxBarcode + 1;
+      setBarcode(String(nextBarcode));
+    } catch (error) {
+      console.error("Error generating barcode:", error);
+      // في حالة الخطأ، نستخدم الباركود الافتراضي
+      setBarcode("10006");
+    }
+  };
+
+  // توليد باركود تلقائي عند تحميل الصفحة
+  useEffect(() => {
+    generateNextBarcode();
+  }, []);
 
   // تحميل لستة العملاء عند فتح الصفحة
   useEffect(() => {
@@ -206,8 +245,9 @@ function AddStone() {
   const totalArea = previews.reduce((sum, p) => sum + p.area, 0);
 
   const saveStone = async () => {
+    // الباركود مطلوب ولكن سيتم توليده تلقائيًا إذا كان فارغًا
     if (!barcode) {
-      alert("الرجاء إدخال الباركود");
+      alert("الرجاء إدخال الباركود أو استخدام الباركود التلقائي");
       return;
     }
 
@@ -232,9 +272,8 @@ function AddStone() {
     }
 
     try {
-      await api.post("/stones", {
-        barcode,
-        orderNumber: orderNumber || undefined,
+      // إرسال الباركود إذا كان موجودًا، وإلا سيتم توليده تلقائيًا في الخادم
+      const payload: any = {
         items: items.map((item) => ({
           stoneType: item.stoneType,
           length: Number(item.length) || 0,
@@ -244,16 +283,31 @@ function AddStone() {
           linearMeter:
             item.linearMeter !== "" ? Number(item.linearMeter) : undefined,
         })),
-      });
+      };
+
+      // إضافة الباركود إذا كان موجودًا
+      if (barcode) {
+        payload.barcode = barcode;
+      }
+
+      // إضافة رقم الطلبية إذا كان موجودًا
+      if (orderNumber) {
+        payload.orderNumber = orderNumber;
+      }
+
+      await api.post("/stones", payload);
 
       alert("تم إضافة المشتاح بنجاح");
 
-      setBarcode("");
+      // إعادة تعيين النموذج
       setSelectedCustomerId("");
       setOrderNumber("");
       setCustomerOrders([]);
       setOrderItems([]);
       setItems([emptyItem()]);
+      
+      // توليد باركود جديد للمشتاح التالي
+      await generateNextBarcode();
     } catch (error: any) {
       console.log(error.response?.data || error);
       alert(error.response?.data?.message || "حدث خطأ أثناء الإضافة");
@@ -264,11 +318,33 @@ function AddStone() {
     <div className="add-stone">
       <h1>إضافة مشتاح جديد</h1>
 
-      <input
-        placeholder="الباركود"
-        value={barcode}
-        onChange={(e) => setBarcode(e.target.value)}
-      />
+      <div className="barcode-field">
+        <input
+          placeholder="الباركود (تلقائي)"
+          value={barcode}
+          onChange={(e) => {
+            setBarcode(e.target.value);
+            setIsAutoBarcode(false);
+          }}
+          style={{ 
+            backgroundColor: isAutoBarcode ? '#f0f0f0' : 'white',
+            direction: 'ltr'
+          }}
+        />
+        {isAutoBarcode && (
+          <span className="auto-badge">تلقائي</span>
+        )}
+        <button 
+          type="button" 
+          onClick={() => {
+            generateNextBarcode();
+            setIsAutoBarcode(true);
+          }}
+          className="generate-barcode-btn"
+        >
+          توليد جديد
+        </button>
+      </div>
 
       {/* اختيار العميل */}
       <select
