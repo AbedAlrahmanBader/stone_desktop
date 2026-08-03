@@ -69,6 +69,16 @@ function OrderDetails() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderNumber]);
 
+  // تنظيف data-print-mode لو المستخدم لغى الطباعة بدون ما يكمل
+  useEffect(() => {
+    const clearPrintMode = () => document.body.removeAttribute("data-print-mode");
+    window.addEventListener("afterprint", clearPrintMode);
+    return () => {
+      window.removeEventListener("afterprint", clearPrintMode);
+      clearPrintMode();
+    };
+  }, []);
+
   const startEditItem = (item: any) => {
     setEditingItemId(item._id);
     setEditItem({
@@ -128,21 +138,12 @@ function OrderDetails() {
       alert("لا توجد طلبية للطباعة");
       return;
     }
+    // إلغاء أي وضع تعديل مفتوح، عشان ما تطبع input بدل نص عادي
+    if (editingItemId) cancelEditItem();
 
-    const printContainer = document.querySelector('.print-order-container1');
-    if (printContainer) {
-      printContainer.classList.add('active1');
-    }
-    
-    setTimeout(() => {
-      window.print();
-    }, 100);
-    
-    setTimeout(() => {
-      if (printContainer) {
-        printContainer.classList.remove('active1');
-      }
-    }, 2000);
+    document.body.setAttribute("data-print-mode", "order");
+    window.print();
+    // afterprint listener فوق رح يشيل الـ attribute تلقائياً
   };
 
   if (loading) {
@@ -171,8 +172,8 @@ function OrderDetails() {
           <span className="order-number-badge1">#{order.orderNumber}</span>
         </div>
         <div className="header-actions1">
-          <button 
-            className="btn-print-order1" 
+          <button
+            className="btn-print-order1"
             onClick={handlePrintCurrentOrder}
           >
             📄 طباعة الطلبية
@@ -432,113 +433,6 @@ function OrderDetails() {
           <div className="stat-item-box1">
             <span className="stat-label-text1">إجمالي الناقص</span>
             <span className="stat-value-number1 warning1">{totalRemaining}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* حاوية طباعة الطلبية الحالية */}
-      <div className="print-order-container1">
-        <div className="print-order-item1">
-          <div className="print-page1">
-            <div className="print-header1">
-              <h1>تفاصيل الطلبية</h1>
-              <div className="print-order-number1">رقم الطلبية: #{order.orderNumber}</div>
-            </div>
-
-            <div className="print-order-info1">
-              <div className="info-group1">
-                <p><strong>الاسم:</strong> {order.customer?.name}</p>
-                <p><strong>الهاتف:</strong> {order.customer?.phone || "---"}</p>
-              </div>
-              <div className="info-group1">
-                <p><strong>الحالة:</strong> {order.status === "Open" ? "مفتوحة" : "مكتملة"}</p>
-                {order.description && (
-                  <p><strong>الوصف:</strong> {order.description}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="print-items-table1">
-              <h3 style={{ marginBottom: '10px' }}>قائمة الأصناف</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>نوع الحجر</th>
-                    <th>الطول</th>
-                    <th>العرض</th>
-                    <th>السمك</th>
-                    <th>الوحدة</th>
-                    <th>الكمية المطلوبة</th>
-                    <th>الكمية المتبقية</th>
-                    <th>تفاصيل</th>
-                    <th>الحالة</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {order.items.map((item: any, index: number) => (
-                    <tr key={item._id}>
-                      <td>{index + 1}</td>
-                      <td>{item.stoneType}</td>
-                      <td>{item.length || "---"}</td>
-                      <td>{item.width || "---"}</td>
-                      <td>{item.thickness || "---"}</td>
-                      <td>
-                        {item.unit === "pieces" && "قطع"}
-                        {item.unit === "linearMeter" && "متر طولي"}
-                        {item.unit === "area" && "مساحة"}
-                      </td>
-                      <td>{item.requiredQty}</td>
-                      <td>{item.remainingQty}</td>
-                      <td>{item.details || "---"}</td>
-                      <td>
-                        {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="print-summary1">
-              <h3 style={{ marginBottom: '10px' }}>ملخص الطلبية</h3>
-              <div className="summary-grid1">
-                <div className="summary-item1">
-                  <div className="label1">إجمالي الأصناف</div>
-                  <div className="value1">{order.items.length}</div>
-                </div>
-                <div className="summary-item1">
-                  <div className="label1">الأصناف المكتملة</div>
-                  <div className="value1" style={{ color: '#28a745' }}>
-                    {order.items.filter((item: any) => item.remainingQty === 0).length}
-                  </div>
-                </div>
-                <div className="summary-item1">
-                  <div className="label1">الأصناف قيد التنفيذ</div>
-                  <div className="value1" style={{ color: '#ffc107' }}>
-                    {order.items.filter((item: any) => item.remainingQty > 0).length}
-                  </div>
-                </div>
-                <div className="summary-item1">
-                  <div className="label1">إجمالي الكمية المطلوبة</div>
-                  <div className="value1">
-                    {order.items.reduce((sum: number, item: any) => sum + (item.requiredQty || 0), 0)}
-                  </div>
-                </div>
-                <div className="summary-item1">
-                  <div className="label1">إجمالي المنجز</div>
-                  <div className="value1" style={{ color: '#28a745' }}>
-                    {order.items.reduce((sum: number, item: any) => sum + (item.requiredQty - item.remainingQty || 0), 0)}
-                  </div>
-                </div>
-                <div className="summary-item1">
-                  <div className="label1">إجمالي الناقص</div>
-                  <div className="value1" style={{ color: '#dc3545' }}>
-                    {order.items.reduce((sum: number, item: any) => sum + (item.remainingQty || 0), 0)}
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
