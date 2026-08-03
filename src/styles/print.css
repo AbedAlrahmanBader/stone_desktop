@@ -396,35 +396,32 @@
     font-style: italic;
 }
 
-/* ===== وضع الطباعة الفردية (إرسالية واحدة فقط) ===== */
+/* ======================================== */
+/* ===== MEDIA PRINT - الوضع العام ====== */
+/* ======================================== */
 @media print {
-    /* إخفاء كل الصفحة */
-    body * {
-        visibility: hidden;
-    }
-
-    /* إظهار ورقة الإرسالية فقط */
-    .print-page,
-    .print-page * {
-        visibility: visible;
-    }
-
-    /* تثبيت الورقة في أعلى الصفحة فقط إذا كانت الطباعة فردية */
-    .print-page {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 210mm;
-        height: 297mm;
+    /* إعدادات الصفحة الأساسية */
+    @page {
+        size: A4;
         margin: 0;
-        padding: 10mm;
-        box-shadow: none;
-        background: white;
     }
 
-    /* إخفاء زر الطباعة */
+    .print-container {
+        background: #fff;
+        padding: 0;
+    }
+
     .print-button {
         display: none !important;
+    }
+
+    /* إخفاء قوائم اختيار الوحدة وإظهار النص الثابت بدلاً منها */
+    .unit-select {
+        display: none !important;
+    }
+
+    .unit-print-label {
+        display: inline !important;
     }
 
     /* إخفاء أي تأثيرات تحرير عند الطباعة */
@@ -441,27 +438,46 @@
         background-color: transparent !important;
         outline: none !important;
     }
+}
 
-    /* إخفاء قوائم اختيار الوحدة وإظهار النص الثابت بدلاً منها */
-    .unit-select {
-        display: none !important;
-    }
-
-    .unit-print-label {
-        display: inline !important;
-    }
-
-    /* إعداد حجم الورقة */
-    @page {
-        size: A4;
+/* ======================================== */
+/* ===== الطباعة الفردية (إرسالية واحدة) ===== */
+/* ======================================== */
+@media print {
+    /*只有当页面中只有一个 .print-page 且不在 .print-batch-container 内时才应用 */
+    body:not(.printing-batch) .print-page:not(.print-batch-container .print-page) {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 210mm;
+        height: 297mm;
         margin: 0;
+        padding: 10mm;
+        box-shadow: none;
+        background: white;
+    }
+
+    /* إخفاء كل محتوى الصفحة ما عدا ورقة الطباعة */
+    body:not(.printing-batch) * {
+        visibility: hidden;
+    }
+
+    body:not(.printing-batch) .print-page,
+    body:not(.printing-batch) .print-page * {
+        visibility: visible;
     }
 }
 
-/* ===== وضع الطباعة الجماعية (أكثر من إرسالية مع بعض) ===== */
+/* ======================================== */
+/* ===== الطباعة الجماعية (دفعة إرساليات) ===== */
+/* ======================================== */
 @media print {
-    /* تعطيل التموضع المطلق يلي مصمم لإرسالية واحدة فقط،
-       عشان كل إرسالية ترجع لتدفقها الطبيعي وينفصلوا عن بعض بصفحات */
+    /* عند وجود batch-container، نعرض كل المحتوى */
+    .print-batch-container,
+    .print-batch-container * {
+        visibility: visible !important;
+    }
+
     .print-batch-container .print-page {
         position: static !important;
         top: auto !important;
@@ -472,7 +488,8 @@
         margin: 0 auto;
         padding: 10mm;
         page-break-inside: avoid;
-        visibility: visible !important;
+        box-shadow: none;
+        background: white;
     }
 
     .print-batch-container .print-container {
@@ -487,13 +504,12 @@
         page-break-after: always;
     }
 
-    /* آخر إرسالية بالدفعة ما لازم تعمل فصل صفحة بعدها */
     .print-batch-item:last-child {
         page-break-after: auto !important;
     }
 
-    /* عند الطباعة الجماعية، نلغي visibility: hidden على body */
-    .print-batch-container * {
-        visibility: visible !important;
+    /* إلغاء إخفاء أي عناصر خارج الطباعة */
+    .print-batch-container ~ * {
+        display: none !important;
     }
 }
