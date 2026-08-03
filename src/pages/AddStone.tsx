@@ -331,19 +331,8 @@ function AddStone() {
             direction: 'ltr'
           }}
         />
-        {isAutoBarcode && (
-          <span className="auto-badge">تلقائي</span>
-        )}
-        <button 
-          type="button" 
-          onClick={() => {
-            generateNextBarcode();
-            setIsAutoBarcode(true);
-          }}
-          className="generate-barcode-btn"
-        >
-          توليد جديد
-        </button>
+      
+    
       </div>
 
       {/* اختيار العميل */}
