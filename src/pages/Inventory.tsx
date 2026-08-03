@@ -3,7 +3,6 @@ import api from "../api/axios";
 import "../styles/inventory.css";
 import { QRCodeSVG } from "qrcode.react";
 import JsBarcode from "jsbarcode";
-import AAA from "../assets/AAA.jpg";
 
 
 interface StoneItem {
@@ -161,12 +160,6 @@ const printQRAndBarcode = (
         `;
 
         // الحصول على تاريخ اليوم
-        const today = new Date();
-        const dateStr = today.toLocaleDateString('ar-EG', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
 
  printWindow.document.write(`
             <!DOCTYPE html>
