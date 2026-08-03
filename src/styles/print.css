@@ -110,7 +110,7 @@
 .header-main {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: flex-end;
 }
 
 .company-name-block {
