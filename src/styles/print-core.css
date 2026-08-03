@@ -1,0 +1,37 @@
+/* ============================================
+   print-core.css
+   القاعدة الوحيدة في التطبيق المسؤولة عن إخفاء
+   كل شيء عدا منطقة الطباعة المطلوبة.
+   يجب استيراد هذا الملف مرة واحدة فقط في نقطة
+   دخول التطبيق (main.tsx أو App.tsx).
+   ============================================ */
+
+@media print {
+  /* افتراضياً: إذا مافي data-print-mode ما في أي إخفاء */
+  body[data-print-mode] * {
+    visibility: hidden !important;
+  }
+
+  /* طباعة تفاصيل الطلبية (صفحة كاملة، بدون container خاص) */
+  body[data-print-mode="order"] .order-details-container1,
+  body[data-print-mode="order"] .order-details-container1 * {
+    visibility: visible !important;
+  }
+
+  /* طباعة إرسالية واحدة */
+  body[data-print-mode="shipment-single"] .print-page,
+  body[data-print-mode="shipment-single"] .print-page * {
+    visibility: visible !important;
+  }
+
+  /* طباعة دفعة إرساليات */
+  body[data-print-mode="shipment-batch"] .print-batch-container,
+  body[data-print-mode="shipment-batch"] .print-batch-container * {
+    visibility: visible !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
