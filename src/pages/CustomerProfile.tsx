@@ -1,10 +1,9 @@
 // CustomerProfile.tsx - الجزء المتعلق بالطلب
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import api from "../api/axios";
 import ShipmentPrint from "../components/ShipmentPrint";
-import OrderPrint from "../components/OrderPrint";
 
 import "../styles/customerProfile.css";
 
@@ -53,24 +52,6 @@ function CustomerProfile() {
     items: []
   });
   const [editLoading, setEditLoading] = useState(false);
-
-  // ------- فلاتر الطلبيات -------
-  const [filterOrderStatus, setFilterOrderStatus] = useState("All");
-  const [searchOrder, setSearchOrder] = useState("");
-
-  // ------- فلاتر الإرساليات -------
-  const [filterShipmentStatus, setFilterShipmentStatus] = useState("All");
-  const [filterShipmentDateFrom, setFilterShipmentDateFrom] = useState("");
-  const [filterShipmentDateTo, setFilterShipmentDateTo] = useState("");
-
-  // ------- تحديد وطباعة عدة طلبيات مع بعض -------
-  const [selectedOrderIds, setSelectedOrderIds] = useState<Set<string>>(new Set());
-  const [orderPrintBatch, setOrderPrintBatch] = useState<any[]>([]);
-
-  // ------- تحديد وطباعة عدة إرساليات مع بعض -------
-  const [selectedShipmentIds, setSelectedShipmentIds] = useState<Set<string>>(new Set());
-  const [shipmentPrintBatch, setShipmentPrintBatch] = useState<any[]>([]);
-  const [preparingShipmentPrint, setPreparingShipmentPrint] = useState(false);
 
   const loadCustomer = async () => {
     try {
@@ -270,205 +251,6 @@ function CustomerProfile() {
     }
   };
 
-  // ================= فلاتر الطلبيات =================
-
-  const filteredOrders = useMemo(() => {
-    const list = data?.orders || [];
-
-    return list.filter((order: any) => {
-      const matchStatus =
-        filterOrderStatus === "All" || order.status === filterOrderStatus;
-
-      const search = searchOrder.trim().toLowerCase();
-      const matchSearch =
-        !search ||
-        order.orderNumber?.toLowerCase().includes(search) ||
-        order.description?.toLowerCase().includes(search);
-
-      return matchStatus && matchSearch;
-    });
-  }, [data?.orders, filterOrderStatus, searchOrder]);
-
-  const resetOrderFilters = () => {
-    setFilterOrderStatus("All");
-    setSearchOrder("");
-  };
-
-  // ================= فلاتر الإرساليات =================
-
-  const availableShipmentStatuses = useMemo(() => {
-    const list = data?.shipments || [];
-    const set = new Set(list.map((s: any) => s.status).filter(Boolean));
-    return Array.from(set) as string[];
-  }, [data?.shipments]);
-
-  const filteredShipments = useMemo(() => {
-    const list = data?.shipments || [];
-
-    return list.filter((shipment: any) => {
-      const matchStatus =
-        filterShipmentStatus === "All" || shipment.status === filterShipmentStatus;
-
-      const shipmentDate = shipment.createdAt ? new Date(shipment.createdAt) : null;
-
-      let matchFrom = true;
-      if (filterShipmentDateFrom && shipmentDate) {
-        const fromDate = new Date(filterShipmentDateFrom);
-        fromDate.setHours(0, 0, 0, 0);
-        matchFrom = shipmentDate >= fromDate;
-      }
-
-      let matchTo = true;
-      if (filterShipmentDateTo && shipmentDate) {
-        const toDate = new Date(filterShipmentDateTo);
-        toDate.setHours(23, 59, 59, 999);
-        matchTo = shipmentDate <= toDate;
-      }
-
-      return matchStatus && matchFrom && matchTo;
-    });
-  }, [data?.shipments, filterShipmentStatus, filterShipmentDateFrom, filterShipmentDateTo]);
-
-  const resetShipmentFilters = () => {
-    setFilterShipmentStatus("All");
-    setFilterShipmentDateFrom("");
-    setFilterShipmentDateTo("");
-  };
-
-  // ================= تحديد وطباعة عدة طلبيات =================
-
-  const toggleOrderSelection = (orderId: string) => {
-    setSelectedOrderIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(orderId)) next.delete(orderId);
-      else next.add(orderId);
-      return next;
-    });
-  };
-
-  const allFilteredOrdersSelected =
-    filteredOrders.length > 0 &&
-    filteredOrders.every((o: any) => selectedOrderIds.has(o._id));
-
-  const toggleSelectAllOrders = () => {
-    setSelectedOrderIds((prev) => {
-      const next = new Set(prev);
-      if (allFilteredOrdersSelected) {
-        filteredOrders.forEach((o: any) => next.delete(o._id));
-      } else {
-        filteredOrders.forEach((o: any) => next.add(o._id));
-      }
-      return next;
-    });
-  };
-
-  const printSelectedOrders = () => {
-    const selected = filteredOrders.filter((o: any) => selectedOrderIds.has(o._id));
-
-    if (selected.length === 0) {
-      alert("الرجاء اختيار طلبية واحدة على الأقل للطباعة");
-      return;
-    }
-
-    // إلغاء أي دفعة طباعة إرساليات نشطة تجنبًا للتعارض
-    setShipmentPrintBatch([]);
-    setOrderPrintBatch(selected);
-  };
-
-  useEffect(() => {
-    if (orderPrintBatch.length > 0) {
-      const timer = setTimeout(() => {
-        window.print();
-      }, 200);
-
-      const handleAfterPrint = () => {
-        setOrderPrintBatch([]);
-      };
-
-      window.addEventListener("afterprint", handleAfterPrint);
-
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener("afterprint", handleAfterPrint);
-      };
-    }
-  }, [orderPrintBatch]);
-
-  // ================= تحديد وطباعة عدة إرساليات =================
-
-  const toggleShipmentSelection = (shipmentId: string) => {
-    setSelectedShipmentIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(shipmentId)) next.delete(shipmentId);
-      else next.add(shipmentId);
-      return next;
-    });
-  };
-
-  const allFilteredShipmentsSelected =
-    filteredShipments.length > 0 &&
-    filteredShipments.every((s: any) => selectedShipmentIds.has(s._id));
-
-  const toggleSelectAllShipments = () => {
-    setSelectedShipmentIds((prev) => {
-      const next = new Set(prev);
-      if (allFilteredShipmentsSelected) {
-        filteredShipments.forEach((s: any) => next.delete(s._id));
-      } else {
-        filteredShipments.forEach((s: any) => next.add(s._id));
-      }
-      return next;
-    });
-  };
-
-  // بيانات data.shipments مختصرة (بدون تفاصيل المشاتيح الكاملة)،
-  // فلازم نجيب كل إرسالية بتفاصيلها الكاملة قبل الطباعة
-  const printSelectedShipments = async () => {
-    const ids = filteredShipments
-      .filter((s: any) => selectedShipmentIds.has(s._id))
-      .map((s: any) => s._id);
-
-    if (ids.length === 0) {
-      alert("الرجاء اختيار إرسالية واحدة على الأقل للطباعة");
-      return;
-    }
-
-    // إلغاء أي دفعة طباعة طلبيات نشطة تجنبًا للتعارض
-    setOrderPrintBatch([]);
-    setPreparingShipmentPrint(true);
-
-    try {
-      const results = await Promise.all(
-        ids.map((sid: string) => api.get(`/shipments/${sid}`))
-      );
-      setShipmentPrintBatch(results.map((r) => r.data));
-    } catch (error) {
-      console.error(error);
-      alert("تعذر تحميل بيانات بعض الإرساليات");
-    } finally {
-      setPreparingShipmentPrint(false);
-    }
-  };
-
-  useEffect(() => {
-    if (shipmentPrintBatch.length > 0) {
-      const timer = setTimeout(() => {
-        window.print();
-      }, 200);
-
-      const handleAfterPrint = () => {
-        setShipmentPrintBatch([]);
-      };
-
-      window.addEventListener("afterprint", handleAfterPrint);
-
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener("afterprint", handleAfterPrint);
-      };
-    }
-  }, [shipmentPrintBatch]);
-
   if (!data) {
     return <h2>جاري تحميل بيانات العميل...</h2>;
   }
@@ -497,65 +279,12 @@ function CustomerProfile() {
           </button>
         </div>
 
-        {/* فلاتر الطلبيات */}
-        <div className="cp-filters">
-          <div className="cp-filter-field">
-            <label>الحالة</label>
-            <select
-              value={filterOrderStatus}
-              onChange={(e) => setFilterOrderStatus(e.target.value)}
-            >
-              <option value="All">الكل</option>
-              <option value="Open">مفتوحة</option>
-              <option value="Completed">مكتملة</option>
-            </select>
-          </div>
-
-          <div className="cp-filter-field cp-filter-grow">
-            <label>بحث</label>
-            <input
-              type="text"
-              placeholder="رقم الطلبية أو الوصف..."
-              value={searchOrder}
-              onChange={(e) => setSearchOrder(e.target.value)}
-            />
-          </div>
-
-          <button
-            type="button"
-            className="cp-btn-reset"
-            onClick={resetOrderFilters}
-          >
-            ✕ إعادة تعيين
-          </button>
-
-          <button
-            type="button"
-            className="cp-btn-print"
-            onClick={printSelectedOrders}
-            disabled={selectedOrderIds.size === 0}
-          >
-            🖨 طباعة المحدد ({selectedOrderIds.size})
-          </button>
-        </div>
-
-        <div className="cp-filters-summary">
-          عرض {filteredOrders.length} من أصل {data.orders?.length || 0} طلبية
-        </div>
-
-        {filteredOrders.length === 0 ? (
-          <h3>لا يوجد طلبيات مطابقة</h3>
+        {data.orders?.length === 0 ? (
+          <h3>لا يوجد طلبيات لهذا العميل</h3>
         ) : (
           <table className="orders-table">
             <thead>
               <tr>
-                <th>
-                  <input
-                    type="checkbox"
-                    checked={allFilteredOrdersSelected}
-                    onChange={toggleSelectAllOrders}
-                  />
-                </th>
                 <th>رقم الطلبية</th>
                 <th>الوصف</th>
                 <th>عدد الأصناف</th>
@@ -565,15 +294,8 @@ function CustomerProfile() {
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map((order: any) => (
+              {data.orders?.map((order: any) => (
                 <tr key={order._id}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedOrderIds.has(order._id)}
-                      onChange={() => toggleOrderSelection(order._id)}
-                    />
-                  </td>
                   <td>{order.orderNumber}</td>
                   <td>{order.description || "---"}</td>
                   <td>{order.items?.length || 0}</td>
@@ -616,78 +338,12 @@ function CustomerProfile() {
 
       <h2>🚚 الإرساليات</h2>
 
-      {/* فلاتر الإرساليات */}
-      <div className="cp-filters">
-        <div className="cp-filter-field">
-          <label>الحالة</label>
-          <select
-            value={filterShipmentStatus}
-            onChange={(e) => setFilterShipmentStatus(e.target.value)}
-          >
-            <option value="All">الكل</option>
-            {availableShipmentStatuses.map((st) => (
-              <option key={st} value={st}>
-                {st}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="cp-filter-field">
-          <label>من تاريخ</label>
-          <input
-            type="date"
-            value={filterShipmentDateFrom}
-            onChange={(e) => setFilterShipmentDateFrom(e.target.value)}
-          />
-        </div>
-
-        <div className="cp-filter-field">
-          <label>إلى تاريخ</label>
-          <input
-            type="date"
-            value={filterShipmentDateTo}
-            onChange={(e) => setFilterShipmentDateTo(e.target.value)}
-          />
-        </div>
-
-        <button
-          type="button"
-          className="cp-btn-reset"
-          onClick={resetShipmentFilters}
-        >
-          ✕ إعادة تعيين
-        </button>
-
-        <button
-          type="button"
-          className="cp-btn-print"
-          onClick={printSelectedShipments}
-          disabled={selectedShipmentIds.size === 0 || preparingShipmentPrint}
-        >
-          {preparingShipmentPrint
-            ? "⏳ جاري التحضير..."
-            : `🖨 طباعة المحدد (${selectedShipmentIds.size})`}
-        </button>
-      </div>
-
-      <div className="cp-filters-summary">
-        عرض {filteredShipments.length} من أصل {data.shipments?.length || 0} إرسالية
-      </div>
-
-      {filteredShipments.length === 0 ? (
-        <h3>لا يوجد إرساليات مطابقة</h3>
+      {data.shipments?.length === 0 ? (
+        <h3>لا يوجد إرساليات لهذا العميل</h3>
       ) : (
         <table>
           <thead>
             <tr>
-              <th>
-                <input
-                  type="checkbox"
-                  checked={allFilteredShipmentsSelected}
-                  onChange={toggleSelectAllShipments}
-                />
-              </th>
               <th>التاريخ</th>
               <th>عدد القطع</th>
               <th>المساحة الإجمالية</th>
@@ -697,15 +353,8 @@ function CustomerProfile() {
           </thead>
 
           <tbody>
-            {filteredShipments.map((s: any) => (
+            {data.shipments.map((s: any) => (
               <tr key={s._id}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedShipmentIds.has(s._id)}
-                    onChange={() => toggleShipmentSelection(s._id)}
-                  />
-                </td>
                 <td>
                   {s.createdAt
                     ? new Date(s.createdAt).toLocaleDateString("ar")
@@ -1009,183 +658,6 @@ function CustomerProfile() {
           </div>
         </div>
       )}
-
-      {/* منطقة طباعة عدة طلبيات دفعة وحدة */}
-      {orderPrintBatch.length > 0 && (
-        <div className="order-batch-container">
-          {orderPrintBatch.map((order, index) => (
-            <div
-              key={order._id}
-              className="order-batch-item"
-              style={{
-                pageBreakAfter:
-                  index < orderPrintBatch.length - 1 ? "always" : "auto",
-              }}
-            >
-              <OrderPrint order={order} customerName={data.customer?.name} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* منطقة طباعة عدة إرساليات دفعة وحدة */}
-      {shipmentPrintBatch.length > 0 && (
-        <div className="print-batch-container">
-          {shipmentPrintBatch.map((shipment, index) => (
-            <div
-              key={shipment._id}
-              className="print-batch-item"
-              style={{
-                pageBreakAfter:
-                  index < shipmentPrintBatch.length - 1 ? "always" : "auto",
-              }}
-            >
-              <ShipmentPrint shipment={shipment} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* عند الطباعة الجماعية (طلبيات أو إرساليات)، إخفِ كل شي غير منطقة الطباعة النشطة */}
-      {orderPrintBatch.length > 0 && (
-        <style>{`
-          @media print {
-            .customer-profile > *:not(.order-batch-container) {
-              display: none !important;
-            }
-            .order-batch-container {
-              display: block !important;
-            }
-          }
-        `}</style>
-      )}
-
-      {shipmentPrintBatch.length > 0 && (
-        <style>{`
-          @media print {
-            .customer-profile > *:not(.print-batch-container) {
-              display: none !important;
-            }
-            .print-batch-container {
-              display: block !important;
-            }
-          }
-        `}</style>
-      )}
-
-      {/* أنماط الفلاتر والـ checkboxes (مستقلة عن customerProfile.css) */}
-      <style>{`
-        .cp-filters {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: flex-end;
-          gap: 16px;
-          background: #f4f7f4;
-          border: 1px solid #dfe7df;
-          border-radius: 10px;
-          padding: 16px 18px;
-          margin: 14px 0;
-        }
-
-        .cp-filter-field {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-
-        .cp-filter-grow {
-          flex: 1;
-          min-width: 200px;
-        }
-
-        .cp-filter-field label {
-          font-size: 12.5px;
-          font-weight: bold;
-          color: #33513a;
-        }
-
-        .cp-filter-field input,
-        .cp-filter-field select {
-          padding: 9px 12px;
-          border: 1px solid #cdd8cd;
-          border-radius: 7px;
-          font-size: 13.5px;
-          color: #222;
-          background: white;
-          min-width: 150px;
-        }
-
-        .cp-filter-field input:focus,
-        .cp-filter-field select:focus {
-          outline: none;
-          border-color: #1b5e20;
-          box-shadow: 0 0 0 3px rgba(27,94,32,0.12);
-        }
-
-        .cp-btn-reset {
-          background: white;
-          color: #b71c1c;
-          border: 1px solid #b71c1c;
-          padding: 9px 18px;
-          border-radius: 7px;
-          cursor: pointer;
-          font-size: 13.5px;
-          font-weight: bold;
-          height: 38px;
-          transition: background 0.2s, color 0.2s;
-        }
-
-        .cp-btn-reset:hover {
-          background: #b71c1c;
-          color: white;
-        }
-
-        .cp-btn-print {
-          background: #1b5e20;
-          color: white;
-          border: none;
-          padding: 9px 18px;
-          border-radius: 7px;
-          cursor: pointer;
-          font-size: 13.5px;
-          font-weight: bold;
-          height: 38px;
-          transition: background 0.2s;
-        }
-
-        .cp-btn-print:hover:not(:disabled) {
-          background: #144717;
-        }
-
-        .cp-btn-print:disabled {
-          background: #a5a5a5;
-          cursor: not-allowed;
-        }
-
-        .cp-filters-summary {
-          font-size: 13px;
-          color: #666;
-          margin-bottom: 10px;
-        }
-
-        @media (max-width: 768px) {
-          .cp-filters {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .cp-filter-field input,
-          .cp-filter-field select {
-            min-width: 0;
-          }
-
-          .cp-btn-reset,
-          .cp-btn-print {
-            width: 100%;
-          }
-        }
-      `}</style>
-
     </div>
   );
 }

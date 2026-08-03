@@ -40,26 +40,6 @@ function Shipments() {
         loadShipments();
     }, []);
 
-    // لما تنجهز دفعة الطباعة، افتح نافذة الطباعة تلقائيًا
-    useEffect(() => {
-        if (printBatch.length > 0) {
-            const timer = setTimeout(() => {
-                window.print();
-            }, 200);
-
-            const handleAfterPrint = () => {
-                setPrintBatch([]);
-            };
-
-            window.addEventListener("afterprint", handleAfterPrint);
-
-            return () => {
-                clearTimeout(timer);
-                window.removeEventListener("afterprint", handleAfterPrint);
-            };
-        }
-    }, [printBatch]);
-
     // بدء تعديل إرسالية
     const startEdit = (shipment: Shipment) => {
         setEditingId(shipment._id);
@@ -157,14 +137,41 @@ function Shipments() {
         });
     }, [shipments, filterCustomer, filterStatus, filterDateFrom, filterDateTo]);
 
-    // طباعة كل الإرساليات المفلترة دفعة وحدة
+    // دالة للطباعة الفردية
+    const printIndividual = (shipment: Shipment) => {
+        setPrintBatch([]); // إلغاء أي طباعة جماعية سابقة
+        setSelected(shipment); // تعيين الإرسالية المحددة للطباعة الفردية
+    };
+
+    // دالة للطباعة الجماعية (تستخدم window.print)
     const printAllFiltered = () => {
         if (filteredShipments.length === 0) {
             alert("لا يوجد إرساليات لطباعتها");
             return;
         }
-        setSelected(null);
-        setPrintBatch(filteredShipments);
+        setSelected(null); // إلغاء الطباعة الفردية
+        setPrintBatch(filteredShipments); // تعيين دفعة الطباعة
+    };
+
+    // إضافة إرسالية للطباعة الجماعية
+    const addToBatch = (shipment: Shipment) => {
+        setPrintBatch(prev => {
+            // التأكد من عدم إضافة الإرسالية مرتين
+            if (prev.find(s => s._id === shipment._id)) {
+                return prev;
+            }
+            return [...prev, shipment];
+        });
+    };
+
+    // إزالة إرسالية من الطباعة الجماعية
+    const removeFromBatch = (shipmentId: string) => {
+        setPrintBatch(prev => prev.filter(s => s._id !== shipmentId));
+    };
+
+    // مسح كل قائمة الطباعة
+    const clearBatch = () => {
+        setPrintBatch([]);
     };
 
     return (
@@ -242,6 +249,19 @@ function Shipments() {
                 عرض {filteredShipments.length} من أصل {shipments.length} إرسالية
             </div>
 
+            {/* شريط التحكم بالطباعة الجماعية */}
+            {printBatch.length > 0 && (
+                <div className="batch-controls">
+                    <span>قائمة الطباعة: {printBatch.length} إرسالية</span>
+                    <button className="btn-print-batch" onClick={() => window.print()}>
+                        🖨 طباعة المجموعة
+                    </button>
+                    <button className="btn-clear-batch" onClick={clearBatch}>
+                        ✕ مسح الكل
+                    </button>
+                </div>
+            )}
+
             <table>
                 <thead>
                     <tr>
@@ -251,99 +271,122 @@ function Shipments() {
                         <th>المساحة</th>
                         <th>الحالة</th>
                         <th>التاريخ</th>
-                        <th>طباعة</th>
+                        <th>طباعة فردية</th>
+                        <th>طباعة جماعية</th>
                         <th>إجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
                     {filteredShipments.length === 0 ? (
                         <tr>
-                            <td colSpan={8} className="no-results">
+                            <td colSpan={9} className="no-results">
                                 لا يوجد إرساليات مطابقة لهذا البحث
                             </td>
                         </tr>
                     ) : (
-                        filteredShipments.map((shipment) => (
-                            <tr key={shipment._id}>
-                                <td>{shipment.consignmentNumber}</td>
-                                <td>
-                                    {editingId === shipment._id ? (
-                                        <input
-                                            value={editCustomer}
-                                            onChange={(e) =>
-                                                setEditCustomer(e.target.value)
-                                            }
-                                        />
-                                    ) : (
-                                        shipment.customer
-                                    )}
-                                </td>
-                                <td>{shipment.stones.length}</td>
-                                <td>{shipment.totalArea.toFixed(2)} m²</td>
-                                <td>
-                                    {editingId === shipment._id ? (
-                                        <select
-                                            value={editStatus}
-                                            onChange={(e) =>
-                                                setEditStatus(e.target.value)
-                                            }
+                        filteredShipments.map((shipment) => {
+                            const isInBatch = printBatch.some(s => s._id === shipment._id);
+                            return (
+                                <tr key={shipment._id}>
+                                    <td>{shipment.consignmentNumber}</td>
+                                    <td>
+                                        {editingId === shipment._id ? (
+                                            <input
+                                                value={editCustomer}
+                                                onChange={(e) =>
+                                                    setEditCustomer(e.target.value)
+                                                }
+                                            />
+                                        ) : (
+                                            shipment.customer
+                                        )}
+                                    </td>
+                                    <td>{shipment.stones.length}</td>
+                                    <td>{shipment.totalArea.toFixed(2)} m²</td>
+                                    <td>
+                                        {editingId === shipment._id ? (
+                                            <select
+                                                value={editStatus}
+                                                onChange={(e) =>
+                                                    setEditStatus(e.target.value)
+                                                }
+                                            >
+                                                <option value="Pending">Pending</option>
+                                                <option value="Ready">Ready</option>
+                                                <option value="Shipped">Shipped</option>
+                                                <option value="Cancelled">Cancelled</option>
+                                            </select>
+                                        ) : (
+                                            shipment.status
+                                        )}
+                                    </td>
+                                    <td>
+                                        {new Date(shipment.createdAt).toLocaleDateString()}
+                                    </td>
+                                    <td>
+                                        <button
+                                            className="btn-print-individual"
+                                            onClick={() => printIndividual(shipment)}
                                         >
-                                            <option value="Pending">Pending</option>
-                                            <option value="Ready">Ready</option>
-                                            <option value="Shipped">Shipped</option>
-                                            <option value="Cancelled">Cancelled</option>
-                                        </select>
-                                    ) : (
-                                        shipment.status
-                                    )}
-                                </td>
-                                <td>
-                                    {new Date(shipment.createdAt).toLocaleDateString()}
-                                </td>
-                                <td>
-                                    <button
-                                        onClick={() => {
-                                            setPrintBatch([]);
-                                            setSelected(shipment);
-                                        }}
-                                    >
-                                        🖨 طباعة
-                                    </button>
-                                </td>
-                                <td>
-                                    {editingId === shipment._id ? (
-                                        <>
-                                            <button onClick={() => saveEdit(shipment._id)}>
-                                                ✅ حفظ
+                                            🖨 طباعة
+                                        </button>
+                                    </td>
+                                    <td>
+                                        {isInBatch ? (
+                                            <button
+                                                className="btn-remove-batch"
+                                                onClick={() => removeFromBatch(shipment._id)}
+                                            >
+                                                ✕ إزالة
                                             </button>
-                                            <button onClick={cancelEdit}>
-                                                ❌ إلغاء
+                                        ) : (
+                                            <button
+                                                className="btn-add-batch"
+                                                onClick={() => addToBatch(shipment)}
+                                            >
+                                                ➕ إضافة
                                             </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button onClick={() => startEdit(shipment)}>
-                                                ✏️ تعديل
-                                            </button>
-                                            <button onClick={() => handleDelete(shipment._id)}>
-                                                🗑 حذف
-                                            </button>
-                                        </>
-                                    )}
-                                </td>
-                            </tr>
-                        ))
+                                        )}
+                                    </td>
+                                    <td>
+                                        {editingId === shipment._id ? (
+                                            <>
+                                                <button onClick={() => saveEdit(shipment._id)}>
+                                                    ✅ حفظ
+                                                </button>
+                                                <button onClick={cancelEdit}>
+                                                    ❌ إلغاء
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => startEdit(shipment)}>
+                                                    ✏️ تعديل
+                                                </button>
+                                                <button onClick={() => handleDelete(shipment._id)}>
+                                                    🗑 حذف
+                                                </button>
+                                            </>
+                                        )}
+                                    </td>
+                                </tr>
+                            );
+                        })
                     )}
                 </tbody>
             </table>
 
+            {/* الطباعة الفردية - تظهر في نافذة منفصلة */}
             {selected && (
-                <div style={{ marginTop: "30px" }}>
-                    <ShipmentPrint shipment={selected} />
+                <div className="individual-print-container">
+                    <ShipmentPrint 
+                        shipment={selected} 
+                        isBatchPrint={false}
+                    />
                 </div>
             )}
 
-            {/* منطقة طباعة كل الإرساليات دفعة وحدة - معدلة */}
+            {/* الطباعة الجماعية - تظهر في نفس الصفحة */}
             {printBatch.length > 0 && (
                 <div className="print-batch-container">
                     {printBatch.map((shipment, index) => (
@@ -351,7 +394,10 @@ function Shipments() {
                             key={shipment._id}
                             className="print-batch-item"
                         >
-                            <ShipmentPrint shipment={shipment} />
+                            <ShipmentPrint 
+                                shipment={shipment} 
+                                isBatchPrint={true}
+                            />
                         </div>
                     ))}
                 </div>

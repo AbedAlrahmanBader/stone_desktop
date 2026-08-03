@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import "../styles/print.css";
 import logo from "../assets/AAA.jpg";
 
@@ -47,6 +47,7 @@ interface ThicknessOnlyRow {
 
 interface Props {
     shipment: any;
+    isBatchPrint?: boolean;
 }
 
 const num = (v: any) => Number(v) || 0;
@@ -123,10 +124,8 @@ function getEnteredQuantity(s: Stone): { value: string; unit: SoldUnit } {
     return sold;
 }
 
-function ShipmentPrint({ shipment }: Props) {
-    const printPage = () => {
-        window.print();
-    };
+function ShipmentPrint({ shipment, isBatchPrint = false }: Props) {
+    const printRef = useRef<HTMLDivElement>(null);
 
     let stones: Stone[] =
         shipment?.stones && shipment.stones.length > 0
@@ -211,16 +210,115 @@ function ShipmentPrint({ shipment }: Props) {
         shipment?.summaryByThicknessTotal ??
         summaryByThickness.reduce((sum, r) => sum + num(r.area), 0).toFixed(4);
 
+    // دالة الطباعة الفردية
+    const printIndividual = () => {
+        const printWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes');
+        if (!printWindow) {
+            alert('يرجى السماح بنوافذ المنبثقة للطباعة');
+            return;
+        }
+
+        const content = printRef.current?.innerHTML || '';
+        
+        // الحصول على جميع الـ styles من الصفحة
+        const styles = document.querySelector('style')?.innerHTML || '';
+        const allStyles = Array.from(document.querySelectorAll('style'))
+            .map(style => style.innerHTML)
+            .join('\n');
+
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html dir="ltr">
+                <head>
+                    <title>طباعة إرسالية رقم ${shipment?.consignmentNumber || ''}</title>
+                    <meta charset="UTF-8">
+                    <style>
+                        /* إعادة تعيين الهوامش */
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body { 
+                            margin: 0; 
+                            padding: 0; 
+                            background: white; 
+                            display: flex;
+                            justify-content: center;
+                            align-items: flex-start;
+                            min-height: 100vh;
+                        }
+                        .print-wrapper {
+                            width: 210mm;
+                            min-height: 297mm;
+                            background: white;
+                            padding: 10mm;
+                        }
+                        /* نسخ جميع الـ styles */
+                        ${allStyles}
+                        /* تعديلات إضافية للطباعة */
+                        .print-page {
+                            width: 100% !important;
+                            min-height: auto !important;
+                            padding: 5mm !important;
+                            box-shadow: none !important;
+                        }
+                        .print-button {
+                            display: none !important;
+                        }
+                        .unit-select {
+                            display: none !important;
+                        }
+                        .unit-print-label {
+                            display: inline !important;
+                        }
+                        @media print {
+                            body { margin: 0; padding: 0; }
+                            .print-wrapper { padding: 0; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-wrapper">
+                        ${content}
+                    </div>
+                    <script>
+                        // طباعة تلقائية بعد تحميل الصفحة
+                        window.onload = function() {
+                            window.print();
+                            // إغلاق النافذة بعد الطباعة
+                            window.onafterprint = function() {
+                                window.close();
+                            };
+                        };
+                    <\/script>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    };
+
+    // دالة الطباعة الجماعية
+    const printBatch = () => {
+        window.print();
+    };
+
+    // اختيار دالة الطباعة المناسبة
+    const handlePrint = () => {
+        if (isBatchPrint) {
+            printBatch();
+        } else {
+            printIndividual();
+        }
+    };
+
     return (
         <div className="print-container">
-            <button className="print-button" onClick={printPage}>
-                🖨 طباعة الإرسالية
+            <button className="print-button" onClick={handlePrint}>
+                🖨 {isBatchPrint ? 'طباعة الكل' : 'طباعة الإرسالية'}
             </button>
 
             <div
+                ref={printRef}
                 className="print-page"
                 dir="ltr"
-                contentEditable
+                contentEditable={!isBatchPrint}
                 suppressContentEditableWarning
             >
                 <div className="company-header">
