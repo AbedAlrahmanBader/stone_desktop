@@ -516,4 +516,22 @@
     .print-batch-item:last-child {
         page-break-after: auto !important;
     }
+
+    /* --- إصلاح انزياح الإرساليات نحو الشمال أثناء الطباعة الجماعية --- */
+
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* اجبار التوسيط الحقيقي بدل الاعتماد على تطابق العرض بالصدفة مع الأب */
+    .print-batch-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 }

@@ -154,3 +154,14 @@
     }
 
 }
+
+/* ---------- إصلاح تموضع الطباعة الجماعية ---------- */
+@media print {
+
+    .shipments {
+        padding: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+    }
+
+}
