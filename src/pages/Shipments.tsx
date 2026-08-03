@@ -1,11 +1,12 @@
-// Shipments.tsx
 import { useEffect, useMemo, useState } from "react";
 import api from "../api/axios";
 import "../styles/shipments.css";
-import ShipmentPrintIndividual from "../components/ShipmentPrintIndividual";
-import ShipmentPrintBatch from "../components/ShipmentPrintBatch";
+
+import ShipmentPrint from "../components/ShipmentPrint";
+
 
 interface Shipment {
+
     _id: string;
     consignmentNumber: number;
     customer: string;
@@ -13,14 +14,24 @@ interface Shipment {
     status: string;
     stones: any[];
     createdAt: string;
+
 }
 
+
 function Shipments() {
+
     const [shipments, setShipments] = useState<Shipment[]>([]);
-    const [selectedForIndividual, setSelectedForIndividual] = useState<Shipment | null>(null);
+
+    // شحنة واحدة للطباعة الفردية (زر الطباعة بجانب كل سطر)
+    const [selected, setSelected] = useState<Shipment | null>(null);
+
+    // مجموعة الإرساليات المطلوب طباعتها دفعة وحدة
     const [printBatch, setPrintBatch] = useState<Shipment[]>([]);
+
     const [editingId, setEditingId] = useState<string | null>(null);
+
     const [editCustomer, setEditCustomer] = useState("");
+
     const [editStatus, setEditStatus] = useState("");
 
     // --- فلاتر البحث ---
@@ -29,90 +40,157 @@ function Shipments() {
     const [filterDateFrom, setFilterDateFrom] = useState("");
     const [filterDateTo, setFilterDateTo] = useState("");
 
+
     const loadShipments = async () => {
+
         try {
+
             const response = await api.get("/shipments");
+
             setShipments(response.data);
+
+
         } catch (error) {
+
             console.log(error);
+
         }
+
     };
 
+
     useEffect(() => {
+
         loadShipments();
+
     }, []);
+
+
+    // لما تنجهز دفعة الطباعة، افتح نافذة الطباعة تلقائيًا
+    useEffect(() => {
+
+        if (printBatch.length > 0) {
+
+            const timer = setTimeout(() => {
+                window.print();
+            }, 200);
+
+            return () => clearTimeout(timer);
+
+        }
+
+    }, [printBatch]);
+
 
     // بدء تعديل إرسالية
     const startEdit = (shipment: Shipment) => {
+
         setEditingId(shipment._id);
         setEditCustomer(shipment.customer);
         setEditStatus(shipment.status);
+
     };
+
 
     // إلغاء التعديل
     const cancelEdit = () => {
+
         setEditingId(null);
         setEditCustomer("");
         setEditStatus("");
+
     };
+
 
     // حفظ التعديل
     const saveEdit = async (id: string) => {
+
         try {
+
             await api.put(`/shipments/${id}`, {
+
                 customer: editCustomer,
                 status: editStatus
+
             });
+
             cancelEdit();
+
             await loadShipments();
+
+
         } catch (error) {
+
             console.log(error);
+
             alert("حدث خطأ أثناء التعديل");
+
         }
+
     };
+
 
     // حذف إرسالية
     const handleDelete = async (id: string) => {
+
         const confirmed = window.confirm(
             "متأكد إنك بدك تحذف هذه الإرسالية؟ رح ترجع القطع المرتبطة فيها للمخزون."
         );
+
         if (!confirmed) return;
 
         try {
+
             await api.delete(`/shipments/${id}`);
-            if (selectedForIndividual?._id === id) {
-                setSelectedForIndividual(null);
+
+            if (selected?._id === id) {
+                setSelected(null);
             }
+
             await loadShipments();
+
+
         } catch (error) {
+
             console.log(error);
+
             alert("حدث خطأ أثناء الحذف");
+
         }
+
     };
 
     // إعادة تعيين كل الفلاتر
     const resetFilters = () => {
+
         setFilterCustomer("All");
         setFilterStatus("All");
         setFilterDateFrom("");
         setFilterDateTo("");
+
     };
 
-    // قائمة أسماء العملاء الموجودين فعليًا
+    // قائمة أسماء العملاء الموجودين فعليًا (لتعبئة قائمة فلتر العميل تلقائيًا)
     const availableCustomers = useMemo(() => {
+
         const set = new Set(shipments.map((s) => s.customer));
         return Array.from(set).sort((a, b) => a.localeCompare(b));
+
     }, [shipments]);
 
-    // قائمة حالات الإرسالية الموجودة فعليًا
+    // قائمة حالات الإرسالية الموجودة فعليًا (لتعبئة قائمة الفلتر تلقائيًا)
     const availableStatuses = useMemo(() => {
+
         const set = new Set(shipments.map((s) => s.status));
         return Array.from(set);
+
     }, [shipments]);
 
     // الإرساليات بعد تطبيق الفلاتر
     const filteredShipments = useMemo(() => {
+
         return shipments.filter((shipment) => {
+
             const matchCustomer =
                 filterCustomer === "All" || shipment.customer === filterCustomer;
 
@@ -136,56 +214,37 @@ function Shipments() {
             }
 
             return matchCustomer && matchStatus && matchFrom && matchTo;
+
         });
+
     }, [shipments, filterCustomer, filterStatus, filterDateFrom, filterDateTo]);
 
-    // دالة للطباعة الفردية
-    const printIndividual = (shipment: Shipment) => {
-        setPrintBatch([]); // إلغاء أي طباعة جماعية سابقة
-        setSelectedForIndividual(shipment);
-    };
 
-    // إغلاق الطباعة الفردية
-    const closeIndividualPrint = () => {
-        setSelectedForIndividual(null);
-    };
-
-    // دالة للطباعة الجماعية
+    // طباعة كل الإرساليات المفلترة دفعة وحدة
     const printAllFiltered = () => {
+
         if (filteredShipments.length === 0) {
             alert("لا يوجد إرساليات لطباعتها");
             return;
         }
-        setSelectedForIndividual(null);
+
+        setSelected(null);
         setPrintBatch(filteredShipments);
+
     };
 
-    // إضافة إرسالية للطباعة الجماعية
-    const addToBatch = (shipment: Shipment) => {
-        setPrintBatch(prev => {
-            if (prev.find(s => s._id === shipment._id)) {
-                return prev;
-            }
-            return [...prev, shipment];
-        });
-    };
-
-    // إزالة إرسالية من الطباعة الجماعية
-    const removeFromBatch = (shipmentId: string) => {
-        setPrintBatch(prev => prev.filter(s => s._id !== shipmentId));
-    };
-
-    // مسح كل قائمة الطباعة
-    const clearBatch = () => {
-        setPrintBatch([]);
-    };
 
     return (
+
         <div className="shipments">
-            <h1>الإرساليات</h1>
+
+            <h1>
+                الإرساليات
+            </h1>
 
             {/* شريط الفلاتر */}
             <div className="shipments-filters">
+
                 <div className="filter-field">
                     <label>العميل</label>
                     <select
@@ -249,6 +308,7 @@ function Shipments() {
                 >
                     🖨 طباعة الكل ({filteredShipments.length})
                 </button>
+
             </div>
 
             <div className="filters-summary">
@@ -256,136 +316,248 @@ function Shipments() {
             </div>
 
             <table>
+
                 <thead>
+
                     <tr>
+
                         <th>رقم الإرسالية</th>
                         <th>العميل</th>
                         <th>عدد المشاتيح</th>
                         <th>المساحة</th>
                         <th>الحالة</th>
                         <th>التاريخ</th>
-                        <th>طباعة فردية</th>
-                        <th>طباعة جماعية</th>
+                        <th>طباعة</th>
                         <th>إجراءات</th>
+
                     </tr>
+
                 </thead>
+
                 <tbody>
-                    {filteredShipments.length === 0 ? (
+
+                {
+
+                    filteredShipments.length === 0 ? (
+
                         <tr>
-                            <td colSpan={9} className="no-results">
+                            <td colSpan={8} className="no-results">
                                 لا يوجد إرساليات مطابقة لهذا البحث
                             </td>
                         </tr>
+
                     ) : (
-                        filteredShipments.map((shipment) => {
-                            const isInBatch = printBatch.some(s => s._id === shipment._id);
-                            return (
-                                <tr key={shipment._id}>
-                                    <td>{shipment.consignmentNumber}</td>
-                                    <td>
-                                        {editingId === shipment._id ? (
-                                            <input
-                                                value={editCustomer}
-                                                onChange={(e) =>
-                                                    setEditCustomer(e.target.value)
-                                                }
-                                            />
-                                        ) : (
-                                            shipment.customer
-                                        )}
-                                    </td>
-                                    <td>{shipment.stones.length}</td>
-                                    <td>{shipment.totalArea.toFixed(2)} m²</td>
-                                    <td>
-                                        {editingId === shipment._id ? (
-                                            <select
-                                                value={editStatus}
-                                                onChange={(e) =>
-                                                    setEditStatus(e.target.value)
-                                                }
-                                            >
-                                                <option value="Pending">Pending</option>
-                                                <option value="Ready">Ready</option>
-                                                <option value="Shipped">Shipped</option>
-                                                <option value="Cancelled">Cancelled</option>
-                                            </select>
-                                        ) : (
-                                            shipment.status
-                                        )}
-                                    </td>
-                                    <td>
-                                        {new Date(shipment.createdAt).toLocaleDateString()}
-                                    </td>
-                                    <td>
-                                        <button
-                                            className="btn-print-individual"
-                                            onClick={() => printIndividual(shipment)}
+
+                    filteredShipments.map((shipment) => (
+
+                        <tr key={shipment._id}>
+
+                            <td>
+                                {shipment.consignmentNumber}
+                            </td>
+
+                            <td>
+
+                                {
+                                    editingId === shipment._id ? (
+
+                                        <input
+                                            value={editCustomer}
+                                            onChange={(e) =>
+                                                setEditCustomer(e.target.value)
+                                            }
+                                        />
+
+                                    ) : (
+
+                                        shipment.customer
+
+                                    )
+                                }
+
+                            </td>
+
+                            <td>
+                                {shipment.stones.length}
+                            </td>
+
+                            <td>
+                                {shipment.totalArea.toFixed(2)} m²
+                            </td>
+
+                            <td>
+
+                                {
+                                    editingId === shipment._id ? (
+
+                                        <select
+                                            value={editStatus}
+                                            onChange={(e) =>
+                                                setEditStatus(e.target.value)
+                                            }
                                         >
-                                            🖨 طباعة
-                                        </button>
-                                    </td>
-                                    <td>
-                                        {isInBatch ? (
-                                            <button
-                                                className="btn-remove-batch"
-                                                onClick={() => removeFromBatch(shipment._id)}
-                                            >
-                                                ✕ إزالة
+                                            <option value="Pending">Pending</option>
+                                            <option value="Ready">Ready</option>
+                                            <option value="Shipped">Shipped</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        </select>
+
+                                    ) : (
+
+                                        shipment.status
+
+                                    )
+                                }
+
+                            </td>
+
+                            <td>
+
+                                {
+                                new Date(
+                                    shipment.createdAt
+                                )
+                                .toLocaleDateString()
+                                }
+
+                            </td>
+
+                            <td>
+
+                                <button
+                                    onClick={() => {
+                                        setPrintBatch([]);
+                                        setSelected(shipment);
+                                    }}
+                                >
+
+                                    🖨 طباعة
+
+                                </button>
+
+                            </td>
+
+                            <td>
+
+                                {
+                                    editingId === shipment._id ? (
+
+                                        <>
+
+                                            <button onClick={() => saveEdit(shipment._id)}>
+                                                ✅ حفظ
                                             </button>
-                                        ) : (
-                                            <button
-                                                className="btn-add-batch"
-                                                onClick={() => addToBatch(shipment)}
-                                            >
-                                                ➕ إضافة
+
+                                            <button onClick={cancelEdit}>
+                                                ❌ إلغاء
                                             </button>
-                                        )}
-                                    </td>
-                                    <td>
-                                        {editingId === shipment._id ? (
-                                            <>
-                                                <button onClick={() => saveEdit(shipment._id)}>
-                                                    ✅ حفظ
-                                                </button>
-                                                <button onClick={cancelEdit}>
-                                                    ❌ إلغاء
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <button onClick={() => startEdit(shipment)}>
-                                                    ✏️ تعديل
-                                                </button>
-                                                <button onClick={() => handleDelete(shipment._id)}>
-                                                    🗑 حذف
-                                                </button>
-                                            </>
-                                        )}
-                                    </td>
-                                </tr>
-                            );
-                        })
-                    )}
+
+                                        </>
+
+                                    ) : (
+
+                                        <>
+
+                                            <button onClick={() => startEdit(shipment)}>
+                                                ✏️ تعديل
+                                            </button>
+
+                                            <button onClick={() => handleDelete(shipment._id)}>
+                                                🗑 حذف
+                                            </button>
+
+                                        </>
+
+                                    )
+                                }
+
+                            </td>
+
+                        </tr>
+
+                    ))
+
+                    )
+
+                }
+
                 </tbody>
+
             </table>
 
-            {/* الطباعة الفردية */}
-            {selectedForIndividual && (
-                <ShipmentPrintIndividual 
-                    shipment={selectedForIndividual}
-                    onClose={closeIndividualPrint}
-                />
-            )}
+            {
 
-            {/* الطباعة الجماعية */}
-            {printBatch.length > 0 && (
-                <ShipmentPrintBatch 
-                    shipments={printBatch}
-                    onClear={clearBatch}
-                />
-            )}
+                selected && (
+
+                    <div style={{ marginTop: "30px" }}>
+
+                        <ShipmentPrint
+                            shipment={selected}
+                        />
+
+                    </div>
+
+                )
+
+            }
+
+            {/* منطقة طباعة كل الإرساليات دفعة وحدة */}
+            {
+
+                printBatch.length > 0 && (
+
+                    <div className="print-batch-container">
+
+                        {
+                            printBatch.map((shipment, index) => (
+
+                                <div
+                                    key={shipment._id}
+                                    className="print-batch-item"
+                                    style={{
+                                        pageBreakAfter:
+                                            index < printBatch.length - 1
+                                                ? "always"
+                                                : "auto",
+                                    }}
+                                >
+
+                                    <ShipmentPrint shipment={shipment} />
+
+                                </div>
+
+                            ))
+                        }
+
+                    </div>
+
+                )
+
+            }
+
+            {/* عند الطباعة الجماعية، إخفِ كل شي غير منطقة الطباعة */}
+            {
+                printBatch.length > 0 && (
+
+                    <style>{`
+                        @media print {
+                            .shipments > *:not(.print-batch-container) {
+                                display: none !important;
+                            }
+                            .print-batch-container {
+                                display: block !important;
+                            }
+                        }
+                    `}</style>
+
+                )
+            }
+
         </div>
+
     );
+
 }
+
 
 export default Shipments;
