@@ -458,7 +458,6 @@ function OrderDetails() {
                 {order.description && (
                   <p><strong>الوصف:</strong> {order.description}</p>
                 )}
-                <p><strong>تاريخ الإنشاء:</strong> {new Date(order.createdAt).toLocaleDateString("ar")}</p>
               </div>
             </div>
 
