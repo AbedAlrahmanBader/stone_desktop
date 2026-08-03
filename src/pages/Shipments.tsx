@@ -39,6 +39,7 @@ function Shipments() {
     const [filterStatus, setFilterStatus] = useState("All");
     const [filterDateFrom, setFilterDateFrom] = useState("");
     const [filterDateTo, setFilterDateTo] = useState("");
+    const [filterConsignmentNumber, setFilterConsignmentNumber] = useState("");
 
 
     const loadShipments = async () => {
@@ -167,6 +168,7 @@ function Shipments() {
         setFilterStatus("All");
         setFilterDateFrom("");
         setFilterDateTo("");
+        setFilterConsignmentNumber("");
 
     };
 
@@ -197,6 +199,10 @@ function Shipments() {
             const matchStatus =
                 filterStatus === "All" || shipment.status === filterStatus;
 
+            const matchConsignmentNumber =
+                filterConsignmentNumber === "" ||
+                String(shipment.consignmentNumber).includes(filterConsignmentNumber);
+
             const shipmentDate = new Date(shipment.createdAt);
 
             let matchFrom = true;
@@ -213,11 +219,11 @@ function Shipments() {
                 matchTo = shipmentDate <= toDate;
             }
 
-            return matchCustomer && matchStatus && matchFrom && matchTo;
+            return matchCustomer && matchStatus && matchConsignmentNumber && matchFrom && matchTo;
 
         });
 
-    }, [shipments, filterCustomer, filterStatus, filterDateFrom, filterDateTo]);
+    }, [shipments, filterCustomer, filterStatus, filterDateFrom, filterDateTo, filterConsignmentNumber]);
 
 
     // طباعة كل الإرساليات المفلترة دفعة وحدة
@@ -244,6 +250,17 @@ function Shipments() {
 
             {/* شريط الفلاتر */}
             <div className="shipments-filters">
+
+                <div className="filter-field">
+                    <label>رقم الإرسالية</label>
+                    <input
+                        type="text"
+                        value={filterConsignmentNumber}
+                        onChange={(e) => setFilterConsignmentNumber(e.target.value)}
+                        placeholder="ابحث بالرقم..."
+                        dir="ltr"
+                    />
+                </div>
 
                 <div className="filter-field">
                     <label>العميل</label>
