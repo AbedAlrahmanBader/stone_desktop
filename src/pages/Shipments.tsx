@@ -20,7 +20,6 @@ function Shipments() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editCustomer, setEditCustomer] = useState("");
     const [editStatus, setEditStatus] = useState("");
-    const [isPrinting, setIsPrinting] = useState(false);
 
     // --- فلاتر البحث ---
     const [filterCustomer, setFilterCustomer] = useState("All");
@@ -43,19 +42,13 @@ function Shipments() {
 
     // لما تنجهز دفعة الطباعة، افتح نافذة الطباعة تلقائيًا
     useEffect(() => {
-        if (printBatch.length > 0 && !isPrinting) {
-            setIsPrinting(true);
-            
-            // ننتظر قليلاً حتى يتم تحميل المحتوى
+        if (printBatch.length > 0) {
             const timer = setTimeout(() => {
                 window.print();
-            }, 500);
+            }, 200);
 
             const handleAfterPrint = () => {
-                setIsPrinting(false);
                 setPrintBatch([]);
-                // إزالة المستمع بعد التنفيذ
-                window.removeEventListener("afterprint", handleAfterPrint);
             };
 
             window.addEventListener("afterprint", handleAfterPrint);
@@ -65,7 +58,7 @@ function Shipments() {
                 window.removeEventListener("afterprint", handleAfterPrint);
             };
         }
-    }, [printBatch, isPrinting]);
+    }, [printBatch]);
 
     // بدء تعديل إرسالية
     const startEdit = (shipment: Shipment) => {
@@ -175,195 +168,188 @@ function Shipments() {
     };
 
     return (
-        <div className={`shipments ${printBatch.length > 0 ? 'printing-mode' : ''}`}>
+        <div className="shipments">
             <h1>الإرساليات</h1>
 
-            {/* شريط الفلاتر - يختفي أثناء الطباعة */}
-            {printBatch.length === 0 && (
-                <>
-                    <div className="shipments-filters">
-                        <div className="filter-field">
-                            <label>العميل</label>
-                            <select
-                                value={filterCustomer}
-                                onChange={(e) => setFilterCustomer(e.target.value)}
-                            >
-                                <option value="All">الكل</option>
-                                {availableCustomers.map((customer) => (
-                                    <option key={customer} value={customer}>
-                                        {customer}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+            {/* شريط الفلاتر */}
+            <div className="shipments-filters">
+                <div className="filter-field">
+                    <label>العميل</label>
+                    <select
+                        value={filterCustomer}
+                        onChange={(e) => setFilterCustomer(e.target.value)}
+                    >
+                        <option value="All">الكل</option>
+                        {availableCustomers.map((customer) => (
+                            <option key={customer} value={customer}>
+                                {customer}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
-                        <div className="filter-field">
-                            <label>الحالة</label>
-                            <select
-                                value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                            >
-                                <option value="All">الكل</option>
-                                {availableStatuses.map((status) => (
-                                    <option key={status} value={status}>
-                                        {status}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                <div className="filter-field">
+                    <label>الحالة</label>
+                    <select
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                    >
+                        <option value="All">الكل</option>
+                        {availableStatuses.map((status) => (
+                            <option key={status} value={status}>
+                                {status}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
-                        <div className="filter-field">
-                            <label>من تاريخ</label>
-                            <input
-                                type="date"
-                                value={filterDateFrom}
-                                onChange={(e) => setFilterDateFrom(e.target.value)}
-                            />
-                        </div>
+                <div className="filter-field">
+                    <label>من تاريخ</label>
+                    <input
+                        type="date"
+                        value={filterDateFrom}
+                        onChange={(e) => setFilterDateFrom(e.target.value)}
+                    />
+                </div>
 
-                        <div className="filter-field">
-                            <label>إلى تاريخ</label>
-                            <input
-                                type="date"
-                                value={filterDateTo}
-                                onChange={(e) => setFilterDateTo(e.target.value)}
-                            />
-                        </div>
+                <div className="filter-field">
+                    <label>إلى تاريخ</label>
+                    <input
+                        type="date"
+                        value={filterDateTo}
+                        onChange={(e) => setFilterDateTo(e.target.value)}
+                    />
+                </div>
 
-                        <button
-                            type="button"
-                            className="btn-reset-filters"
-                            onClick={resetFilters}
-                        >
-                            ✕ إعادة تعيين
-                        </button>
+                <button
+                    type="button"
+                    className="btn-reset-filters"
+                    onClick={resetFilters}
+                >
+                    ✕ إعادة تعيين
+                </button>
 
-                        <button
-                            type="button"
-                            className="btn-print-all"
-                            onClick={printAllFiltered}
-                        >
-                            🖨 طباعة الكل ({filteredShipments.length})
-                        </button>
-                    </div>
+                <button
+                    type="button"
+                    className="btn-print-all"
+                    onClick={printAllFiltered}
+                >
+                    🖨 طباعة الكل ({filteredShipments.length})
+                </button>
+            </div>
 
-                    <div className="filters-summary">
-                        عرض {filteredShipments.length} من أصل {shipments.length} إرسالية
-                    </div>
+            <div className="filters-summary">
+                عرض {filteredShipments.length} من أصل {shipments.length} إرسالية
+            </div>
 
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>رقم الإرسالية</th>
-                                <th>العميل</th>
-                                <th>عدد المشاتيح</th>
-                                <th>المساحة</th>
-                                <th>الحالة</th>
-                                <th>التاريخ</th>
-                                <th>طباعة</th>
-                                <th>إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredShipments.length === 0 ? (
-                                <tr>
-                                    <td colSpan={8} className="no-results">
-                                        لا يوجد إرساليات مطابقة لهذا البحث
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredShipments.map((shipment) => (
-                                    <tr key={shipment._id}>
-                                        <td>{shipment.consignmentNumber}</td>
-                                        <td>
-                                            {editingId === shipment._id ? (
-                                                <input
-                                                    value={editCustomer}
-                                                    onChange={(e) =>
-                                                        setEditCustomer(e.target.value)
-                                                    }
-                                                />
-                                            ) : (
-                                                shipment.customer
-                                            )}
-                                        </td>
-                                        <td>{shipment.stones.length}</td>
-                                        <td>{shipment.totalArea.toFixed(2)} m²</td>
-                                        <td>
-                                            {editingId === shipment._id ? (
-                                                <select
-                                                    value={editStatus}
-                                                    onChange={(e) =>
-                                                        setEditStatus(e.target.value)
-                                                    }
-                                                >
-                                                    <option value="Pending">Pending</option>
-                                                    <option value="Ready">Ready</option>
-                                                    <option value="Shipped">Shipped</option>
-                                                    <option value="Cancelled">Cancelled</option>
-                                                </select>
-                                            ) : (
-                                                shipment.status
-                                            )}
-                                        </td>
-                                        <td>
-                                            {new Date(shipment.createdAt).toLocaleDateString()}
-                                        </td>
-                                        <td>
-                                            <button
-                                                onClick={() => {
-                                                    setPrintBatch([]);
-                                                    setSelected(shipment);
-                                                }}
-                                            >
-                                                🖨 طباعة
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم الإرسالية</th>
+                        <th>العميل</th>
+                        <th>عدد المشاتيح</th>
+                        <th>المساحة</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th>طباعة</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filteredShipments.length === 0 ? (
+                        <tr>
+                            <td colSpan={8} className="no-results">
+                                لا يوجد إرساليات مطابقة لهذا البحث
+                            </td>
+                        </tr>
+                    ) : (
+                        filteredShipments.map((shipment) => (
+                            <tr key={shipment._id}>
+                                <td>{shipment.consignmentNumber}</td>
+                                <td>
+                                    {editingId === shipment._id ? (
+                                        <input
+                                            value={editCustomer}
+                                            onChange={(e) =>
+                                                setEditCustomer(e.target.value)
+                                            }
+                                        />
+                                    ) : (
+                                        shipment.customer
+                                    )}
+                                </td>
+                                <td>{shipment.stones.length}</td>
+                                <td>{shipment.totalArea.toFixed(2)} m²</td>
+                                <td>
+                                    {editingId === shipment._id ? (
+                                        <select
+                                            value={editStatus}
+                                            onChange={(e) =>
+                                                setEditStatus(e.target.value)
+                                            }
+                                        >
+                                            <option value="Pending">Pending</option>
+                                            <option value="Ready">Ready</option>
+                                            <option value="Shipped">Shipped</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        </select>
+                                    ) : (
+                                        shipment.status
+                                    )}
+                                </td>
+                                <td>
+                                    {new Date(shipment.createdAt).toLocaleDateString()}
+                                </td>
+                                <td>
+                                    <button
+                                        onClick={() => {
+                                            setPrintBatch([]);
+                                            setSelected(shipment);
+                                        }}
+                                    >
+                                        🖨 طباعة
+                                    </button>
+                                </td>
+                                <td>
+                                    {editingId === shipment._id ? (
+                                        <>
+                                            <button onClick={() => saveEdit(shipment._id)}>
+                                                ✅ حفظ
                                             </button>
-                                        </td>
-                                        <td>
-                                            {editingId === shipment._id ? (
-                                                <>
-                                                    <button onClick={() => saveEdit(shipment._id)}>
-                                                        ✅ حفظ
-                                                    </button>
-                                                    <button onClick={cancelEdit}>
-                                                        ❌ إلغاء
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <button onClick={() => startEdit(shipment)}>
-                                                        ✏️ تعديل
-                                                    </button>
-                                                    <button onClick={() => handleDelete(shipment._id)}>
-                                                        🗑 حذف
-                                                    </button>
-                                                </>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-
-                    {selected && (
-                        <div style={{ marginTop: "30px" }}>
-                            <ShipmentPrint shipment={selected} />
-                        </div>
+                                            <button onClick={cancelEdit}>
+                                                ❌ إلغاء
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button onClick={() => startEdit(shipment)}>
+                                                ✏️ تعديل
+                                            </button>
+                                            <button onClick={() => handleDelete(shipment._id)}>
+                                                🗑 حذف
+                                            </button>
+                                        </>
+                                    )}
+                                </td>
+                            </tr>
+                        ))
                     )}
-                </>
+                </tbody>
+            </table>
+
+            {selected && (
+                <div style={{ marginTop: "30px" }}>
+                    <ShipmentPrint shipment={selected} />
+                </div>
             )}
 
-            {/* منطقة طباعة كل الإرساليات دفعة وحدة */}
+            {/* منطقة طباعة كل الإرساليات دفعة وحدة - معدلة */}
             {printBatch.length > 0 && (
                 <div className="print-batch-container">
                     {printBatch.map((shipment, index) => (
                         <div
                             key={shipment._id}
                             className="print-batch-item"
-                            style={{
-                                pageBreakAfter: index < printBatch.length - 1 ? "always" : "auto",
-                            }}
                         >
                             <ShipmentPrint shipment={shipment} />
                         </div>

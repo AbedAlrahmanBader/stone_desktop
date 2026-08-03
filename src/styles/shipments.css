@@ -234,13 +234,4 @@
         border-radius: 0 !important;
         background: transparent !important;
     }
-
-    /* إخفاء كل شيء في الصفحة الرئيسية أثناء الطباعة */
-    .shipments.printing-mode > *:not(.print-batch-container) {
-        display: none !important;
-    }
-    
-    .shipments.printing-mode .print-batch-container {
-        display: block !important;
-    }
 }
