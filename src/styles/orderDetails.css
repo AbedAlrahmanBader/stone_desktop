@@ -1,12 +1,15 @@
-/* orderDetails.css */
-.order-details {
+/* orderDetails.css - تم تغيير جميع أسماء التنسيقات */
+
+/* الحاوية الرئيسية */
+.order-details-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   direction: rtl;
 }
 
-.order-header {
+/* رأس الطلبية */
+.order-header-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -17,18 +20,18 @@
   margin-bottom: 30px;
 }
 
-.order-title {
+.order-title-group {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-.order-title h1 {
+.order-title-group h1 {
   margin: 0;
   color: #333;
 }
 
-.order-number {
+.order-number-badge {
   background: #007bff;
   color: white;
   padding: 5px 15px;
@@ -37,7 +40,8 @@
   font-weight: bold;
 }
 
-.btn-back {
+/* أزرار الإجراءات */
+.btn-back-action {
   background: #6c757d;
   color: white;
   border: none;
@@ -48,11 +52,11 @@
   transition: background 0.3s;
 }
 
-.btn-back:hover {
+.btn-back-action:hover {
   background: #5a6268;
 }
 
-.btn-print {
+.btn-print-action {
   background: #28a745;
   color: white;
   border: none;
@@ -64,30 +68,31 @@
   margin-left: 10px;
 }
 
-.btn-print:hover {
+.btn-print-action:hover {
   background: #218838;
 }
 
-.order-header-actions {
+.order-actions-wrapper {
   display: flex;
   align-items: center;
 }
 
-.order-info-grid {
+/* شبكة المعلومات */
+.info-grid-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   margin-bottom: 30px;
 }
 
-.info-card {
+.info-card-component {
   background: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.info-card h3 {
+.info-card-component h3 {
   margin-top: 0;
   margin-bottom: 15px;
   color: #333;
@@ -95,16 +100,17 @@
   padding-bottom: 10px;
 }
 
-.info-card p {
+.info-card-component p {
   margin: 10px 0;
   color: #555;
 }
 
-.info-card strong {
+.info-card-component strong {
   color: #333;
 }
 
-.status-badge {
+/* شارة الحالة */
+.status-indicator {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
@@ -113,17 +119,18 @@
   margin-right: 8px;
 }
 
-.status-badge.open {
+.status-indicator.open {
   background: #fff3cd;
   color: #856404;
 }
 
-.status-badge.completed {
+.status-indicator.completed {
   background: #d4edda;
   color: #155724;
 }
 
-.items-section {
+/* قسم الأصناف */
+.items-section-wrapper {
   background: white;
   padding: 20px;
   border-radius: 8px;
@@ -131,22 +138,22 @@
   margin-bottom: 30px;
 }
 
-.items-section h2 {
+.items-section-wrapper h2 {
   margin-top: 0;
   margin-bottom: 20px;
   color: #333;
 }
 
-.table-responsive {
+.table-scroll-wrapper {
   overflow-x: auto;
 }
 
-.order-items-table {
+.items-data-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.order-items-table th {
+.items-data-table th {
   background: #f8f9fa;
   color: #333;
   padding: 12px;
@@ -155,18 +162,18 @@
   font-weight: bold;
 }
 
-.order-items-table td {
+.items-data-table td {
   padding: 12px;
   border-bottom: 1px solid #dee2e6;
   color: #555;
 }
 
-.order-items-table tr:hover {
+.items-data-table tr:hover {
   background: #f8f9fa;
 }
 
-.order-items-table td input,
-.order-items-table td select {
+.items-data-table td input,
+.items-data-table td select {
   width: 100%;
   min-width: 70px;
   padding: 6px 8px;
@@ -176,14 +183,15 @@
   color: #333;
 }
 
-.order-items-table td input:focus,
-.order-items-table td select:focus {
+.items-data-table td input:focus,
+.items-data-table td select:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
 }
 
-.item-status {
+/* حالة الصنف */
+.item-status-badge {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
@@ -191,32 +199,34 @@
   font-weight: bold;
 }
 
-.item-status.completed {
+.item-status-badge.completed {
   background: #d4edda;
   color: #155724;
 }
 
-.item-status.pending {
+.item-status-badge.pending {
   background: #fff3cd;
   color: #856404;
 }
 
-.remaining-highlight {
+/* الناقص */
+.remaining-value-highlight {
   font-weight: bold;
   color: #dc3545;
 }
 
-.item-details-cell {
+.item-details-text {
   max-width: 150px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.btn-edit-item,
-.btn-delete-item,
-.btn-save-item,
-.btn-cancel-item {
+/* أزرار إدارة الأصناف */
+.btn-item-edit,
+.btn-item-delete,
+.btn-item-save,
+.btn-item-cancel {
   border: none;
   border-radius: 5px;
   padding: 6px 12px;
@@ -227,49 +237,50 @@
   transition: opacity 0.2s;
 }
 
-.btn-edit-item:last-child,
-.btn-delete-item:last-child,
-.btn-save-item:last-child,
-.btn-cancel-item:last-child {
+.btn-item-edit:last-child,
+.btn-item-delete:last-child,
+.btn-item-save:last-child,
+.btn-item-cancel:last-child {
   margin-inline-end: 0;
 }
 
-.btn-edit-item {
+.btn-item-edit {
   background: #e7f1ff;
   color: #0056b3;
 }
 
-.btn-delete-item {
+.btn-item-delete {
   background: #f8d7da;
   color: #842029;
 }
 
-.btn-save-item {
+.btn-item-save {
   background: #28a745;
   color: white;
 }
 
-.btn-cancel-item {
+.btn-item-cancel {
   background: #e2e3e5;
   color: #383d41;
 }
 
-.btn-edit-item:hover,
-.btn-delete-item:hover,
-.btn-save-item:hover,
-.btn-cancel-item:hover {
+.btn-item-edit:hover,
+.btn-item-delete:hover,
+.btn-item-save:hover,
+.btn-item-cancel:hover {
   opacity: 0.85;
 }
 
-.btn-edit-item:disabled,
-.btn-delete-item:disabled,
-.btn-save-item:disabled,
-.btn-cancel-item:disabled {
+.btn-item-edit:disabled,
+.btn-item-delete:disabled,
+.btn-item-save:disabled,
+.btn-item-cancel:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.linked-stones-section {
+/* قسم المشاتيح المرتبطة */
+.linked-stones-section-wrapper {
   background: white;
   padding: 20px;
   border-radius: 8px;
@@ -277,26 +288,26 @@
   margin-bottom: 30px;
 }
 
-.linked-stones-section h2 {
+.linked-stones-section-wrapper h2 {
   margin-top: 0;
   margin-bottom: 20px;
   color: #333;
 }
 
-.stones-loading,
-.stones-empty {
+.stones-loading-message,
+.stones-empty-message {
   color: #888;
   font-size: 14px;
   margin: 0;
 }
 
-.linked-stones-list {
+.stones-grid-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 14px;
 }
 
-.linked-stone-card {
+.stone-card-item {
   background: #f8f9fa;
   border: 1px solid #dee2e6;
   border-radius: 8px;
@@ -304,18 +315,18 @@
   transition: box-shadow 0.2s;
 }
 
-.linked-stone-card:hover {
+.stone-card-item:hover {
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-.linked-stone-barcode-svg {
+.stone-barcode-image {
   display: block;
   width: 100%;
   height: auto;
   margin-bottom: 8px;
 }
 
-.linked-stone-status {
+.stone-status-badge {
   display: inline-block;
   padding: 3px 10px;
   border-radius: 20px;
@@ -324,48 +335,49 @@
   margin-bottom: 10px;
 }
 
-.linked-stone-status.in-stock {
+.stone-status-badge.in-stock {
   background: #d4edda;
   color: #155724;
 }
 
-.linked-stone-status.shipped {
+.stone-status-badge.shipped {
   background: #cce5ff;
   color: #004085;
 }
 
-.linked-stone-types {
+.stone-types-list {
   font-size: 13px;
   color: #555;
   margin-bottom: 6px;
   line-height: 1.5;
 }
 
-.linked-stone-totals {
+.stone-totals-info {
   font-size: 12px;
   color: #888;
 }
 
-.order-summary {
+/* ملخص الطلبية */
+.order-summary-section {
   background: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.order-summary h3 {
+.order-summary-section h3 {
   margin-top: 0;
   margin-bottom: 20px;
   color: #333;
 }
 
-.summary-stats {
+.summary-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
-.stat-item {
+.stat-item-box {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -374,73 +386,75 @@
   border-radius: 8px;
 }
 
-.stat-label {
+.stat-label-text {
   font-size: 14px;
   color: #666;
   margin-bottom: 5px;
 }
 
-.stat-value {
+.stat-value-number {
   font-size: 24px;
   font-weight: bold;
   color: #333;
 }
 
-.stat-value.success {
+.stat-value-number.success {
   color: #28a745;
 }
 
-.stat-value.warning {
+.stat-value-number.warning {
   color: #ffc107;
 }
 
-.loading, .not-found {
+/* حالات التحميل والخطأ */
+.loading-state,
+.not-found-state {
   text-align: center;
   padding: 50px;
   font-size: 20px;
   color: #666;
 }
 
+/* استجابة للشاشات الصغيرة */
 @media (max-width: 768px) {
-  .order-info-grid {
+  .info-grid-layout {
     grid-template-columns: 1fr;
   }
   
-  .summary-stats {
+  .summary-stats-grid {
     grid-template-columns: 1fr;
   }
   
-  .order-header {
+  .order-header-section {
     flex-direction: column;
     gap: 15px;
   }
   
-  .order-title {
+  .order-title-group {
     flex-direction: column;
     text-align: center;
   }
 
-  .linked-stones-list {
+  .stones-grid-list {
     grid-template-columns: 1fr;
   }
 
-  .order-header-actions {
+  .order-actions-wrapper {
     flex-direction: column;
     gap: 10px;
     width: 100%;
   }
 
-  .btn-print, .btn-back {
+  .btn-print-action, .btn-back-action {
     width: 100%;
   }
 
-
-
   /* ==========================
-   Print Styles
-========================== */
-.print-only-header {
-  display: none;
+     Print Styles
+  ========================== */
+  .print-only-header-display {
+    display: none;
+  }
 }
 
 @media print {
@@ -462,12 +476,12 @@
     visibility: hidden;
   }
 
-  #order-print-area,
-  #order-print-area * {
+  #print-area-container,
+  #print-area-container * {
     visibility: visible;
   }
 
-  #order-print-area {
+  #print-area-container {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -476,11 +490,11 @@
     margin: 0;
   }
 
-  .no-print {
+  .no-print-hidden {
     display: none !important;
   }
 
-  .print-only-header {
+  .print-only-header-display {
     display: block;
     text-align: center;
     margin-bottom: 20px;
@@ -488,26 +502,26 @@
     padding-bottom: 10px;
   }
 
-  .print-only-header h1 {
+  .print-only-header-display h1 {
     margin: 0;
     font-size: 24px;
   }
 
-  .print-date {
+  .print-date-info {
     margin-top: 5px;
     font-size: 13px;
   }
 
-  .order-info-grid {
+  .info-grid-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     margin-bottom: 20px;
   }
 
-  .info-card,
-  .items-section,
-  .order-summary {
+  .info-card-component,
+  .items-section-wrapper,
+  .order-summary-section {
     box-shadow: none;
     border: 1px solid #000;
     border-radius: 0;
@@ -515,29 +529,29 @@
     page-break-inside: avoid;
   }
 
-  .order-items-table {
+  .items-data-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
   }
 
-  .order-items-table th,
-  .order-items-table td {
+  .items-data-table th,
+  .items-data-table td {
     border: 1px solid #000;
     padding: 6px;
   }
 
-  .order-items-table th {
+  .items-data-table th {
     background: #eee !important;
   }
 
-  .summary-stats {
+  .summary-stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
   }
 
-  .stat-item {
+  .stat-item-box {
     border: 1px solid #000;
     background: white;
   }
@@ -558,4 +572,4 @@
     display: table-footer-group;
   }
 }
-}
+
