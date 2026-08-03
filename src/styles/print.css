@@ -431,4 +431,36 @@
         size: A4;
         margin: 0;
     }
+
+
+    /* ===== إصلاح مشكلة الشاشة البيضاء في الطباعة الجماعية ===== */
+@media print {
+    /* التأكد من ظهور محتوى الطباعة */
+    .print-batch-container,
+    .print-batch-container .print-container,
+    .print-batch-container .print-page {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        min-height: 297mm !important;
+    }
+    
+    /* إجبار عرض المحتوى */
+    .print-batch-item {
+        display: block !important;
+        visibility: visible !important;
+        width: 210mm !important;
+        margin: 0 auto !important;
+        page-break-after: always !important;
+    }
+    
+    /* حل مشكلة الشاشة البيضاء */
+    body {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 100vh !important;
+    }
+}
 }
