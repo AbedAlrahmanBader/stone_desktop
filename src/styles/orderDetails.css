@@ -1,15 +1,19 @@
-/* orderDetails.css - تم تغيير جميع أسماء التنسيقات */
+/* orderDetails.css - نسخة معدلة بأسماء تنسيقات محسنة */
 
-/* الحاوية الرئيسية */
-.order-details-container {
+/* ========================================
+   الحاوية الرئيسية - Main Container
+   ======================================== */
+.page-wrapper {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   direction: rtl;
 }
 
-/* رأس الطلبية */
-.order-header-section {
+/* ========================================
+   رأس الصفحة - Page Header
+   ======================================== */
+.page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -20,18 +24,18 @@
   margin-bottom: 30px;
 }
 
-.order-title-group {
+.header-title-wrapper {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-.order-title-group h1 {
+.header-title-wrapper h1 {
   margin: 0;
   color: #333;
 }
 
-.order-number-badge {
+.order-id-tag {
   background: #007bff;
   color: white;
   padding: 5px 15px;
@@ -40,8 +44,10 @@
   font-weight: bold;
 }
 
-/* أزرار الإجراءات */
-.btn-back-action {
+/* ========================================
+   أزرار التحكم - Control Buttons
+   ======================================== */
+.control-btn-back {
   background: #6c757d;
   color: white;
   border: none;
@@ -52,11 +58,11 @@
   transition: background 0.3s;
 }
 
-.btn-back-action:hover {
+.control-btn-back:hover {
   background: #5a6268;
 }
 
-.btn-print-action {
+.control-btn-print {
   background: #28a745;
   color: white;
   border: none;
@@ -68,31 +74,33 @@
   margin-left: 10px;
 }
 
-.btn-print-action:hover {
+.control-btn-print:hover {
   background: #218838;
 }
 
-.order-actions-wrapper {
+.header-controls-group {
   display: flex;
   align-items: center;
 }
 
-/* شبكة المعلومات */
-.info-grid-layout {
+/* ========================================
+   بطاقات المعلومات - Info Cards
+   ======================================== */
+.info-cards-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   margin-bottom: 30px;
 }
 
-.info-card-component {
+.info-card {
   background: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.info-card-component h3 {
+.info-card h3 {
   margin-top: 0;
   margin-bottom: 15px;
   color: #333;
@@ -100,17 +108,19 @@
   padding-bottom: 10px;
 }
 
-.info-card-component p {
+.info-card p {
   margin: 10px 0;
   color: #555;
 }
 
-.info-card-component strong {
+.info-card strong {
   color: #333;
 }
 
-/* شارة الحالة */
-.status-indicator {
+/* ========================================
+   شارة الحالة - Status Badge
+   ======================================== */
+.status-badge {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
@@ -119,18 +129,20 @@
   margin-right: 8px;
 }
 
-.status-indicator.open {
+.status-badge.type-open {
   background: #fff3cd;
   color: #856404;
 }
 
-.status-indicator.completed {
+.status-badge.type-completed {
   background: #d4edda;
   color: #155724;
 }
 
-/* قسم الأصناف */
-.items-section-wrapper {
+/* ========================================
+   قسم الأصناف - Items Section
+   ======================================== */
+.items-section {
   background: white;
   padding: 20px;
   border-radius: 8px;
@@ -138,22 +150,22 @@
   margin-bottom: 30px;
 }
 
-.items-section-wrapper h2 {
+.items-section h2 {
   margin-top: 0;
   margin-bottom: 20px;
   color: #333;
 }
 
-.table-scroll-wrapper {
+.table-responsive-wrap {
   overflow-x: auto;
 }
 
-.items-data-table {
+.items-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.items-data-table th {
+.items-table th {
   background: #f8f9fa;
   color: #333;
   padding: 12px;
@@ -162,18 +174,18 @@
   font-weight: bold;
 }
 
-.items-data-table td {
+.items-table td {
   padding: 12px;
   border-bottom: 1px solid #dee2e6;
   color: #555;
 }
 
-.items-data-table tr:hover {
+.items-table tr:hover {
   background: #f8f9fa;
 }
 
-.items-data-table td input,
-.items-data-table td select {
+.items-table td input,
+.items-table td select {
   width: 100%;
   min-width: 70px;
   padding: 6px 8px;
@@ -183,15 +195,17 @@
   color: #333;
 }
 
-.items-data-table td input:focus,
-.items-data-table td select:focus {
+.items-table td input:focus,
+.items-table td select:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
 }
 
-/* حالة الصنف */
-.item-status-badge {
+/* ========================================
+   حالة الصنف - Item Status
+   ======================================== */
+.item-status-tag {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
@@ -199,34 +213,35 @@
   font-weight: bold;
 }
 
-.item-status-badge.completed {
+.item-status-tag.state-completed {
   background: #d4edda;
   color: #155724;
 }
 
-.item-status-badge.pending {
+.item-status-tag.state-pending {
   background: #fff3cd;
   color: #856404;
 }
 
-/* الناقص */
-.remaining-value-highlight {
+/* ========================================
+   القيم البارزة - Highlighted Values
+   ======================================== */
+.remaining-value {
   font-weight: bold;
   color: #dc3545;
 }
 
-.item-details-text {
+.item-notes-cell {
   max-width: 150px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* أزرار إدارة الأصناف */
-.btn-item-edit,
-.btn-item-delete,
-.btn-item-save,
-.btn-item-cancel {
+/* ========================================
+   أزرار إدارة الأصناف - Item Action Buttons
+   ======================================== */
+.item-action-btn {
   border: none;
   border-radius: 5px;
   padding: 6px 12px;
@@ -237,50 +252,43 @@
   transition: opacity 0.2s;
 }
 
-.btn-item-edit:last-child,
-.btn-item-delete:last-child,
-.btn-item-save:last-child,
-.btn-item-cancel:last-child {
+.item-action-btn:last-child {
   margin-inline-end: 0;
 }
 
-.btn-item-edit {
+.item-action-btn.action-edit {
   background: #e7f1ff;
   color: #0056b3;
 }
 
-.btn-item-delete {
+.item-action-btn.action-delete {
   background: #f8d7da;
   color: #842029;
 }
 
-.btn-item-save {
+.item-action-btn.action-save {
   background: #28a745;
   color: white;
 }
 
-.btn-item-cancel {
+.item-action-btn.action-cancel {
   background: #e2e3e5;
   color: #383d41;
 }
 
-.btn-item-edit:hover,
-.btn-item-delete:hover,
-.btn-item-save:hover,
-.btn-item-cancel:hover {
+.item-action-btn:hover {
   opacity: 0.85;
 }
 
-.btn-item-edit:disabled,
-.btn-item-delete:disabled,
-.btn-item-save:disabled,
-.btn-item-cancel:disabled {
+.item-action-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* قسم المشاتيح المرتبطة */
-.linked-stones-section-wrapper {
+/* ========================================
+   قسم المشاتيح المرتبطة - Linked Stones
+   ======================================== */
+.stones-section {
   background: white;
   padding: 20px;
   border-radius: 8px;
@@ -288,26 +296,26 @@
   margin-bottom: 30px;
 }
 
-.linked-stones-section-wrapper h2 {
+.stones-section h2 {
   margin-top: 0;
   margin-bottom: 20px;
   color: #333;
 }
 
-.stones-loading-message,
-.stones-empty-message {
+.stones-loading-text,
+.stones-empty-text {
   color: #888;
   font-size: 14px;
   margin: 0;
 }
 
-.stones-grid-list {
+.stones-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 14px;
 }
 
-.stone-card-item {
+.stone-card {
   background: #f8f9fa;
   border: 1px solid #dee2e6;
   border-radius: 8px;
@@ -315,18 +323,18 @@
   transition: box-shadow 0.2s;
 }
 
-.stone-card-item:hover {
+.stone-card:hover {
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-.stone-barcode-image {
+.stone-barcode-svg {
   display: block;
   width: 100%;
   height: auto;
   margin-bottom: 8px;
 }
 
-.stone-status-badge {
+.stone-status-tag {
   display: inline-block;
   padding: 3px 10px;
   border-radius: 20px;
@@ -335,49 +343,51 @@
   margin-bottom: 10px;
 }
 
-.stone-status-badge.in-stock {
+.stone-status-tag.tag-in-stock {
   background: #d4edda;
   color: #155724;
 }
 
-.stone-status-badge.shipped {
+.stone-status-tag.tag-shipped {
   background: #cce5ff;
   color: #004085;
 }
 
-.stone-types-list {
+.stone-types-text {
   font-size: 13px;
   color: #555;
   margin-bottom: 6px;
   line-height: 1.5;
 }
 
-.stone-totals-info {
+.stone-measurements {
   font-size: 12px;
   color: #888;
 }
 
-/* ملخص الطلبية */
-.order-summary-section {
+/* ========================================
+   ملخص الطلبية - Order Summary
+   ======================================== */
+.summary-section {
   background: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.order-summary-section h3 {
+.summary-section h3 {
   margin-top: 0;
   margin-bottom: 20px;
   color: #333;
 }
 
-.summary-stats-grid {
+.summary-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
-.stat-item-box {
+.summary-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -386,73 +396,78 @@
   border-radius: 8px;
 }
 
-.stat-label-text {
+.summary-label {
   font-size: 14px;
   color: #666;
   margin-bottom: 5px;
 }
 
-.stat-value-number {
+.summary-value {
   font-size: 24px;
   font-weight: bold;
   color: #333;
 }
 
-.stat-value-number.success {
+.summary-value.value-success {
   color: #28a745;
 }
 
-.stat-value-number.warning {
+.summary-value.value-warning {
   color: #ffc107;
 }
 
-/* حالات التحميل والخطأ */
-.loading-state,
-.not-found-state {
+/* ========================================
+   حالات التحميل والخطأ - Loading & Error
+   ======================================== */
+.loading-screen,
+.not-found-screen {
   text-align: center;
   padding: 50px;
   font-size: 20px;
   color: #666;
 }
 
-/* استجابة للشاشات الصغيرة */
+/* ========================================
+   التجاوب مع الشاشات الصغيرة - Responsive
+   ======================================== */
 @media (max-width: 768px) {
-  .info-grid-layout {
+  .info-cards-grid {
     grid-template-columns: 1fr;
   }
   
-  .summary-stats-grid {
+  .summary-grid {
     grid-template-columns: 1fr;
   }
   
-  .order-header-section {
+  .page-header {
     flex-direction: column;
     gap: 15px;
   }
   
-  .order-title-group {
+  .header-title-wrapper {
     flex-direction: column;
     text-align: center;
   }
 
-  .stones-grid-list {
+  .stones-grid {
     grid-template-columns: 1fr;
   }
 
-  .order-actions-wrapper {
+  .header-controls-group {
     flex-direction: column;
     gap: 10px;
     width: 100%;
   }
 
-  .btn-print-action, .btn-back-action {
+  .control-btn-print,
+  .control-btn-back {
     width: 100%;
   }
 
-  /* ==========================
-     Print Styles
-  ========================== */
-  .print-only-header-display {
+  /* ========================================
+     أنماط الطباعة - Print Styles
+     ======================================== */
+  .print-header {
     display: none;
   }
 }
@@ -476,12 +491,12 @@
     visibility: hidden;
   }
 
-  #print-area-container,
-  #print-area-container * {
+  #print-area,
+  #print-area * {
     visibility: visible;
   }
 
-  #print-area-container {
+  #print-area {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -490,11 +505,11 @@
     margin: 0;
   }
 
-  .no-print-hidden {
+  .hide-on-print {
     display: none !important;
   }
 
-  .print-only-header-display {
+  .print-header {
     display: block;
     text-align: center;
     margin-bottom: 20px;
@@ -502,26 +517,26 @@
     padding-bottom: 10px;
   }
 
-  .print-only-header-display h1 {
+  .print-header h1 {
     margin: 0;
     font-size: 24px;
   }
 
-  .print-date-info {
+  .print-date {
     margin-top: 5px;
     font-size: 13px;
   }
 
-  .info-grid-layout {
+  .info-cards-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     margin-bottom: 20px;
   }
 
-  .info-card-component,
-  .items-section-wrapper,
-  .order-summary-section {
+  .info-card,
+  .items-section,
+  .summary-section {
     box-shadow: none;
     border: 1px solid #000;
     border-radius: 0;
@@ -529,29 +544,29 @@
     page-break-inside: avoid;
   }
 
-  .items-data-table {
+  .items-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
   }
 
-  .items-data-table th,
-  .items-data-table td {
+  .items-table th,
+  .items-table td {
     border: 1px solid #000;
     padding: 6px;
   }
 
-  .items-data-table th {
+  .items-table th {
     background: #eee !important;
   }
 
-  .summary-stats-grid {
+  .summary-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
   }
 
-  .stat-item-box {
+  .summary-item {
     border: 1px solid #000;
     background: white;
   }
