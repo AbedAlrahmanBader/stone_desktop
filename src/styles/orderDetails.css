@@ -417,44 +417,151 @@
   color: #666;
 }
 
-/* ===== طباعة تفاصيل الطلبية =====
-   ملاحظة: منطق إخفاء بقية الصفحة موجود مركزياً في print-core.css
-   عبر body[data-print-mode="order"]. هون بس نضبط شكل الصفحة
-   المطبوعة وإخفاء عناصر التحكم غير المرغوبة بالطباعة. */
-@media print {
-  .btn-print-order1,
-  .btn-back-action1,
-  .header-actions1,
-  .btn-item-edit1,
-  .btn-item-delete1,
-  .btn-item-save1,
-  .btn-item-cancel1 {
-    display: none !important;
-  }
+/* ===== طباعة الطلبية الحالية ===== */
 
-  body {
-    background: white !important;
-  }
-
-  .order-details-container1 {
-    max-width: 100% !important;
-    padding: 0 !important;
-  }
-
-  .info-card-component1,
-  .items-section-wrapper1,
-  .linked-stones-section-wrapper1,
-  .order-summary-section1 {
-    box-shadow: none !important;
-    break-inside: avoid;
-  }
-
-  @page {
-    margin: 15mm;
-  }
+/* حاوية طباعة الطلبية */
+.print-order-container1 {
+  display: none;
+  width: 100%;
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 0;
+  background: white;
 }
 
-/* استجابة للشاشات الصغيرة */
+.print-order-container1.active1 {
+  display: block;
+}
+
+.print-order-item1 {
+  width: 100%;
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 0;
+  page-break-after: always;
+}
+
+/* أنماط الطباعة للصفحة */
+.print-page1 {
+  width: 100%;
+  min-height: 297mm;
+  background: #fff;
+  padding: 14mm 12mm;
+  font-family: "Arial", "Tahoma", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  box-sizing: border-box;
+  direction: rtl;
+}
+
+.print-page1 .print-header1 {
+  text-align: center;
+  border-bottom: 2px solid #333;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.print-page1 .print-header1 h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #000;
+}
+
+.print-page1 .print-header1 .print-order-number1 {
+  font-size: 18px;
+  color: #555;
+  margin-top: 5px;
+}
+
+.print-page1 .print-order-info1 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.print-page1 .print-order-info1 .info-group1 strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.print-page1 .print-order-info1 .info-group1 p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.print-page1 .print-items-table1 {
+  margin: 20px 0;
+}
+
+.print-page1 .print-items-table1 table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.print-page1 .print-items-table1 th {
+  background: #333;
+  color: white;
+  padding: 10px;
+  text-align: right;
+  border: 1px solid #333;
+}
+
+.print-page1 .print-items-table1 td {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  text-align: right;
+}
+
+.print-page1 .print-items-table1 tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.print-page1 .print-summary1 {
+  margin-top: 30px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.print-page1 .print-summary1 .summary-grid1 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.print-page1 .print-summary1 .summary-item1 {
+  text-align: center;
+  padding: 10px;
+  background: white;
+  border-radius: 5px;
+}
+
+.print-page1 .print-summary1 .summary-item1 .label1 {
+  font-size: 12px;
+  color: #666;
+}
+
+.print-page1 .print-summary1 .summary-item1 .value1 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.print-page1 .print-footer1 {
+  margin-top: 40px;
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+  font-size: 12px;
+  color: #888;
+}
+
 @media (max-width: 768px) {
   .info-grid-layout1 {
     grid-template-columns: 1fr;
