@@ -448,12 +448,10 @@ function OrderDetails() {
 
             <div className="print-order-info">
               <div className="info-group">
-                <strong>معلومات العميل</strong>
                 <p><strong>الاسم:</strong> {order.customer?.name}</p>
                 <p><strong>الهاتف:</strong> {order.customer?.phone || "---"}</p>
               </div>
               <div className="info-group">
-                <strong>معلومات الطلبية</strong>
                 <p><strong>الحالة:</strong> {order.status === "Open" ? "مفتوحة" : "مكتملة"}</p>
                 {order.description && (
                   <p><strong>الوصف:</strong> {order.description}</p>
