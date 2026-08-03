@@ -370,8 +370,6 @@
 
 /* ---------- Notes & signatures ---------- */
 
-/* هاد العنصر أول شي بعد آخر قسم بالمحتوى، فبيدفع كل شي بعده (الملاحظات + التواقيع + الفوتر)
-   لتحت لآخر الصفحة، بفضل flex-direction:column على .print-page */
 .notes-section {
     margin-top: auto;
     padding-top: 20px;
@@ -398,7 +396,7 @@
     font-style: italic;
 }
 
-/* ---------- Print media ---------- */
+/* ---------- Print media (وضع الطباعة الفردية) ---------- */
 
 @media print {
     .print-container {
@@ -437,7 +435,7 @@
         visibility: visible;
     }
 
-    /* تثبيت الورقة في أعلى الصفحة */
+    /* تثبيت الورقة في أعلى الصفحة (وضع "إرسالية واحدة") */
     .print-page {
         position: absolute;
         top: 0;
@@ -484,6 +482,38 @@
         size: A4;
         margin: 0;
     }
+}
 
+/* ===== وضع الطباعة الجماعية (أكثر من إرسالية مع بعض) ===== */
+@media print {
 
+    /* تعطيل التموضع المطلق يلي مصمم لإرسالية واحدة فقط،
+       عشان كل إرسالية ترجع لتدفقها الطبيعي وينفصلوا عن بعض بصفحات */
+    .print-batch-container .print-page {
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        width: 210mm;
+        height: auto;
+        min-height: 297mm;
+        margin: 0 auto;
+        padding: 10mm;
+        page-break-inside: avoid;
+    }
+
+    .print-batch-container .print-container {
+        min-height: 0;
+        padding: 0;
+        background: transparent;
+    }
+
+    .print-batch-item {
+        width: 210mm;
+        margin: 0 auto;
+    }
+
+    /* آخر إرسالية بالدفعة ما لازم تعمل فصل صفحة بعدها */
+    .print-batch-item:last-child {
+        page-break-after: auto !important;
+    }
 }

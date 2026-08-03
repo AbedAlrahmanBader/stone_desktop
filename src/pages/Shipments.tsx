@@ -67,6 +67,7 @@ function Shipments() {
 
 
     // لما تنجهز دفعة الطباعة، افتح نافذة الطباعة تلقائيًا
+    // وبعد ما يخلص المستخدم من الطباعة (أو يلغيها)، رجّع الصفحة لوضعها الطبيعي
     useEffect(() => {
 
         if (printBatch.length > 0) {
@@ -75,7 +76,16 @@ function Shipments() {
                 window.print();
             }, 200);
 
-            return () => clearTimeout(timer);
+            const handleAfterPrint = () => {
+                setPrintBatch([]);
+            };
+
+            window.addEventListener("afterprint", handleAfterPrint);
+
+            return () => {
+                clearTimeout(timer);
+                window.removeEventListener("afterprint", handleAfterPrint);
+            };
 
         }
 
