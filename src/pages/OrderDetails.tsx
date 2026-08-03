@@ -443,9 +443,7 @@ function OrderDetails() {
             <div className="print-header">
               <h1>تفاصيل الطلبية</h1>
               <div className="print-order-number">رقم الطلبية: #{order.orderNumber}</div>
-              <div style={{ marginTop: '5px', fontSize: '14px', color: '#666' }}>
-                تاريخ الطباعة: {new Date().toLocaleDateString('ar')}
-              </div>
+            
             </div>
 
             <div className="print-order-info">
@@ -453,7 +451,6 @@ function OrderDetails() {
                 <strong>معلومات العميل</strong>
                 <p><strong>الاسم:</strong> {order.customer?.name}</p>
                 <p><strong>الهاتف:</strong> {order.customer?.phone || "---"}</p>
-                <p><strong>البريد:</strong> {order.customer?.email || "---"}</p>
               </div>
               <div className="info-group">
                 <strong>معلومات الطلبية</strong>
@@ -547,12 +544,7 @@ function OrderDetails() {
               </div>
             </div>
 
-            <div className="print-footer">
-              <p>تم الطباعة من نظام إدارة الطلبيات</p>
-              <p style={{ marginTop: '5px', fontSize: '10px' }}>
-                {new Date().toLocaleString('ar')}
-              </p>
-            </div>
+          
           </div>
         </div>
       </div>
