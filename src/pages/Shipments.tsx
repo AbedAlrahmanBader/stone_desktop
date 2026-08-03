@@ -512,41 +512,38 @@ function Shipments() {
             }
 
             {/* منطقة طباعة كل الإرساليات دفعة وحدة */}
-         {/* عند الطباعة الجماعية، إخفِ كل شي غير منطقة الطباعة */}
-{
-    printBatch.length > 0 && (
+            {
 
-        <style>{`
-            @media print {
-                /* إضافة كلاس للـ body لتمييز وضع الطباعة الجماعية */
-                body.printing-batch .shipments > *:not(.print-batch-container) {
-                    display: none !important;
-                }
-                
-                body.printing-batch .print-batch-container {
-                    display: block !important;
-                    width: 100%;
-                }
-                
-                body.printing-batch .print-batch-container * {
-                    visibility: visible !important;
-                }
-                
-                /* إلغاء أي إخفاء عام */
-                body.printing-batch * {
-                    visibility: visible !important;
-                }
+                printBatch.length > 0 && (
+
+                    <div className="print-batch-container">
+
+                        {
+                            printBatch.map((shipment, index) => (
+
+                                <div
+                                    key={shipment._id}
+                                    className="print-batch-item"
+                                    style={{
+                                        pageBreakAfter:
+                                            index < printBatch.length - 1
+                                                ? "always"
+                                                : "auto",
+                                    }}
+                                >
+
+                                    <ShipmentPrint shipment={shipment} />
+
+                                </div>
+
+                            ))
+                        }
+
+                    </div>
+
+                )
+
             }
-            
-            /* إضافة الكلاس للـ body */
-            body.printing-batch {
-                /* هذا الكلاس يضاف تلقائياً عند الطباعة */
-            }
-        `}</style>
-
-    )
-
-}
 
             {/* عند الطباعة الجماعية، إخفِ كل شي غير منطقة الطباعة */}
             {
@@ -559,19 +556,11 @@ function Shipments() {
                             }
                             .print-batch-container {
                                 display: block !important;
-                                width: 100%;
-                            }
-                            .print-batch-container * {
-                                visibility: visible !important;
-                            }
-                            body * {
-                                visibility: visible !important;
                             }
                         }
                     `}</style>
 
                 )
-
             }
 
         </div>
