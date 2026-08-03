@@ -110,7 +110,7 @@
 .header-main {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: flex-end;
 }
 
 .company-name-block {
@@ -396,10 +396,7 @@
     font-style: italic;
 }
 
-/* ---------- Print media (وضع الطباعة الفردية) =====
-   ملاحظة: الإخفاء العام لبقية الصفحة (visibility: hidden)
-   بقى محصور بالكامل في print-core.css عبر body[data-print-mode].
-   هون بس شكل/تموضع .print-page نفسها. */
+/* ---------- Print media (وضع الطباعة الفردية) ---------- */
 
 @media print {
     .print-container {
@@ -408,12 +405,38 @@
     }
 
     .print-button {
-        display: none !important;
+        display: none;
+    }
+
+    .print-page {
+        box-shadow: none;
+        width: auto;
+        min-height: auto;
+        height: 297mm;
+        padding: 8mm 10mm;
+    }
+
+    @page {
+        size: A4;
+        margin: 8mm;
     }
 }
 
 @media print {
-    body[data-print-mode="shipment-single"] .print-page {
+
+    /* إخفاء كل الصفحة */
+    body * {
+        visibility: hidden;
+    }
+
+    /* إظهار ورقة الإرسالية فقط */
+    .print-page,
+    .print-page * {
+        visibility: visible;
+    }
+
+    /* تثبيت الورقة في أعلى الصفحة (وضع "إرسالية واحدة") */
+    .print-page {
         position: absolute;
         top: 0;
         left: 0;
@@ -425,17 +448,22 @@
         background: white;
     }
 
+    /* إخفاء زر الطباعة */
+    .print-button {
+        display: none !important;
+    }
+
     /* إخفاء أي تأثيرات تحرير عند الطباعة */
-    body[data-print-mode="shipment-single"] .print-page[contenteditable="true"] {
+    .print-page[contenteditable="true"] {
         box-shadow: none !important;
     }
 
-    body[data-print-mode="shipment-single"] .print-page[contenteditable="true"] td:hover,
-    body[data-print-mode="shipment-single"] .print-page[contenteditable="true"] th:hover,
-    body[data-print-mode="shipment-single"] .print-page[contenteditable="true"] .value:hover,
-    body[data-print-mode="shipment-single"] .print-page[contenteditable="true"] .detail-row:hover,
-    body[data-print-mode="shipment-single"] .print-page[contenteditable="true"] .company-name:hover,
-    body[data-print-mode="shipment-single"] .print-page[contenteditable="true"] .license-value:hover {
+    .print-page[contenteditable="true"] td:hover,
+    .print-page[contenteditable="true"] th:hover,
+    .print-page[contenteditable="true"] .value:hover,
+    .print-page[contenteditable="true"] .detail-row:hover,
+    .print-page[contenteditable="true"] .company-name:hover,
+    .print-page[contenteditable="true"] .license-value:hover {
         background-color: transparent !important;
         outline: none !important;
     }
@@ -448,6 +476,12 @@
     .unit-print-label {
         display: inline !important;
     }
+
+    /* إعداد حجم الورقة */
+    @page {
+        size: A4;
+        margin: 0;
+    }
 }
 
 /* ===== وضع الطباعة الجماعية (أكثر من إرسالية مع بعض) ===== */
@@ -455,7 +489,7 @@
 
     /* تعطيل التموضع المطلق يلي مصمم لإرسالية واحدة فقط،
        عشان كل إرسالية ترجع لتدفقها الطبيعي وينفصلوا عن بعض بصفحات */
-    body[data-print-mode="shipment-batch"] .print-batch-container .print-page {
+    .print-batch-container .print-page {
         position: static !important;
         top: auto !important;
         left: auto !important;
@@ -467,19 +501,19 @@
         page-break-inside: avoid;
     }
 
-    body[data-print-mode="shipment-batch"] .print-batch-container .print-container {
+    .print-batch-container .print-container {
         min-height: 0;
         padding: 0;
         background: transparent;
     }
 
-    body[data-print-mode="shipment-batch"] .print-batch-item {
+    .print-batch-item {
         width: 210mm;
         margin: 0 auto;
     }
 
     /* آخر إرسالية بالدفعة ما لازم تعمل فصل صفحة بعدها */
-    body[data-print-mode="shipment-batch"] .print-batch-item:last-child {
+    .print-batch-item:last-child {
         page-break-after: auto !important;
     }
 }
