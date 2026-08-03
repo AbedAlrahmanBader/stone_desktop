@@ -344,7 +344,6 @@ function Shipments() {
                         <th>المساحة</th>
                         <th>الحالة</th>
                         <th>التاريخ</th>
-                        <th>طباعة</th>
                         <th>إجراءات</th>
 
                     </tr>
