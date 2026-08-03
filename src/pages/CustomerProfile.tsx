@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import api from "../api/axios";
-import ShipmentPrint from "../components/ShipmentPrint";
+import ShipmentPrint from "../components/ShipmentPrintBatch";
 
 import "../styles/customerProfile.css";
 
@@ -654,7 +654,6 @@ function CustomerProfile() {
               ✕ إغلاق
             </button>
 
-            <ShipmentPrint shipment={selectedShipment} />
           </div>
         </div>
       )}
