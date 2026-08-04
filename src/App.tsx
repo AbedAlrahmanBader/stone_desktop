@@ -4,7 +4,7 @@ import {
   Route
 } from "react-router-dom";
 
-import OrderDetails from "./pages/OrderDetails";
+import OrderDetails from "./pages/OrderDetail";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";
