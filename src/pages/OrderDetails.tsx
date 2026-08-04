@@ -374,7 +374,39 @@ function OrderDetails() {
         )}
       </div>
 
-    
+      <div className="order-summary-section1">
+        <h3>ملخص الطلبية</h3>
+        <div className="summary-stats-grid1">
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">إجمالي الأصناف</span>
+            <span className="stat-value-number1">{order.items.length}</span>
+          </div>
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">الأصناف المكتملة</span>
+            <span className="stat-value-number1 success1">
+              {order.items.filter((item: any) => item.remainingQty === 0).length}
+            </span>
+          </div>
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">الأصناف قيد التنفيذ</span>
+            <span className="stat-value-number1 warning1">
+              {order.items.filter((item: any) => item.remainingQty > 0).length}
+            </span>
+          </div>
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">إجمالي الكمية المطلوبة</span>
+            <span className="stat-value-number1">{totalRequired}</span>
+          </div>
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">إجمالي المنجز</span>
+            <span className="stat-value-number1 success1">{totalCompleted}</span>
+          </div>
+          <div className="stat-item-box1">
+            <span className="stat-label-text1">إجمالي الناقص</span>
+            <span className="stat-value-number1 warning1">{totalRemaining}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
