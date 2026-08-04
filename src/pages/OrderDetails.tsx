@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import JsBarcode from "jsbarcode";
@@ -37,6 +37,9 @@ function OrderDetails() {
   const [stones, setStones] = useState<OrderStone[]>([]);
   const [loadingStones, setLoadingStones] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
+  
+  // Ref للحاوية المطبوعة
+  const printContainerRef = useRef<HTMLDivElement>(null);
 
   const loadOrder = async () => {
     try {
@@ -123,7 +126,7 @@ function OrderDetails() {
     }
   };
 
-  // ===== وظيفة الطباعة الجماعية للطلب الحالي =====
+  // ===== وظيفة الطباعة =====
   const handlePrintOrder = () => {
     if (!order) {
       alert("لا توجد طلبية للطباعة");
@@ -131,178 +134,29 @@ function OrderDetails() {
     }
 
     setIsPrinting(true);
-    const printContainer = document.querySelector('.print-order-container1');
     
-    if (printContainer) {
-      // بناء محتوى الطباعة للطلب الحالي بشكل جماعي
-      const totalRequired = order.items.reduce(
-        (sum: number, item: any) => sum + (item.requiredQty || 0), 0
-      );
-      const totalRemaining = order.items.reduce(
-        (sum: number, item: any) => sum + (item.remainingQty || 0), 0
-      );
-      const totalCompleted = totalRequired - totalRemaining;
-
-      let printContent = `
-        <div class="print-order-item1">
-          <div class="print-page1">
-            <div class="print-header1">
-              <h1>📋 تفاصيل الطلبية</h1>
-              <div class="print-order-number1">رقم الطلبية: #${order.orderNumber}</div>
-              <div style="font-size: 12px; color: #888; margin-top: 5px;">
-                تاريخ الطباعة: ${new Date().toLocaleDateString("ar")} - ${new Date().toLocaleTimeString("ar")}
-              </div>
-            </div>
-
-            <div class="print-order-info1">
-              <div class="info-group1">
-                <h4 style="margin-bottom: 10px; color: #333;">👤 معلومات العميل</h4>
-                <p><strong>الاسم:</strong> ${order.customer?.name || '---'}</p>
-                <p><strong>الهاتف:</strong> ${order.customer?.phone || '---'}</p>
-                <p><strong>البريد:</strong> ${order.customer?.email || '---'}</p>
-                <p><strong>العنوان:</strong> ${order.customer?.address || '---'}</p>
-              </div>
-              <div class="info-group1">
-                <h4 style="margin-bottom: 10px; color: #333;">📦 معلومات الطلبية</h4>
-                <p><strong>الحالة:</strong> <span style="color: ${order.status === "Open" ? '#856404' : '#155724'};">${order.status === "Open" ? "🟡 مفتوحة" : "🟢 مكتملة"}</span></p>
-                ${order.description ? `<p><strong>الوصف:</strong> ${order.description}</p>` : ''}
-                <p><strong>تاريخ الإنشاء:</strong> ${new Date(order.createdAt).toLocaleDateString("ar")}</p>
-                <p><strong>آخر تحديث:</strong> ${new Date(order.updatedAt).toLocaleDateString("ar")}</p>
-              </div>
-            </div>
-
-            <div class="print-items-table1">
-              <h3 style="margin-bottom: 10px;">📊 قائمة الأصناف</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>نوع الحجر</th>
-                    <th>الطول (سم)</th>
-                    <th>العرض (سم)</th>
-                    <th>السمك (سم)</th>
-                    <th>الوحدة</th>
-                    <th>الكمية المطلوبة</th>
-                    <th>الكمية المتبقية</th>
-                    <th>التفاصيل</th>
-                    <th>الحالة</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${order.items.map((item: any, index: number) => `
-                    <tr>
-                      <td>${index + 1}</td>
-                      <td><strong>${item.stoneType}</strong></td>
-                      <td>${item.length || '---'}</td>
-                      <td>${item.width || '---'}</td>
-                      <td>${item.thickness || '---'}</td>
-                      <td>${item.unit === "pieces" ? "قطع" : item.unit === "linearMeter" ? "متر طولي" : "مساحة"}</td>
-                      <td>${item.requiredQty}</td>
-                      <td style="color: ${item.remainingQty > 0 ? '#dc3545' : '#28a745'}; font-weight: bold;">
-                        ${item.remainingQty}
-                      </td>
-                      <td>${item.details || '---'}</td>
-                      <td>
-                        <span style="color: ${item.remainingQty === 0 ? '#28a745' : '#ffc107'};">
-                          ${item.remainingQty === 0 ? '✅ مكتمل' : '⏳ قيد التنفيذ'}
-                        </span>
-                      </td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-                <tfoot>
-                  <tr style="background: #f8f9fa; font-weight: bold;">
-                    <td colspan="6" style="text-align: left;">المجموع</td>
-                    <td>${totalRequired}</td>
-                    <td>${totalRemaining}</td>
-                    <td colspan="2">${totalCompleted} مكتمل</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-
-            <div class="print-summary1">
-              <h3 style="margin-bottom: 10px;">📈 ملخص الطلبية</h3>
-              <div class="summary-grid1">
-                <div class="summary-item1" style="border-right: 3px solid #007bff;">
-                  <div class="label1">📦 إجمالي الأصناف</div>
-                  <div class="value1" style="color: #007bff;">${order.items.length}</div>
-                </div>
-                <div class="summary-item1" style="border-right: 3px solid #28a745;">
-                  <div class="label1">✅ الأصناف المكتملة</div>
-                  <div class="value1" style="color: #28a745;">
-                    ${order.items.filter((item: any) => item.remainingQty === 0).length}
-                  </div>
-                </div>
-                <div class="summary-item1" style="border-right: 3px solid #ffc107;">
-                  <div class="label1">⏳ قيد التنفيذ</div>
-                  <div class="value1" style="color: #ffc107;">
-                    ${order.items.filter((item: any) => item.remainingQty > 0).length}
-                  </div>
-                </div>
-                <div class="summary-item1" style="border-right: 3px solid #17a2b8;">
-                  <div class="label1">📊 إجمالي الكمية</div>
-                  <div class="value1" style="color: #17a2b8;">${totalRequired}</div>
-                </div>
-                <div class="summary-item1" style="border-right: 3px solid #28a745;">
-                  <div class="label1">✅ المنجز</div>
-                  <div class="value1" style="color: #28a745;">${totalCompleted}</div>
-                </div>
-                <div class="summary-item1" style="border-right: 3px solid #dc3545;">
-                  <div class="label1">⚠️ الناقص</div>
-                  <div class="value1" style="color: #dc3545;">${totalRemaining}</div>
-                </div>
-              </div>
-            </div>
-
-            ${stones.length > 0 ? `
-              <div class="print-stones-section1">
-                <h3 style="margin-bottom: 10px;">🏷️ المشاتيح المرتبطة</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
-                  ${stones.map((stone) => `
-                    <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; text-align: center; border: 1px solid #dee2e6;">
-                      <div style="font-size: 11px; color: #666; margin-bottom: 5px;">باركود</div>
-                      <div style="font-size: 16px; font-weight: bold; font-family: monospace; margin: 5px 0;">${stone.barcode}</div>
-                      <div style="font-size: 12px; color: #555;">
-                        <span style="color: ${stone.status === 'In Stock' ? '#28a745' : '#0056b3'};">
-                          ${stone.status === 'In Stock' ? '✅ متوفر' : '📤 مشحون'}
-                        </span>
-                      </div>
-                      <div style="font-size: 11px; color: #888; margin-top: 5px;">
-                        ${stone.items.map((it) => it.stoneType).join('، ')}
-                      </div>
-                      <div style="font-size: 10px; color: #999; margin-top: 3px;">
-                        ${stone.totalLinearMeter?.toFixed(2) || 0} م.ط | ${stone.totalArea?.toFixed(2) || 0} م²
-                      </div>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            ` : ''}
-
-            <div class="print-footer1">
-              <p>تم إنشاء هذا التقرير بواسطة نظام إدارة الطلبيات</p>
-              <p style="font-size: 10px; color: #aaa;">© ${new Date().getFullYear()} - جميع الحقوق محفوظة</p>
-            </div>
-          </div>
-        </div>
-      `;
-
-      printContainer.innerHTML = printContent;
-      printContainer.classList.add('active1');
-    }
-
+    // نستخدم setTimeout للتأكد من تحديث DOM
     setTimeout(() => {
-      window.print();
-    }, 500);
-
-    setTimeout(() => {
-      if (printContainer) {
-        printContainer.classList.remove('active1');
-        printContainer.innerHTML = '';
+      if (printContainerRef.current) {
+        // جعل الحاوية مرئية
+        printContainerRef.current.style.display = 'block';
+        printContainerRef.current.classList.add('active1');
+        
+        // نمرر الأمر للطباعة بعد ظهور المحتوى
+        setTimeout(() => {
+          window.print();
+        }, 500);
+        
+        // إعادة إخفاء الحاوية بعد الطباعة
+        setTimeout(() => {
+          if (printContainerRef.current) {
+            printContainerRef.current.style.display = 'none';
+            printContainerRef.current.classList.remove('active1');
+          }
+          setIsPrinting(false);
+        }, 3000);
       }
-      setIsPrinting(false);
-    }, 3000);
+    }, 100);
   };
 
   if (loading) {
@@ -342,7 +196,6 @@ function OrderDetails() {
         </div>
       </div>
 
-      {/* باقي المحتوى كما هو */}
       <div className="info-grid-layout1">
         <div className="info-card-component1">
           <h3>معلومات العميل</h3>
@@ -594,8 +447,188 @@ function OrderDetails() {
         </div>
       </div>
 
-      {/* حاوية الطباعة الجماعية للطلب الحالي */}
-      <div className="print-order-container1"></div>
+      {/* ===== حاوية الطباعة ===== */}
+      <div 
+        className="print-order-container1" 
+        ref={printContainerRef}
+        style={{ display: 'none' }}
+      >
+        <div className="print-order-item1">
+          <div className="print-page1">
+            <div className="print-header1">
+              <h1>📋 تفاصيل الطلبية</h1>
+              <div className="print-order-number1">رقم الطلبية: #{order.orderNumber}</div>
+              <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
+                تاريخ الطباعة: {new Date().toLocaleDateString("ar")} - {new Date().toLocaleTimeString("ar")}
+              </div>
+            </div>
+
+            <div className="print-order-info1">
+              <div className="info-group1">
+                <h4 style={{ marginBottom: '10px', color: '#333' }}>👤 معلومات العميل</h4>
+                <p><strong>الاسم:</strong> {order.customer?.name || '---'}</p>
+                <p><strong>الهاتف:</strong> {order.customer?.phone || '---'}</p>
+                <p><strong>البريد:</strong> {order.customer?.email || '---'}</p>
+                <p><strong>العنوان:</strong> {order.customer?.address || '---'}</p>
+              </div>
+              <div className="info-group1">
+                <h4 style={{ marginBottom: '10px', color: '#333' }}>📦 معلومات الطلبية</h4>
+                <p><strong>الحالة:</strong> 
+                  <span style={{ color: order.status === "Open" ? '#856404' : '#155724' }}>
+                    {order.status === "Open" ? "🟡 مفتوحة" : "🟢 مكتملة"}
+                  </span>
+                </p>
+                {order.description && <p><strong>الوصف:</strong> {order.description}</p>}
+                <p><strong>تاريخ الإنشاء:</strong> {new Date(order.createdAt).toLocaleDateString("ar")}</p>
+                <p><strong>آخر تحديث:</strong> {new Date(order.updatedAt).toLocaleDateString("ar")}</p>
+              </div>
+            </div>
+
+            <div className="print-items-table1">
+              <h3 style={{ marginBottom: '10px' }}>📊 قائمة الأصناف</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>نوع الحجر</th>
+                    <th>الطول (سم)</th>
+                    <th>العرض (سم)</th>
+                    <th>السمك (سم)</th>
+                    <th>الوحدة</th>
+                    <th>الكمية المطلوبة</th>
+                    <th>الكمية المتبقية</th>
+                    <th>التفاصيل</th>
+                    <th>الحالة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {order.items.map((item: any, index: number) => (
+                    <tr key={item._id}>
+                      <td>{index + 1}</td>
+                      <td><strong>{item.stoneType}</strong></td>
+                      <td>{item.length || '---'}</td>
+                      <td>{item.width || '---'}</td>
+                      <td>{item.thickness || '---'}</td>
+                      <td>
+                        {item.unit === "pieces" ? "قطع" : 
+                         item.unit === "linearMeter" ? "متر طولي" : "مساحة"}
+                      </td>
+                      <td>{item.requiredQty}</td>
+                      <td style={{ 
+                        color: item.remainingQty > 0 ? '#dc3545' : '#28a745', 
+                        fontWeight: 'bold' 
+                      }}>
+                        {item.remainingQty}
+                      </td>
+                      <td>{item.details || '---'}</td>
+                      <td>
+                        <span style={{ 
+                          color: item.remainingQty === 0 ? '#28a745' : '#ffc107' 
+                        }}>
+                          {item.remainingQty === 0 ? '✅ مكتمل' : '⏳ قيد التنفيذ'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr style={{ background: '#f8f9fa', fontWeight: 'bold' }}>
+                    <td colSpan={6} style={{ textAlign: 'left' }}>المجموع</td>
+                    <td>{totalRequired}</td>
+                    <td>{totalRemaining}</td>
+                    <td colSpan={2}>{totalCompleted} مكتمل</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div className="print-summary1">
+              <h3 style={{ marginBottom: '10px' }}>📈 ملخص الطلبية</h3>
+              <div className="summary-grid1">
+                <div className="summary-item1">
+                  <div className="label1">📦 إجمالي الأصناف</div>
+                  <div className="value1" style={{ color: '#007bff' }}>{order.items.length}</div>
+                </div>
+                <div className="summary-item1">
+                  <div className="label1">✅ الأصناف المكتملة</div>
+                  <div className="value1" style={{ color: '#28a745' }}>
+                    {order.items.filter((item: any) => item.remainingQty === 0).length}
+                  </div>
+                </div>
+                <div className="summary-item1">
+                  <div className="label1">⏳ قيد التنفيذ</div>
+                  <div className="value1" style={{ color: '#ffc107' }}>
+                    {order.items.filter((item: any) => item.remainingQty > 0).length}
+                  </div>
+                </div>
+                <div className="summary-item1">
+                  <div className="label1">📊 إجمالي الكمية</div>
+                  <div className="value1" style={{ color: '#17a2b8' }}>{totalRequired}</div>
+                </div>
+                <div className="summary-item1">
+                  <div className="label1">✅ المنجز</div>
+                  <div className="value1" style={{ color: '#28a745' }}>{totalCompleted}</div>
+                </div>
+                <div className="summary-item1">
+                  <div className="label1">⚠️ الناقص</div>
+                  <div className="value1" style={{ color: '#dc3545' }}>{totalRemaining}</div>
+                </div>
+              </div>
+            </div>
+
+            {stones.length > 0 && (
+              <div className="print-stones-section1">
+                <h3 style={{ marginBottom: '10px' }}>🏷️ المشاتيح المرتبطة</h3>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
+                  gap: '15px' 
+                }}>
+                  {stones.map((stone) => (
+                    <div key={stone._id} style={{ 
+                      background: '#f8f9fa', 
+                      padding: '10px', 
+                      borderRadius: '5px', 
+                      textAlign: 'center', 
+                      border: '1px solid #dee2e6' 
+                    }}>
+                      <div style={{ fontSize: '11px', color: '#666', marginBottom: '5px' }}>باركود</div>
+                      <div style={{ 
+                        fontSize: '16px', 
+                        fontWeight: 'bold', 
+                        fontFamily: 'monospace', 
+                        margin: '5px 0' 
+                      }}>
+                        {stone.barcode}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#555' }}>
+                        <span style={{ 
+                          color: stone.status === 'In Stock' ? '#28a745' : '#0056b3' 
+                        }}>
+                          {stone.status === 'In Stock' ? '✅ متوفر' : '📤 مشحون'}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#888', marginTop: '5px' }}>
+                        {stone.items.map((it) => it.stoneType).join('، ')}
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#999', marginTop: '3px' }}>
+                        {stone.totalLinearMeter?.toFixed(2) || 0} م.ط | {stone.totalArea?.toFixed(2) || 0} م²
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="print-footer1">
+              <p>تم إنشاء هذا التقرير بواسطة نظام إدارة الطلبيات</p>
+              <p style={{ fontSize: '10px', color: '#aaa' }}>
+                © {new Date().getFullYear()} - جميع الحقوق محفوظة
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
