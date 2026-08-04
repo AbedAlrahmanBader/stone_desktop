@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import JsBarcode from "jsbarcode";
+import { QRCodeSVG } from "qrcode.react";
 import "../styles/OrderDetails.css";
 
 interface EditItemState {
@@ -36,10 +37,10 @@ function OrderDetails() {
 
   const [stones, setStones] = useState<OrderStone[]>([]);
   const [loadingStones, setLoadingStones] = useState(true);
-  const [isPrinting, setIsPrinting] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
   
-  // Ref للحاوية المطبوعة
-  const printContainerRef = useRef<HTMLDivElement>(null);
+  const qrContainerRef = useRef<HTMLDivElement>(null);
+  const qrCodeRef = useRef<HTMLDivElement>(null);
 
   const loadOrder = async () => {
     try {
@@ -126,37 +127,101 @@ function OrderDetails() {
     }
   };
 
-  // ===== وظيفة الطباعة =====
-  const handlePrintOrder = () => {
+  // ===== وظيفة عرض QR Code =====
+  const handleShowQRCode = () => {
     if (!order) {
-      alert("لا توجد طلبية للطباعة");
+      alert("لا توجد طلبية");
       return;
     }
+    setShowQRCode(true);
+  };
 
-    setIsPrinting(true);
+  // ===== وظيفة طباعة QR Code =====
+  const handlePrintQRCode = () => {
+    if (!qrCodeRef.current) return;
     
-    // نستخدم setTimeout للتأكد من تحديث DOM
-    setTimeout(() => {
-      if (printContainerRef.current) {
-        // جعل الحاوية مرئية
-        printContainerRef.current.style.display = 'block';
-        printContainerRef.current.classList.add('active1');
-        
-        // نمرر الأمر للطباعة بعد ظهور المحتوى
-        setTimeout(() => {
-          window.print();
-        }, 500);
-        
-        // إعادة إخفاء الحاوية بعد الطباعة
-        setTimeout(() => {
-          if (printContainerRef.current) {
-            printContainerRef.current.style.display = 'none';
-            printContainerRef.current.classList.remove('active1');
-          }
-          setIsPrinting(false);
-        }, 3000);
+    const printWindow = window.open('', '_blank', 'width=500,height=500');
+    if (printWindow) {
+      const content = qrCodeRef.current.innerHTML;
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="rtl">
+          <head>
+            <title>QR Code - طلبية ${order?.orderNumber}</title>
+            <style>
+              body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+                background: white;
+                font-family: Arial, sans-serif;
+              }
+              .qr-wrapper {
+                text-align: center;
+                padding: 30px;
+              }
+              .qr-wrapper h2 {
+                margin-bottom: 20px;
+                color: #333;
+              }
+              .qr-wrapper .order-number {
+                margin-top: 15px;
+                font-size: 16px;
+                color: #666;
+              }
+              .qr-wrapper .qr-container {
+                display: flex;
+                justify-content: center;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="qr-wrapper">
+              <h2>📱 رمز الطلبية</h2>
+              ${content}
+              <div class="order-number">رقم الطلبية: #${order?.orderNumber}</div>
+              <div style="margin-top: 10px; font-size: 12px; color: #aaa;">
+                ${new Date().toLocaleDateString("ar")}
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+  };
+
+  // ===== وظيفة تحميل QR Code كصورة =====
+  const handleDownloadQRCode = () => {
+    const svg = document.querySelector('.qr-code-svg');
+    if (!svg) return;
+
+    const canvas = document.createElement('canvas');
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width * 2;
+      canvas.height = img.height * 2;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.scale(2, 2);
+        ctx.drawImage(img, 0, 0);
+        const link = document.createElement('a');
+        link.download = `QR_طلبيه_${order?.orderNumber}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        URL.revokeObjectURL(url);
       }
-    }, 100);
+    };
+    img.src = url;
   };
 
   if (loading) {
@@ -175,6 +240,17 @@ function OrderDetails() {
   );
   const totalCompleted = totalRequired - totalRemaining;
 
+  // بيانات QR Code
+  const qrData = JSON.stringify({
+    orderNumber: order.orderNumber,
+    customer: order.customer?.name,
+    date: new Date(order.createdAt).toLocaleDateString("ar"),
+    status: order.status,
+    items: order.items.length,
+    totalQty: totalRequired,
+    url: window.location.href
+  });
+
   return (
     <div className="order-details-container1">
       <div className="order-header-section1">
@@ -184,11 +260,10 @@ function OrderDetails() {
         </div>
         <div className="header-actions1">
           <button 
-            className="btn-print-order1" 
-            onClick={handlePrintOrder}
-            disabled={isPrinting}
+            className="btn-qr-code1" 
+            onClick={handleShowQRCode}
           >
-            {isPrinting ? '⏳ جاري الطباعة...' : '🖨️ طباعة الطلبية'}
+            📱 عرض QR Code
           </button>
           <button className="btn-back-action1" onClick={() => navigate(-1)}>
             ← رجوع
@@ -447,188 +522,67 @@ function OrderDetails() {
         </div>
       </div>
 
-      {/* ===== حاوية الطباعة ===== */}
-      <div 
-        className="print-order-container1" 
-        ref={printContainerRef}
-        style={{ display: 'none' }}
-      >
-        <div className="print-order-item1">
-          <div className="print-page1">
-            <div className="print-header1">
-              <h1>📋 تفاصيل الطلبية</h1>
-              <div className="print-order-number1">رقم الطلبية: #{order.orderNumber}</div>
-              <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
-                تاريخ الطباعة: {new Date().toLocaleDateString("ar")} - {new Date().toLocaleTimeString("ar")}
-              </div>
+      {/* ===== مودال QR Code ===== */}
+      {showQRCode && (
+        <div className="qr-modal-overlay1" onClick={() => setShowQRCode(false)}>
+          <div className="qr-modal-content1" onClick={(e) => e.stopPropagation()}>
+            <div className="qr-modal-header1">
+              <h2>📱 رمز الطلبية</h2>
+              <button 
+                className="qr-modal-close1" 
+                onClick={() => setShowQRCode(false)}
+              >
+                ✕
+              </button>
             </div>
 
-            <div className="print-order-info1">
-              <div className="info-group1">
-                <h4 style={{ marginBottom: '10px', color: '#333' }}>👤 معلومات العميل</h4>
-                <p><strong>الاسم:</strong> {order.customer?.name || '---'}</p>
-                <p><strong>الهاتف:</strong> {order.customer?.phone || '---'}</p>
-                <p><strong>البريد:</strong> {order.customer?.email || '---'}</p>
-                <p><strong>العنوان:</strong> {order.customer?.address || '---'}</p>
-              </div>
-              <div className="info-group1">
-                <h4 style={{ marginBottom: '10px', color: '#333' }}>📦 معلومات الطلبية</h4>
-                <p><strong>الحالة:</strong> 
-                  <span style={{ color: order.status === "Open" ? '#856404' : '#155724' }}>
-                    {order.status === "Open" ? "🟡 مفتوحة" : "🟢 مكتملة"}
-                  </span>
-                </p>
-                {order.description && <p><strong>الوصف:</strong> {order.description}</p>}
-                <p><strong>تاريخ الإنشاء:</strong> {new Date(order.createdAt).toLocaleDateString("ar")}</p>
-                <p><strong>آخر تحديث:</strong> {new Date(order.updatedAt).toLocaleDateString("ar")}</p>
-              </div>
-            </div>
-
-            <div className="print-items-table1">
-              <h3 style={{ marginBottom: '10px' }}>📊 قائمة الأصناف</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>نوع الحجر</th>
-                    <th>الطول (سم)</th>
-                    <th>العرض (سم)</th>
-                    <th>السمك (سم)</th>
-                    <th>الوحدة</th>
-                    <th>الكمية المطلوبة</th>
-                    <th>الكمية المتبقية</th>
-                    <th>التفاصيل</th>
-                    <th>الحالة</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {order.items.map((item: any, index: number) => (
-                    <tr key={item._id}>
-                      <td>{index + 1}</td>
-                      <td><strong>{item.stoneType}</strong></td>
-                      <td>{item.length || '---'}</td>
-                      <td>{item.width || '---'}</td>
-                      <td>{item.thickness || '---'}</td>
-                      <td>
-                        {item.unit === "pieces" ? "قطع" : 
-                         item.unit === "linearMeter" ? "متر طولي" : "مساحة"}
-                      </td>
-                      <td>{item.requiredQty}</td>
-                      <td style={{ 
-                        color: item.remainingQty > 0 ? '#dc3545' : '#28a745', 
-                        fontWeight: 'bold' 
-                      }}>
-                        {item.remainingQty}
-                      </td>
-                      <td>{item.details || '---'}</td>
-                      <td>
-                        <span style={{ 
-                          color: item.remainingQty === 0 ? '#28a745' : '#ffc107' 
-                        }}>
-                          {item.remainingQty === 0 ? '✅ مكتمل' : '⏳ قيد التنفيذ'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr style={{ background: '#f8f9fa', fontWeight: 'bold' }}>
-                    <td colSpan={6} style={{ textAlign: 'left' }}>المجموع</td>
-                    <td>{totalRequired}</td>
-                    <td>{totalRemaining}</td>
-                    <td colSpan={2}>{totalCompleted} مكتمل</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-
-            <div className="print-summary1">
-              <h3 style={{ marginBottom: '10px' }}>📈 ملخص الطلبية</h3>
-              <div className="summary-grid1">
-                <div className="summary-item1">
-                  <div className="label1">📦 إجمالي الأصناف</div>
-                  <div className="value1" style={{ color: '#007bff' }}>{order.items.length}</div>
+            <div className="qr-modal-body1" ref={qrContainerRef}>
+              <div className="qr-code-wrapper1" ref={qrCodeRef}>
+                <div className="qr-code-container1">
+                  <QRCodeSVG
+                    className="qr-code-svg"
+                    value={qrData}
+                    size={250}
+                    bgColor="#ffffff"
+                    fgColor="#000000"
+                    level="H"
+                    includeMargin={true}
+                  />
                 </div>
-                <div className="summary-item1">
-                  <div className="label1">✅ الأصناف المكتملة</div>
-                  <div className="value1" style={{ color: '#28a745' }}>
-                    {order.items.filter((item: any) => item.remainingQty === 0).length}
-                  </div>
-                </div>
-                <div className="summary-item1">
-                  <div className="label1">⏳ قيد التنفيذ</div>
-                  <div className="value1" style={{ color: '#ffc107' }}>
-                    {order.items.filter((item: any) => item.remainingQty > 0).length}
-                  </div>
-                </div>
-                <div className="summary-item1">
-                  <div className="label1">📊 إجمالي الكمية</div>
-                  <div className="value1" style={{ color: '#17a2b8' }}>{totalRequired}</div>
-                </div>
-                <div className="summary-item1">
-                  <div className="label1">✅ المنجز</div>
-                  <div className="value1" style={{ color: '#28a745' }}>{totalCompleted}</div>
-                </div>
-                <div className="summary-item1">
-                  <div className="label1">⚠️ الناقص</div>
-                  <div className="value1" style={{ color: '#dc3545' }}>{totalRemaining}</div>
+                <div className="qr-info1">
+                  <h3>#{order.orderNumber}</h3>
+                  <p><strong>العميل:</strong> {order.customer?.name}</p>
+                  <p><strong>التاريخ:</strong> {new Date(order.createdAt).toLocaleDateString("ar")}</p>
+                  <p><strong>الحالة:</strong> {order.status === "Open" ? "🟡 مفتوحة" : "🟢 مكتملة"}</p>
+                  <p><strong>عدد الأصناف:</strong> {order.items.length}</p>
+                  <p><strong>إجمالي الكمية:</strong> {totalRequired}</p>
                 </div>
               </div>
-            </div>
 
-            {stones.length > 0 && (
-              <div className="print-stones-section1">
-                <h3 style={{ marginBottom: '10px' }}>🏷️ المشاتيح المرتبطة</h3>
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
-                  gap: '15px' 
-                }}>
-                  {stones.map((stone) => (
-                    <div key={stone._id} style={{ 
-                      background: '#f8f9fa', 
-                      padding: '10px', 
-                      borderRadius: '5px', 
-                      textAlign: 'center', 
-                      border: '1px solid #dee2e6' 
-                    }}>
-                      <div style={{ fontSize: '11px', color: '#666', marginBottom: '5px' }}>باركود</div>
-                      <div style={{ 
-                        fontSize: '16px', 
-                        fontWeight: 'bold', 
-                        fontFamily: 'monospace', 
-                        margin: '5px 0' 
-                      }}>
-                        {stone.barcode}
-                      </div>
-                      <div style={{ fontSize: '12px', color: '#555' }}>
-                        <span style={{ 
-                          color: stone.status === 'In Stock' ? '#28a745' : '#0056b3' 
-                        }}>
-                          {stone.status === 'In Stock' ? '✅ متوفر' : '📤 مشحون'}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '11px', color: '#888', marginTop: '5px' }}>
-                        {stone.items.map((it) => it.stoneType).join('، ')}
-                      </div>
-                      <div style={{ fontSize: '10px', color: '#999', marginTop: '3px' }}>
-                        {stone.totalLinearMeter?.toFixed(2) || 0} م.ط | {stone.totalArea?.toFixed(2) || 0} م²
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div className="qr-actions1">
+                <button 
+                  className="btn-print-qr1" 
+                  onClick={handlePrintQRCode}
+                >
+                  🖨️ طباعة
+                </button>
+                <button 
+                  className="btn-download-qr1" 
+                  onClick={handleDownloadQRCode}
+                >
+                  ⬇️ تحميل
+                </button>
+                <button 
+                  className="btn-close-qr1" 
+                  onClick={() => setShowQRCode(false)}
+                >
+                  ✕ إغلاق
+                </button>
               </div>
-            )}
-
-            <div className="print-footer1">
-              <p>تم إنشاء هذا التقرير بواسطة نظام إدارة الطلبيات</p>
-              <p style={{ fontSize: '10px', color: '#aaa' }}>
-                © {new Date().getFullYear()} - جميع الحقوق محفوظة
-              </p>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
