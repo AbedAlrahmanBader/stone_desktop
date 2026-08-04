@@ -45,8 +45,23 @@ interface ThicknessOnlyRow {
     area: number;
 }
 
+// واجهة صنف الطلبية
+interface OrderItem {
+    _id: string;
+    stoneType: string;
+    length?: number;
+    width?: number;
+    thickness?: number;
+    unit: string;
+    requiredQty: number;
+    remainingQty: number;
+    details?: string;
+}
+
 interface Props {
     shipment: any;
+    orderItems?: OrderItem[]; // بيانات الأصناف من الطلبية
+    orderNumber?: string; // رقم الطلبية للربط
 }
 
 const num = (v: any) => Number(v) || 0;
@@ -128,7 +143,51 @@ function getEnteredQuantity(s: Stone): { value: string; unit: SoldUnit } {
     return sold;
 }
 
-function ShipmentPrint({ shipment }: Props) {
+// دالة لإيجاد البيان من الطلبية
+function findOrderItemDescription(stone: Stone, orderItems?: OrderItem[]): string {
+    if (!orderItems || orderItems.length === 0) return '';
+    
+    // محاولة مطابقة الصنف بناءً على النوع والأبعاد
+    const matchedItem = orderItems.find(item => {
+        const matchType = item.stoneType === stone.stoneType;
+        const matchLength = !item.length || !stone.length || Math.abs(item.length - stone.length) < 0.5;
+        const matchWidth = !item.width || !stone.width || Math.abs(item.width - stone.width) < 0.5;
+        const matchThickness = !item.thickness || !stone.thickness || Math.abs(item.thickness - stone.thickness) < 0.5;
+        
+        return matchType && matchLength && matchWidth && matchThickness;
+    });
+    
+    // إذا وجد تطابق تام
+    if (matchedItem) {
+        let description = matchedItem.stoneType;
+        if (matchedItem.details) {
+            description += ` - ${matchedItem.details}`;
+        }
+        // إضافة الكمية المتبقية إذا كانت متاحة
+        if (matchedItem.remainingQty !== undefined && matchedItem.remainingQty > 0) {
+            description += ` (متبقي: ${matchedItem.remainingQty})`;
+        }
+        return description;
+    }
+    
+    // إذا لم يوجد تطابق تام، حاول المطابقة حسب النوع فقط
+    const typeMatch = orderItems.find(item => item.stoneType === stone.stoneType);
+    if (typeMatch) {
+        let description = typeMatch.stoneType;
+        if (typeMatch.details) {
+            description += ` - ${typeMatch.details}`;
+        }
+        if (typeMatch.remainingQty !== undefined && typeMatch.remainingQty > 0) {
+            description += ` (متبقي: ${typeMatch.remainingQty})`;
+        }
+        return description;
+    }
+    
+    // إذا لم يوجد أي تطابق، ارجع فارغ
+    return '';
+}
+
+function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
     const printPage = () => {
         window.print();
     };
@@ -212,7 +271,6 @@ function ShipmentPrint({ shipment }: Props) {
     const updateEnteredUnit = (key: string, unit: SoldUnit) => {
         setEnteredUnitOverrides(prev => {
             const newState = { ...prev, [key]: unit };
-            // حفظ فوري
             saveSelections(newState, soldUnitOverrides);
             return newState;
         });
@@ -221,7 +279,6 @@ function ShipmentPrint({ shipment }: Props) {
     const updateSoldUnit = (key: string, unit: SoldUnit) => {
         setSoldUnitOverrides(prev => {
             const newState = { ...prev, [key]: unit };
-            // حفظ فوري
             saveSelections(enteredUnitOverrides, newState);
             return newState;
         });
@@ -390,7 +447,7 @@ function ShipmentPrint({ shipment }: Props) {
                     </div>
                     <div className="detail-row">
                         <span className="label-en">Order No.</span>
-                        <span className="value">{shipment?.orderNumber}</span>
+                        <span className="value">{shipment?.orderNumber || orderNumber || "---"}</span>
                         <span className="label">:   رقم الطلبية </span>
                     </div>
                     <div className="detail-row">
@@ -430,10 +487,15 @@ function ShipmentPrint({ shipment }: Props) {
                             const soldUnit = soldUnitOverrides[key] ?? autoSold.unit;
                             const soldValue = getValueForUnit(stone, soldUnit);
 
+                            // الحصول على البيان من الطلبية
+                            const orderDescription = findOrderItemDescription(stone, orderItems);
+
                             return (
                                 <tr key={key}>
                                     <td>{index + 1}</td>
-                                    <td></td>
+                                    <td contentEditable={false}>
+                                        {orderDescription || stone.stoneType || "---"}
+                                    </td>
                                     <td>{stone.stoneType || "---"}</td>
                                     <td>{num(stone.length) === 0 ? "مفتوح" : stone.length}</td>
                                     <td>{stone.width ?? "---"}</td>
