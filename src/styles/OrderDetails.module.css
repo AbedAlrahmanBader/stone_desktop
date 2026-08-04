@@ -1,34 +1,42 @@
-/* الصفحة الرئيسية */
+/* ===== الأساسيات ===== */
 .container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 30px;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
 }
 
-/* حالات التحميل */
+/* ===== حالات التحميل ===== */
 .loadingState {
-  text-align: center;
-  padding: 50px;
-  font-size: 18px;
-  color: #666;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 20px;
+  color: #2563eb;
+  background: #f0f4f8;
 }
 
 .notFoundState {
-  text-align: center;
-  padding: 50px;
-  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 24px;
   color: #dc2626;
+  background: #f0f4f8;
 }
 
-/* رأس الصفحة */
+/* ===== رأس الصفحة ===== */
 .headerSection {
-  background: #fff;
+  background: #ffffff;
   border-radius: 16px;
-  padding: 25px 30px;
-  margin-bottom: 30px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-  border: 1px solid #ececec;
+  padding: 20px 30px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -44,19 +52,20 @@
 }
 
 .pageTitle {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 700;
   margin: 0;
-  color: #1a1a1a;
+  color: #1f2937;
 }
 
 .orderNumberBadge {
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
-  padding: 8px 18px;
-  border-radius: 30px;
-  font-size: 15px;
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 16px;
   font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .headerActions {
@@ -64,28 +73,47 @@
   gap: 10px;
 }
 
-.btnBack {
-  background: #2563eb;
-  color: white;
+.btnBack,
+.btnPrint {
+  padding: 10px 22px;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnBack {
+  background: #e5e7eb;
+  color: #4b5563;
 }
 
 .btnBack:hover {
-  background: #1d4ed8;
+  background: #d1d5db;
   transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* شبكة المعلومات */
+.btnPrint {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: white;
+}
+
+.btnPrint:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+}
+
+/* ===== بطاقات المعلومات ===== */
 .infoGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-bottom: 30px;
+  gap: 25px;
+  margin-bottom: 25px;
 }
 
 @media (max-width: 768px) {
@@ -95,172 +123,217 @@
 }
 
 .infoCard {
-  background: #fff;
+  background: #ffffff;
   border-radius: 16px;
   padding: 25px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-  border: 1px solid #ececec;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .infoCard h3 {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
-  margin: 0 0 20px 0;
-  color: #1a1a1a;
+  margin: 0 0 18px 0;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .infoCard p {
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px solid #f1f1f1;
+  align-items: center;
   padding: 10px 0;
   margin: 0;
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .infoCard p:last-child {
   border-bottom: none;
 }
 
-.statusIndicator {
-  padding: 7px 14px;
-  border-radius: 30px;
-  font-size: 13px;
+.label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.value {
+  color: #1f2937;
   font-weight: 600;
 }
 
-.statusIndicator.open {
+/* ===== حالة الطلب ===== */
+.statusBadge {
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.statusBadge.open {
   background: #dbeafe;
   color: #1e40af;
 }
 
-.statusIndicator.completed {
+.statusBadge.completed {
   background: #d1fae5;
   color: #065f46;
 }
 
-/* قسم الأصناف */
+.statusBadge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* ===== قسم الأصناف ===== */
 .itemsSection {
-  background: #fff;
+  background: #ffffff;
   border-radius: 16px;
   padding: 25px 30px;
-  margin-bottom: 30px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-  border: 1px solid #ececec;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
-.itemsSection h2 {
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sectionHeader h2 {
   font-size: 22px;
   font-weight: 700;
-  margin: 0 0 20px 0;
-  color: #1a1a1a;
+  margin: 0;
+  color: #1f2937;
 }
 
-.tableScrollWrapper {
+.itemsCount {
+  background: #e5e7eb;
+  padding: 4px 14px;
+  border-radius: 50px;
+  font-size: 14px;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.tableWrapper {
   overflow-x: auto;
   border-radius: 12px;
 }
 
-.tableScrollWrapper::-webkit-scrollbar {
+.tableWrapper::-webkit-scrollbar {
   height: 8px;
 }
 
-.tableScrollWrapper::-webkit-scrollbar-thumb {
-  background: #cfcfcf;
+.tableWrapper::-webkit-scrollbar-thumb {
+  background: #d1d5db;
   border-radius: 20px;
 }
 
-.tableScrollWrapper::-webkit-scrollbar-track {
-  background: #efefef;
+.tableWrapper::-webkit-scrollbar-track {
+  background: #f3f4f6;
 }
 
 .dataTable {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1200px;
+  min-width: 1100px;
+}
+
+.dataTable thead {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
 }
 
 .dataTable th {
-  background: #2563eb;
   color: white;
-  font-size: 15px;
-  padding: 16px;
-  text-align: right;
+  font-size: 14px;
   font-weight: 600;
+  padding: 14px 16px;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .dataTable td {
-  padding: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
   vertical-align: middle;
-  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.dataTable tbody tr:hover {
+  background: #f8fafc;
 }
 
 .dataTable tbody tr:nth-child(even) {
   background: #fafafa;
 }
 
-.dataTable tbody tr:hover {
-  background: #eef5ff;
+.dataTable tbody tr:nth-child(even):hover {
+  background: #f3f4f6;
 }
 
-/* مدخلات الجدول */
-.tableInput {
-  height: 40px;
+.editingRow {
+  background: #eff6ff !important;
+}
+
+.editingRow:hover {
+  background: #dbeafe !important;
+}
+
+/* ===== الحقول ===== */
+.inputField {
+  height: 38px;
   border-radius: 8px;
-  border: 1px solid #d7d7d7;
-  padding: 0 10px;
-  transition: all 0.25s;
+  border: 1.5px solid #d1d5db;
+  padding: 0 12px;
   width: 100%;
-  min-width: 80px;
+  min-width: 70px;
   font-size: 14px;
-}
-
-.tableInput:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
-  outline: none;
-}
-
-.tableSelect {
-  height: 40px;
-  border-radius: 8px;
-  border: 1px solid #d7d7d7;
-  padding: 0 10px;
-  transition: all 0.25s;
-  width: 100%;
-  min-width: 80px;
-  font-size: 14px;
+  transition: all 0.2s;
   background: white;
 }
 
-.tableSelect:focus {
+.inputField:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   outline: none;
 }
 
-.remainingHighlight {
-  color: #dc2626;
-  font-weight: 700;
+.selectField {
+  height: 38px;
+  border-radius: 8px;
+  border: 1.5px solid #d1d5db;
+  padding: 0 12px;
+  width: 100%;
+  min-width: 90px;
+  font-size: 14px;
+  background: white;
+  transition: all 0.2s;
 }
 
-.itemDetails {
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.selectField:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  outline: none;
 }
 
-/* أزرار الأصناف */
+/* ===== الأزرار ===== */
 .btnEdit,
 .btnDelete,
 .btnSave,
 .btnCancel {
   border: none;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.25s;
-  font-size: 14px;
+  font-size: 16px;
+  transition: all 0.2s;
   margin: 0 3px;
 }
 
@@ -271,7 +344,7 @@
 
 .btnEdit:hover {
   background: #bfdbfe;
-  transform: translateY(-2px);
+  transform: scale(1.1);
 }
 
 .btnDelete {
@@ -281,7 +354,7 @@
 
 .btnDelete:hover:not(:disabled) {
   background: #fecaca;
-  transform: translateY(-2px);
+  transform: scale(1.1);
 }
 
 .btnDelete:disabled {
@@ -292,11 +365,12 @@
 .btnSave {
   background: #2563eb;
   color: white;
+  padding: 6px 14px;
 }
 
 .btnSave:hover:not(:disabled) {
   background: #1d4ed8;
-  transform: translateY(-2px);
+  transform: scale(1.05);
 }
 
 .btnSave:disabled {
@@ -311,47 +385,40 @@
 
 .btnCancel:hover {
   background: #d1d5db;
-  transform: translateY(-2px);
+  transform: scale(1.05);
 }
 
-/* حالة الأصناف */
-.itemStatusBadge {
-  padding: 7px 14px;
-  border-radius: 30px;
-  font-size: 13px;
+/* ===== الحالة في الجدول ===== */
+.remaining {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.stoneType {
   font-weight: 600;
-  display: inline-block;
+  color: #1f2937;
 }
 
-.itemStatusBadge.completed {
-  background: #d1fae5;
-  color: #065f46;
+.details {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #6b7280;
 }
 
-.itemStatusBadge.pending {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-/* قسم المشاتيح */
+/* ===== المشاتيح ===== */
 .stonesSection {
-  background: #fff;
+  background: #ffffff;
   border-radius: 16px;
   padding: 25px 30px;
-  margin-bottom: 30px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-  border: 1px solid #ececec;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
-.stonesSection h2 {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0 0 20px 0;
-  color: #1a1a1a;
-}
-
-.stonesLoadingMessage,
-.stonesEmptyMessage {
+.loadingMessage,
+.emptyMessage {
   text-align: center;
   padding: 30px;
   color: #6b7280;
@@ -360,15 +427,15 @@
 
 .stonesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 20px;
 }
 
 .stoneCard {
-  border-radius: 16px;
-  background: white;
-  padding: 18px;
-  border: 1px solid #e6e6e6;
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
   transition: all 0.3s;
   display: flex;
   flex-direction: column;
@@ -378,93 +445,102 @@
 
 .stoneCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-color: #2563eb;
 }
 
 .barcodeImage {
   width: 100%;
-  max-width: 200px;
+  max-width: 180px;
   height: auto;
   margin-bottom: 10px;
 }
 
-.stoneStatusBadge {
-  padding: 7px 14px;
-  border-radius: 30px;
+.stoneStatus {
+  padding: 4px 14px;
+  border-radius: 50px;
   font-size: 13px;
   font-weight: 600;
   margin: 5px 0;
 }
 
-.stoneStatusBadge.inStock {
+.stoneStatus.inStock {
   background: #d1fae5;
   color: #065f46;
 }
 
-.stoneStatusBadge.shipped {
+.stoneStatus.shipped {
   background: #dbeafe;
   color: #1e40af;
 }
 
-.stoneTypesList {
+.stoneTypes {
   font-size: 14px;
   font-weight: 600;
-  color: #444;
-  margin: 10px 0;
+  color: #1f2937;
+  margin: 8px 0;
 }
 
-.stoneTotals {
-  color: #666;
+.stoneMeasurements {
+  color: #6b7280;
   font-size: 13px;
 }
 
-/* قسم الملخص */
+/* ===== الملخص ===== */
 .summarySection {
-  background: #fff;
+  background: #ffffff;
   border-radius: 16px;
   padding: 25px 30px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-  border: 1px solid #ececec;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .summarySection h3 {
   font-size: 22px;
   font-weight: 700;
   margin: 0 0 20px 0;
-  color: #1a1a1a;
+  color: #1f2937;
 }
 
 .summaryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 20px;
 }
 
-.statItem {
-  border-radius: 14px;
-  padding: 25px;
+.statCard {
   background: #f8fafc;
-  transition: all 0.3s;
+  border-radius: 14px;
+  padding: 20px;
   text-align: center;
+  transition: all 0.3s;
+  border: 1px solid transparent;
 }
 
-.statItem:hover {
-  transform: translateY(-3px);
+.statCard:hover {
+  transform: translateY(-4px);
+  border-color: #e5e7eb;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.statIcon {
+  display: block;
+  font-size: 28px;
+  margin-bottom: 8px;
 }
 
 .statLabel {
   display: block;
-  font-size: 15px;
+  font-size: 14px;
   color: #6b7280;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .statValue {
   display: block;
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #1f2937;
 }
 
 .statValue.success {
@@ -475,7 +551,97 @@
   color: #d97706;
 }
 
-/* تحسينات للشاشات الصغيرة */
+/* ===== إخفاء أثناء الطباعة ===== */
+.noPrint {
+  display: table-cell;
+}
+
+/* ===== أنماط الطباعة ===== */
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .container {
+    padding: 20px !important;
+    background: white !important;
+    max-width: 100% !important;
+  }
+
+  .noPrint {
+    display: none !important;
+  }
+
+  .btnPrint,
+  .btnBack {
+    display: none !important;
+  }
+
+  .headerSection {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    margin-bottom: 20px !important;
+  }
+
+  .infoCard {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+
+  .itemsSection {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    break-inside: avoid;
+  }
+
+  .summarySection {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    break-inside: avoid;
+  }
+
+  .stonesSection {
+    display: none !important;
+  }
+
+  .dataTable thead {
+    background: #2563eb !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .dataTable th {
+    color: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .dataTable td {
+    border: 1px solid #ddd !important;
+  }
+
+  .statusBadge {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .stoneCard {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+  }
+
+  .statCard {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+  }
+
+  .orderNumberBadge {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* ===== تحسينات للشاشات الصغيرة ===== */
 @media (max-width: 640px) {
   .container {
     padding: 15px;
@@ -485,6 +651,7 @@
     flex-direction: column;
     align-items: stretch;
     text-align: center;
+    padding: 15px 20px;
   }
 
   .titleGroup {
@@ -492,11 +659,18 @@
   }
 
   .pageTitle {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .headerActions {
     justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btnBack,
+  .btnPrint {
+    padding: 8px 16px;
+    font-size: 14px;
   }
 
   .summaryGrid {
@@ -504,68 +678,14 @@
   }
 
   .statValue {
-    font-size: 28px;
+    font-size: 26px;
   }
 
-
-  /* زر الطباعة */
-.btnPrint {
-  background: #059669;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.25s;
-}
-
-.btnPrint:hover {
-  background: #047857;
-  transform: translateY(-2px);
-}
-
-/* إخفاء عناصر معينة أثناء الطباعة */
-@media print {
-  .btnPrint,
-  .btnBack,
-  .btnEdit,
-  .btnDelete,
-  .btnSave,
-  .btnCancel,
-  .tableInput,
-  .tableSelect,
-  .no-print {
-    display: none !important;
+  .itemsSection {
+    padding: 15px 15px;
   }
 
-  /* تحسينات الطباعة */
-  .container {
-    padding: 0 !important;
-    max-width: 100% !important;
+  .stonesGrid {
+    grid-template-columns: 1fr 1fr;
   }
-
-  .headerSection,
-  .infoCard,
-  .itemsSection,
-  .summarySection {
-    box-shadow: none !important;
-    border: 1px solid #ddd !important;
-    margin-bottom: 15px !important;
-  }
-
-  .dataTable th {
-    background: #2563eb !important;
-    color: white !important;
-  }
-
-  .dataTable td {
-    border: 1px solid #ddd !important;
-  }
-
-  .stoneCard {
-    border: 1px solid #ddd !important;
-    box-shadow: none !important;
-  }
-}
 }
