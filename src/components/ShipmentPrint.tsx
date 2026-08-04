@@ -13,6 +13,21 @@ interface StoneItem {
     pieces?: number;
 }
 
+interface OrderItemRef {
+    _id?: string;
+    stoneType?: string;
+    length?: number;
+    width?: number;
+    thickness?: number;
+    details?: string;
+}
+
+interface OrderRef {
+    _id?: string;
+    orderNumber?: string;
+    items?: OrderItemRef[];
+}
+
 interface StonePieceDoc {
     _id?: string;
     barcode?: string;
@@ -20,6 +35,7 @@ interface StonePieceDoc {
     totalLinearMeter?: number;
     totalArea?: number;
     status?: string;
+    order?: OrderRef | null;
 }
 
 // صف مسطح جاهز للطباعة: نوع حجر واحد + باركود المشتاح يلي طلع منه
@@ -33,6 +49,7 @@ interface Stone {
     area?: number;
     pieces?: number;
     status?: string;
+    details?: string;
 }
 
 interface ThicknessSummaryRow {
@@ -55,6 +72,26 @@ const num = (v: any) => Number(v) || 0;
 const SOLD_UNITS = ["قطعة", "متر مربع", "متر طول"] as const;
 type SoldUnit = (typeof SOLD_UNITS)[number];
 
+// بيدور على صنف الطلبية المطابق (نفس منطق findOrderItem بالباك اند):
+// stoneType + thickness + length + width بالضبط
+function findMatchingOrderDetails(
+    orderItems: OrderItemRef[] | undefined,
+    item: StoneItem
+): string {
+    if (!orderItems || orderItems.length === 0) return "";
+
+    const match = orderItems.find(
+        (oi) =>
+            String(oi.stoneType || "").trim().toLowerCase() ===
+                String(item.stoneType || "").trim().toLowerCase() &&
+            num(oi.thickness) === num(item.thickness) &&
+            num(oi.length) === num(item.length) &&
+            num(oi.width) === num(item.width)
+    );
+
+    return match?.details || "";
+}
+
 // يفرد كل مشتاح (بأنواعه المتعددة) إلى صفوف مستقلة، صف لكل نوع حجر
 function flattenStones(stonePieces: StonePieceDoc[]): Stone[] {
 
@@ -76,6 +113,7 @@ function flattenStones(stonePieces: StonePieceDoc[]): Stone[] {
                 area: item.area,
                 pieces: item.pieces,
                 status: stone.status,
+                details: findMatchingOrderDetails(stone.order?.items, item),
             });
 
         });
@@ -104,6 +142,10 @@ function groupSimilarStones(stones: Stone[]): Stone[] {
             existing.pieces = (existing.pieces || 0) + (stone.pieces || 0);
             existing.area = (existing.area || 0) + (stone.area || 0);
             existing.linearMeter = (existing.linearMeter || 0) + (stone.linearMeter || 0);
+            // الحفاظ على أول details موجودة عند الدمج
+            if (!existing.details && stone.details) {
+                existing.details = stone.details;
+            }
             // دمج الباركودات (اختياري)
             if (stone.barcode && !existing.barcode?.includes(stone.barcode)) {
                 existing.barcode = existing.barcode ? `${existing.barcode}, ${stone.barcode}` : stone.barcode;
@@ -373,7 +415,7 @@ const soldTotals = stones.reduce<SoldTotals>(
                             return (
                                 <tr key={`${stone.barcode || "row"}-${index}`}>
                                     <td>{index + 1}</td>
-                                    <td></td>
+                                    <td>{stone.details || "---"}</td>
                                     <td>{stone.stoneType || "---"}</td>
                                     <td>{num(stone.length) === 0 ? "مفتوح" : stone.length}</td>
                                     <td>{stone.width ?? "---"}</td>
@@ -440,8 +482,7 @@ const soldTotals = stones.reduce<SoldTotals>(
                     </div>
                 </div>
 
-               
-
+          
                 <div className="notes-section">
                     <div className="note">
                         * Ownership of commodity is transferred when all accrued payments are settled البضاعة ليست ملكاً للمشتري ما لم تسدد قيمتها
