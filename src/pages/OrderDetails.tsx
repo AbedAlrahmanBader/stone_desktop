@@ -153,7 +153,7 @@ function OrderDetails() {
           <td>${item.requiredQty}</td>
           <td>${item.remainingQty}</td>
           <td>${item.details || '---'}</td>
-          <td>${item.remainingQty === 0 ? '✅ مكتمل' : '⏳ قيد التنفيذ'}</td>
+          <td>${item.remainingQty <= 0 ? '✅ مكتمل' : '⏳ قيد التنفيذ'}</td>
         </tr>
       `;
     });
@@ -449,7 +449,7 @@ function OrderDetails() {
             </div>
             <div class="summary-item">
               <div class="label">✅ الأصناف المكتملة</div>
-              <div class="value success">${order.items.filter((item: any) => item.remainingQty === 0).length}</div>
+              <div class="value success">${order.items.filter((item: any) => item.remainingQty <= 0).length}</div>
             </div>
             <div class="summary-item">
               <div class="label">⏳ قيد التنفيذ</div>
@@ -664,8 +664,8 @@ function OrderDetails() {
                     </td>
                     <td className="item-details-text1">{item.details || "---"}</td>
                     <td>
-                      <span className={`item-status-badge1 ${item.remainingQty === 0 ? "completed1" : "pending1"}`}>
-                        {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
+                      <span className={`item-status-badge1 ${item.remainingQty <= 0 ? "completed1" : "pending1"}`}>
+                        {item.remainingQty <= 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
                       </span>
                     </td>
                     <td>
@@ -750,7 +750,7 @@ function OrderDetails() {
           <div className="stat-item-box1">
             <span className="stat-label-text1">الأصناف المكتملة</span>
             <span className="stat-value-number1 success1">
-              {order.items.filter((item: any) => item.remainingQty === 0).length}
+              {order.items.filter((item: any) => item.remainingQty <= 0).length}
             </span>
           </div>
           <div className="stat-item-box1">
