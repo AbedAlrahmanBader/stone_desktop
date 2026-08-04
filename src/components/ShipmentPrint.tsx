@@ -531,6 +531,24 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
 
                 <hr className="section-rule" />
 
+                {/* ===== إضافة رقم الطلبية بشكل بارز ===== */}
+                <div style={{
+                    textAlign: 'center',
+                    padding: '10px 0',
+                    marginBottom: '15px',
+                    backgroundColor: '#f0f8ff',
+                    borderRadius: '8px',
+                    border: '2px solid #0056b3'
+                }}>
+                    <span style={{
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        color: '#0056b3'
+                    }}>
+                        📋 رقم الطلبية: {shipment?.orderNumber || orderNumber || "---"}
+                    </span>
+                </div>
+
                 <div className="title-row">
                     <div className="doc-number">
                         <span className="label-en">No.</span>
