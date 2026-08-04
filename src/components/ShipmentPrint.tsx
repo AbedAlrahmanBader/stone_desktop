@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "../styles/print.css";
 import logo from "../assets/AAA.jpg";
 
@@ -57,12 +57,15 @@ type SoldUnit = (typeof SOLD_UNITS)[number];
 
 // يفرد كل مشتاح (بأنواعه المتعددة) إلى صفوف مستقلة، صف لكل نوع حجر
 function flattenStones(stonePieces: StonePieceDoc[]): Stone[] {
+
     const rows: Stone[] = [];
 
     stonePieces.forEach((stone) => {
+
         const items = stone.items && stone.items.length > 0 ? stone.items : [];
 
         items.forEach((item) => {
+
             rows.push({
                 barcode: stone.barcode,
                 stoneType: item.stoneType,
@@ -74,7 +77,9 @@ function flattenStones(stonePieces: StonePieceDoc[]): Stone[] {
                 pieces: item.pieces,
                 status: stone.status,
             });
+
         });
+
     });
 
     return rows;
@@ -85,6 +90,7 @@ function groupSimilarStones(stones: Stone[]): Stone[] {
     const grouped: Stone[] = [];
     
     stones.forEach((stone) => {
+        // البحث عن صف موجود بنفس الخصائص
         const existingIndex = grouped.findIndex((g) => 
             g.stoneType === stone.stoneType &&
             g.length === stone.length &&
@@ -93,14 +99,17 @@ function groupSimilarStones(stones: Stone[]): Stone[] {
         );
 
         if (existingIndex !== -1) {
+            // دمج الكميات في الصف الموجود
             const existing = grouped[existingIndex];
             existing.pieces = (existing.pieces || 0) + (stone.pieces || 0);
             existing.area = (existing.area || 0) + (stone.area || 0);
             existing.linearMeter = (existing.linearMeter || 0) + (stone.linearMeter || 0);
+            // دمج الباركودات (اختياري)
             if (stone.barcode && !existing.barcode?.includes(stone.barcode)) {
                 existing.barcode = existing.barcode ? `${existing.barcode}, ${stone.barcode}` : stone.barcode;
             }
         } else {
+            // إضافة صف جديد
             grouped.push({ ...stone });
         }
     });
@@ -114,10 +123,11 @@ function getSoldQuantity(s: Stone): { value: string; unit: SoldUnit } {
     return { value: String(num(s.pieces)), unit: "قطعة" };
 }
 
+// بيرجع القيمة المناسبة حسب الوحدة المختارة من المستخدم
 function getValueForUnit(s: Stone, unit: SoldUnit) {
     if (unit === "قطعة") return String(num(s.pieces));
     if (unit === "متر مربع") return num(s.area).toFixed(2);
-    return num(s.linearMeter).toFixed(2);
+    return num(s.linearMeter).toFixed(2); // متر طول
 }
 
 function getEnteredQuantity(s: Stone): { value: string; unit: SoldUnit } {
@@ -136,7 +146,8 @@ function ShipmentPrint({ shipment }: Props) {
         window.print();
     };
 
-    // إعداد البيانات
+    // shipment.stones جاي من الباك اند كمصفوفة مشاتيح كاملة (كل وحدة فيها items[])
+    // فبنفردها هون لصفوف طباعة، صف لكل نوع حجر
     let stones: Stone[] =
         shipment?.stones && shipment.stones.length > 0
             ? flattenStones(shipment.stones as StonePieceDoc[])
@@ -152,92 +163,26 @@ function ShipmentPrint({ shipment }: Props) {
     // تجميع الصفوف المتشابهة
     stones = groupSimilarStones(stones);
 
-    // إنشاء مفتاح فريد لكل صف بناءً على خصائصه
-    const getRowKey = (stone: Stone, index: number) => {
-        return `${stone.stoneType || 'unknown'}_${stone.length || 0}_${stone.width || 0}_${stone.thickness || 0}_${index}`;
-    };
+    // تخزين اختيار الوحدة لكل صف (لو المستخدم غيّر الوحدة يدويًا)
+    const [soldUnitOverrides, setSoldUnitOverrides] = useState<Record<number, SoldUnit>>({});
+    const [enteredUnitOverrides, setEnteredUnitOverrides] = useState<Record<number, SoldUnit>>({});
 
-    // تحميل الاختيارات المحفوظة من localStorage
-    const loadSavedSelections = () => {
-        try {
-            const saved = localStorage.getItem('shipment_unit_selections');
-            if (saved) {
-                return JSON.parse(saved);
-            }
-        } catch (e) {
-            console.error('Error loading saved selections:', e);
-        }
-        return {};
-    };
+   type SoldTotals = { pieces: number; sqm: number; linearM: number };
 
-    // حفظ الاختيارات في localStorage
-    const saveSelections = (entered: Record<string, SoldUnit>, sold: Record<string, SoldUnit>) => {
-        try {
-            localStorage.setItem('shipment_unit_selections', JSON.stringify({
-                entered,
-                sold
-            }));
-        } catch (e) {
-            console.error('Error saving selections:', e);
-        }
-    };
-
-    // الحالة الأولية
-    const initialSaved = loadSavedSelections();
-    const initialEntered: Record<string, SoldUnit> = {};
-    const initialSold: Record<string, SoldUnit> = {};
-
-    stones.forEach((stone, index) => {
-        const key = getRowKey(stone, index);
-        const enteredDefault = getEnteredQuantity(stone);
+const soldTotals = stones.reduce<SoldTotals>(
+    (acc, stone, index) => {
         const autoSold = getSoldQuantity(stone);
-        
-        initialEntered[key] = initialSaved.entered?.[key] || enteredDefault.unit;
-        initialSold[key] = initialSaved.sold?.[key] || autoSold.unit;
-    });
+        const unit = soldUnitOverrides[index] ?? autoSold.unit;
+        const value = Number(getValueForUnit(stone, unit)) || 0;
 
-    // استخدام useState مع القيم المحفوظة
-    const [enteredUnitOverrides, setEnteredUnitOverrides] = useState<Record<string, SoldUnit>>(initialEntered);
-    const [soldUnitOverrides, setSoldUnitOverrides] = useState<Record<string, SoldUnit>>(initialSold);
+        if (unit === "قطعة") acc.pieces += value;
+        else if (unit === "متر مربع") acc.sqm += value;
+        else acc.linearM += value; // متر طول
 
-    // حفظ الاختيارات عند التغيير
-    useEffect(() => {
-        saveSelections(enteredUnitOverrides, soldUnitOverrides);
-    }, [enteredUnitOverrides, soldUnitOverrides]);
-
-    // دالة لتحديث وحدة الكمية المدخلة
-    const updateEnteredUnit = (key: string, unit: SoldUnit) => {
-        setEnteredUnitOverrides(prev => ({
-            ...prev,
-            [key]: unit
-        }));
-    };
-
-    // دالة لتحديث وحدة كمية البيع
-    const updateSoldUnit = (key: string, unit: SoldUnit) => {
-        setSoldUnitOverrides(prev => ({
-            ...prev,
-            [key]: unit
-        }));
-    };
-
-    type SoldTotals = { pieces: number; sqm: number; linearM: number };
-
-    const soldTotals = stones.reduce<SoldTotals>(
-        (acc, stone, index) => {
-            const key = getRowKey(stone, index);
-            const autoSold = getSoldQuantity(stone);
-            const unit = soldUnitOverrides[key] ?? autoSold.unit;
-            const value = Number(getValueForUnit(stone, unit)) || 0;
-
-            if (unit === "قطعة") acc.pieces += value;
-            else if (unit === "متر مربع") acc.sqm += value;
-            else acc.linearM += value;
-
-            return acc;
-        },
-        { pieces: 0, sqm: 0, linearM: 0 }
-    );
+        return acc;
+    },
+    { pieces: 0, sqm: 0, linearM: 0 }
+);
 
     const soldTotalParts: string[] = [];
     if (soldTotals.sqm > 0) soldTotalParts.push(`${soldTotals.sqm.toFixed(2)} متر مربع`);
@@ -341,7 +286,7 @@ function ShipmentPrint({ shipment }: Props) {
                 <div className="title-row">
                     <div className="doc-number">
                         <span className="label-en">No.</span>
-                        <span className="doc-number-value">{shipment?.consignmentNumber ?? "---"}</span>
+<span className="doc-number-value">{shipment?.consignmentNumber ?? "---"}</span>
                         <span>: رقم</span>
                     </div>
                     <div className="certificate-title">
@@ -352,52 +297,54 @@ function ShipmentPrint({ shipment }: Props) {
 
                 <hr className="section-rule" />
 
-                <div className="certificate-details">
-                    <div className="detail-row">
-                        <span className="label-en">Date:</span>
-                        <span className="value">
-                            {shipment?.createdAt
-                                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
-                                : shipment?.date || "03/05/2026"}
-                        </span>
-                        <span className="label">:  التاريخ </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Mr.</span>
-                        <span className="value">
-                            {shipment?.customer || "---"}
-                        </span>
-                        <span className="label">: المرسل اليه السيد  </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Leaving hour:</span>
-                        <span className="value">
-                            {shipment?.leavingHour ||
-                                (shipment?.createdAt
-                                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                      })
-                                    : "---")}
-                        </span>
-                        <span className="label"> : ساعة المغادرة </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Order No.</span>
-                        <span className="value">{shipment?.orderNumber}</span>
-                        <span className="label">:   رقم الطلبية </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Region:</span>
-                        <span className="value">{shipment?.region || "القدس"}</span>
-                        <span className="label">:  المنطقة </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Car No.</span>
-                        <span className="value">{shipment?.carNumber}</span>
-                        <span className="label">:    رقم السيارة </span>
-                    </div>
-                </div>
+
+<div className="certificate-details">
+    <div className="detail-row">
+        <span className="label-en">Date:</span>
+        <span className="value">
+            {shipment?.createdAt
+                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
+                : shipment?.date || "03/05/2026"}
+        </span>
+        <span className="label">:  التاريخ </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Mr.</span>
+        <span className="value">
+            {/* استخدام shipment.customer مباشرة */}
+            {shipment?.customer || "---"}
+        </span>
+        <span className="label">: المرسل اليه السيد  </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Leaving hour:</span>
+        <span className="value">
+            {shipment?.leavingHour ||
+                (shipment?.createdAt
+                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                      })
+                    : "---")}
+        </span>
+        <span className="label"> : ساعة المغادرة </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Order No.</span>
+        <span className="value">{shipment?.orderNumber}</span>
+        <span className="label">:   رقم الطلبية </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Region:</span>
+        <span className="value">{shipment?.region || "القدس"}</span>
+        <span className="label">:  المنطقة </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Car No.</span>
+        <span className="value">{shipment?.carNumber}</span>
+        <span className="label">:    رقم السيارة </span>
+    </div>
+</div>
 
                 <table className="shipment-table">
                     <thead>
@@ -414,18 +361,17 @@ function ShipmentPrint({ shipment }: Props) {
                     </thead>
                     <tbody>
                         {stones.map((stone, index) => {
-                            const key = getRowKey(stone, index);
                             const enteredDefault = getEnteredQuantity(stone);
                             const autoSold = getSoldQuantity(stone);
 
-                            const enteredUnit = enteredUnitOverrides[key] ?? enteredDefault.unit;
+                            const enteredUnit = enteredUnitOverrides[index] ?? enteredDefault.unit;
                             const enteredValue = getValueForUnit(stone, enteredUnit);
 
-                            const soldUnit = soldUnitOverrides[key] ?? autoSold.unit;
+                            const soldUnit = soldUnitOverrides[index] ?? autoSold.unit;
                             const soldValue = getValueForUnit(stone, soldUnit);
 
                             return (
-                                <tr key={key}>
+                                <tr key={`${stone.barcode || "row"}-${index}`}>
                                     <td>{index + 1}</td>
                                     <td></td>
                                     <td>{stone.stoneType || "---"}</td>
@@ -437,7 +383,12 @@ function ShipmentPrint({ shipment }: Props) {
                                         <select
                                             className="unit-select"
                                             value={enteredUnit}
-                                            onChange={(e) => updateEnteredUnit(key, e.target.value as SoldUnit)}
+                                            onChange={(e) =>
+                                                setEnteredUnitOverrides((prev) => ({
+                                                    ...prev,
+                                                    [index]: e.target.value as SoldUnit,
+                                                }))
+                                            }
                                         >
                                             {SOLD_UNITS.map((u) => (
                                                 <option key={u} value={u}>
@@ -452,7 +403,12 @@ function ShipmentPrint({ shipment }: Props) {
                                         <select
                                             className="unit-select"
                                             value={soldUnit}
-                                            onChange={(e) => updateSoldUnit(key, e.target.value as SoldUnit)}
+                                            onChange={(e) =>
+                                                setSoldUnitOverrides((prev) => ({
+                                                    ...prev,
+                                                    [index]: e.target.value as SoldUnit,
+                                                }))
+                                            }
                                         >
                                             {SOLD_UNITS.map((u) => (
                                                 <option key={u} value={u}>
