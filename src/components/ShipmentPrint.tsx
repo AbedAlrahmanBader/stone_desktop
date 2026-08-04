@@ -11,7 +11,7 @@ interface StoneItem {
     linearMeter?: number;
     area?: number;
     pieces?: number;
-    details?: string; // إضافة حقل التفاصيل
+    details?: string;
     requiredQty?: number;
     remainingQty?: number;
 }
@@ -35,7 +35,7 @@ interface Stone {
     area?: number;
     pieces?: number;
     status?: string;
-    details?: string; // إضافة حقل التفاصيل
+    details?: string;
     requiredQty?: number;
     remainingQty?: number;
 }
@@ -66,8 +66,8 @@ interface OrderItem {
 
 interface Props {
     shipment: any;
-    orderItems?: OrderItem[]; // بيانات الأصناف من الطلبية
-    orderNumber?: string; // رقم الطلبية للربط
+    orderItems?: OrderItem[];
+    orderNumber?: string;
 }
 
 const num = (v: any) => Number(v) || 0;
@@ -121,7 +121,6 @@ function groupSimilarStones(stones: Stone[]): Stone[] {
             if (stone.barcode && !existing.barcode?.includes(stone.barcode)) {
                 existing.barcode = existing.barcode ? `${existing.barcode}, ${stone.barcode}` : stone.barcode;
             }
-            // دمج التفاصيل
             if (stone.details && !existing.details) {
                 existing.details = stone.details;
             }
@@ -156,76 +155,84 @@ function getEnteredQuantity(s: Stone): { value: string; unit: SoldUnit } {
     return sold;
 }
 
-// دالة لإيجاد البيان من الطلبية مع التفاصيل الكاملة
-function findOrderItemDescription(stone: Stone, orderItems?: OrderItem[]): string {
-    if (!orderItems || orderItems.length === 0) {
-        // إذا لم توجد طلبية، استخدم التفاصيل المخزنة في الحجر نفسه
-        if (stone.details) {
-            return `${stone.stoneType || "---"} - ${stone.details}`;
+// ===== الدالة الرئيسية لجلب تفاصيل الصنف من الطلبية =====
+function getOrderItemDetails(stone: Stone, orderItems?: OrderItem[]): string {
+    // إذا كانت الطلبية موجودة
+    if (orderItems && orderItems.length > 0) {
+        // 1. محاولة المطابقة التامة (نوع + أبعاد)
+        const exactMatch = orderItems.find(item => {
+            const matchType = item.stoneType === stone.stoneType;
+            const matchLength = !item.length || !stone.length || Math.abs(item.length - stone.length) < 0.5;
+            const matchWidth = !item.width || !stone.width || Math.abs(item.width - stone.width) < 0.5;
+            const matchThickness = !item.thickness || !stone.thickness || Math.abs(item.thickness - stone.thickness) < 0.5;
+            return matchType && matchLength && matchWidth && matchThickness;
+        });
+
+        if (exactMatch) {
+            let details = exactMatch.stoneType;
+            
+            // إضافة التفاصيل
+            if (exactMatch.details) {
+                details += `\n📝 ${exactMatch.details}`;
+            }
+            
+            // إضافة الأبعاد
+            const dims = [];
+            if (exactMatch.length) dims.push(`الطول: ${exactMatch.length}سم`);
+            if (exactMatch.width) dims.push(`العرض: ${exactMatch.width}سم`);
+            if (exactMatch.thickness) dims.push(`السمك: ${exactMatch.thickness}سم`);
+            if (dims.length > 0) {
+                details += `\n📐 ${dims.join(' | ')}`;
+            }
+            
+            // إضافة الكميات
+            details += `\n📦 المطلوب: ${exactMatch.requiredQty}`;
+            if (exactMatch.remainingQty > 0) {
+                details += ` | المتبقي: ${exactMatch.remainingQty}`;
+            } else {
+                details += ` | ✅ مكتمل`;
+            }
+            
+            // إضافة الوحدة
+            const unitMap: Record<string, string> = {
+                'pieces': 'قطع',
+                'linearMeter': 'متر طولي',
+                'area': 'مساحة'
+            };
+            details += `\n📊 الوحدة: ${unitMap[exactMatch.unit] || exactMatch.unit}`;
+            
+            return details;
         }
-        return stone.stoneType || "---";
+
+        // 2. محاولة المطابقة حسب النوع فقط
+        const typeMatch = orderItems.find(item => item.stoneType === stone.stoneType);
+        if (typeMatch) {
+            let details = typeMatch.stoneType;
+            if (typeMatch.details) {
+                details += `\n📝 ${typeMatch.details}`;
+            }
+            details += `\n📦 المطلوب: ${typeMatch.requiredQty}`;
+            if (typeMatch.remainingQty > 0) {
+                details += ` | المتبقي: ${typeMatch.remainingQty}`;
+            }
+            return details;
+        }
     }
-    
-    // محاولة مطابقة الصنف بناءً على النوع والأبعاد
-    const matchedItem = orderItems.find(item => {
-        const matchType = item.stoneType === stone.stoneType;
-        const matchLength = !item.length || !stone.length || Math.abs(item.length - stone.length) < 0.5;
-        const matchWidth = !item.width || !stone.width || Math.abs(item.width - stone.width) < 0.5;
-        const matchThickness = !item.thickness || !stone.thickness || Math.abs(item.thickness - stone.thickness) < 0.5;
-        
-        return matchType && matchLength && matchWidth && matchThickness;
-    });
-    
-    // إذا وجد تطابق تام
-    if (matchedItem) {
-        let description = matchedItem.stoneType;
-        
-        // إضافة التفاصيل من الطلبية
-        if (matchedItem.details) {
-            description += ` - ${matchedItem.details}`;
-        }
-        
-        // إضافة الأبعاد إذا كانت موجودة
-        const dimensions = [];
-        if (matchedItem.length) dimensions.push(`طول: ${matchedItem.length}سم`);
-        if (matchedItem.width) dimensions.push(`عرض: ${matchedItem.width}سم`);
-        if (matchedItem.thickness) dimensions.push(`سمك: ${matchedItem.thickness}سم`);
-        if (dimensions.length > 0) {
-            description += ` (${dimensions.join('، ')})`;
-        }
-        
-        // إضافة الكمية المتبقية إذا كانت متاحة
-        if (matchedItem.remainingQty !== undefined && matchedItem.remainingQty > 0) {
-            description += ` | متبقي: ${matchedItem.remainingQty}`;
-        }
-        
-        // إضافة الكمية المطلوبة
-        if (matchedItem.requiredQty > 0) {
-            description += ` | مطلوب: ${matchedItem.requiredQty}`;
-        }
-        
-        return description;
-    }
-    
-    // إذا لم يوجد تطابق تام، حاول المطابقة حسب النوع فقط
-    const typeMatch = orderItems.find(item => item.stoneType === stone.stoneType);
-    if (typeMatch) {
-        let description = typeMatch.stoneType;
-        if (typeMatch.details) {
-            description += ` - ${typeMatch.details}`;
-        }
-        if (typeMatch.remainingQty !== undefined && typeMatch.remainingQty > 0) {
-            description += ` (متبقي: ${typeMatch.remainingQty})`;
-        }
-        return description;
-    }
-    
-    // إذا كان هناك تفاصيل مخزنة في الحجر نفسه
+
+    // 3. إذا لم توجد طلبية، استخدم التفاصيل المخزنة في الحجر
     if (stone.details) {
-        return `${stone.stoneType || "---"} - ${stone.details}`;
+        let details = stone.stoneType || "---";
+        details += `\n📝 ${stone.details}`;
+        if (stone.requiredQty && stone.requiredQty > 0) {
+            details += `\n📦 المطلوب: ${stone.requiredQty}`;
+        }
+        if (stone.remainingQty && stone.remainingQty > 0) {
+            details += ` | المتبقي: ${stone.remainingQty}`;
+        }
+        return details;
     }
-    
-    // إذا لم يوجد أي تطابق، ارجع نوع الحجر فقط
+
+    // 4. الرجوع إلى نوع الحجر فقط
     return stone.stoneType || "---";
 }
 
@@ -248,7 +255,7 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                       area: 20, 
                       pieces: 20, 
                       status: "In Stock",
-                      details: "وجه polished",
+                      details: "وجه polished - درجة أولى",
                       requiredQty: 20,
                       remainingQty: 5
                   },
@@ -262,7 +269,7 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                       area: 21.74, 
                       pieces: 105, 
                       status: "In Stock",
-                      details: "وجه honed",
+                      details: "وجه honed - درجة ممتازة",
                       requiredQty: 105,
                       remainingQty: 10
                   },
@@ -276,7 +283,7 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                       area: 0, 
                       pieces: 35, 
                       status: "In Stock",
-                      details: "معالجة مطبة",
+                      details: "معالجة مطبة - كاملة",
                       requiredQty: 35,
                       remainingQty: 0
                   },
@@ -290,7 +297,7 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                       area: 0, 
                       pieces: 4, 
                       status: "In Stock",
-                      details: "عتب مع جلب",
+                      details: "عتب مع جلب - مقاس خاص",
                       requiredQty: 4,
                       remainingQty: 2
                   },
@@ -304,7 +311,7 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                       area: 0, 
                       pieces: 20, 
                       status: "In Stock",
-                      details: "سقف مطبة",
+                      details: "سقف مطبة - عيار 30",
                       requiredQty: 20,
                       remainingQty: 8
                   },
@@ -318,7 +325,7 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                       area: 0, 
                       pieces: 17, 
                       status: "In Stock",
-                      details: "سقف مطبة صغير",
+                      details: "سقف مطبة صغير - عيار 15",
                       requiredQty: 17,
                       remainingQty: 3
                   },
@@ -326,14 +333,12 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
 
     stones = groupSimilarStones(stones);
 
-    // مفتاح فريد للتخزين يعتمد على رقم الإرسالية
     const storageKey = `shipment_units_${shipment?.consignmentNumber || 'default'}`;
 
     const getRowKey = (stone: Stone, index: number) => {
         return `${stone.stoneType || 'unknown'}_${stone.length || 0}_${stone.width || 0}_${stone.thickness || 0}_${index}`;
     };
 
-    // تحميل الاختيارات المحفوظة من localStorage
     const loadSavedSelections = () => {
         try {
             const saved = localStorage.getItem(storageKey);
@@ -346,7 +351,6 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
         return { entered: {}, sold: {} };
     };
 
-    // حفظ الاختيارات في localStorage
     const saveSelections = (entered: Record<string, SoldUnit>, sold: Record<string, SoldUnit>) => {
         try {
             localStorage.setItem(storageKey, JSON.stringify({ entered, sold }));
@@ -355,7 +359,6 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
         }
     };
 
-    // الحالة الأولية
     const initialSaved = loadSavedSelections();
     const initialEntered: Record<string, SoldUnit> = {};
     const initialSold: Record<string, SoldUnit> = {};
@@ -372,12 +375,10 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
     const [enteredUnitOverrides, setEnteredUnitOverrides] = useState<Record<string, SoldUnit>>(initialEntered);
     const [soldUnitOverrides, setSoldUnitOverrides] = useState<Record<string, SoldUnit>>(initialSold);
 
-    // حفظ الاختيارات عند التغيير
     useEffect(() => {
         saveSelections(enteredUnitOverrides, soldUnitOverrides);
     }, [enteredUnitOverrides, soldUnitOverrides]);
 
-    // حفظ الاختيارات عند إغلاق الصفحة أو تحديثها
     useEffect(() => {
         const handleBeforeUnload = () => {
             saveSelections(enteredUnitOverrides, soldUnitOverrides);
@@ -470,6 +471,15 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
     const summaryByThicknessTotal =
         shipment?.summaryByThicknessTotal ??
         summaryByThickness.reduce((sum, r) => sum + num(r.area), 0).toFixed(4);
+
+    // دالة لعرض التفاصيل بشكل منسق مع فواصل الأسطر
+    const formatDetailsForDisplay = (details: string) => {
+        return details.split('\n').map((line, i) => (
+            <div key={i} style={{ fontSize: '12px', lineHeight: '1.4', padding: '1px 0' }}>
+                {line}
+            </div>
+        ));
+    };
 
     return (
         <div className="print-container">
@@ -585,14 +595,14 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                 <table className="shipment-table">
                     <thead>
                         <tr>
-                            <th>الرقم</th>
-                            <th>بيان الصنف</th>
-                            <th>المعالجة المطلوبة</th>
-                            <th>الطول (سم)</th>
-                            <th>العرض (سم)</th>
-                            <th>السمك (سم)</th>
-                            <th colSpan={2}>كمية مدخلة</th>
-                            <th colSpan={2}>كمية البيع</th>
+                            <th style={{ width: '5%' }}>الرقم</th>
+                            <th style={{ width: '25%' }}>بيان الصنف</th>
+                            <th style={{ width: '12%' }}>المعالجة المطلوبة</th>
+                            <th style={{ width: '8%' }}>الطول (سم)</th>
+                            <th style={{ width: '8%' }}>العرض (سم)</th>
+                            <th style={{ width: '8%' }}>السمك (سم)</th>
+                            <th colSpan={2} style={{ width: '15%' }}>كمية مدخلة</th>
+                            <th colSpan={2} style={{ width: '15%' }}>كمية البيع</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -607,30 +617,59 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                             const soldUnit = soldUnitOverrides[key] ?? autoSold.unit;
                             const soldValue = getValueForUnit(stone, soldUnit);
 
-                            // الحصول على البيان من الطلبية مع التفاصيل
-                            const orderDescription = findOrderItemDescription(stone, orderItems);
+                            // الحصول على تفاصيل الصنف من الطلبية
+                            const itemDetails = getOrderItemDetails(stone, orderItems);
+                            const detailsLines = itemDetails.split('\n');
 
                             return (
                                 <tr key={key}>
-                                    <td>{index + 1}</td>
-                                    <td contentEditable={false} style={{ 
-                                        backgroundColor: '#f0f8ff', 
-                                        fontWeight: '500',
-                                        color: '#0056b3',
-                                        minWidth: '150px'
-                                    }}>
-                                        {orderDescription}
+                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                                        {index + 1}
                                     </td>
-                                    <td>{stone.stoneType || "---"}</td>
-                                    <td>{num(stone.length) === 0 ? "مفتوح" : stone.length}</td>
-                                    <td>{stone.width ?? "---"}</td>
-                                    <td>{stone.thickness ?? "---"}</td>
-                                    <td>{enteredValue}</td>
-                                    <td contentEditable={false}>
+                                    <td 
+                                        contentEditable={false} 
+                                        style={{ 
+                                            backgroundColor: '#e8f4f8', 
+                                            fontWeight: '500',
+                                            color: '#004466',
+                                            minWidth: '180px',
+                                            fontSize: '11px',
+                                            lineHeight: '1.4',
+                                            padding: '4px 8px',
+                                            textAlign: 'right',
+                                            direction: 'rtl'
+                                        }}
+                                    >
+                                        {detailsLines.map((line, i) => (
+                                            <div key={i} style={{ 
+                                                padding: '1px 0',
+                                                borderBottom: i < detailsLines.length - 1 ? '1px dotted #cce0e8' : 'none'
+                                            }}>
+                                                {line}
+                                            </div>
+                                        ))}
+                                    </td>
+                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                                        {stone.stoneType || "---"}
+                                    </td>
+                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                                        {num(stone.length) === 0 ? "مفتوح" : stone.length}
+                                    </td>
+                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                                        {stone.width ?? "---"}
+                                    </td>
+                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                                        {stone.thickness ?? "---"}
+                                    </td>
+                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                                        {enteredValue}
+                                    </td>
+                                    <td contentEditable={false} style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                                         <select
                                             className="unit-select"
                                             value={enteredUnit}
                                             onChange={(e) => updateEnteredUnit(key, e.target.value as SoldUnit)}
+                                            style={{ fontSize: '11px', padding: '2px 4px' }}
                                         >
                                             {SOLD_UNITS.map((u) => (
                                                 <option key={u} value={u}>
@@ -640,12 +679,15 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                                         </select>
                                         <span className="unit-print-label">{enteredUnit}</span>
                                     </td>
-                                    <td>{soldValue}</td>
-                                    <td contentEditable={false}>
+                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                                        {soldValue}
+                                    </td>
+                                    <td contentEditable={false} style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                                         <select
                                             className="unit-select"
                                             value={soldUnit}
                                             onChange={(e) => updateSoldUnit(key, e.target.value as SoldUnit)}
+                                            style={{ fontSize: '11px', padding: '2px 4px' }}
                                         >
                                             {SOLD_UNITS.map((u) => (
                                                 <option key={u} value={u}>
