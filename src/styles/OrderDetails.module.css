@@ -1,0 +1,509 @@
+/* الصفحة الرئيسية */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* حالات التحميل */
+.loadingState {
+  text-align: center;
+  padding: 50px;
+  font-size: 18px;
+  color: #666;
+}
+
+.notFoundState {
+  text-align: center;
+  padding: 50px;
+  font-size: 18px;
+  color: #dc2626;
+}
+
+/* رأس الصفحة */
+.headerSection {
+  background: #fff;
+  border-radius: 16px;
+  padding: 25px 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+  border: 1px solid #ececec;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  font-size: 30px;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.orderNumberBadge {
+  background: #2563eb;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.headerActions {
+  display: flex;
+  gap: 10px;
+}
+
+.btnBack {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.btnBack:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* شبكة المعلومات */
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.infoCard {
+  background: #fff;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+  border: 1px solid #ececec;
+}
+
+.infoCard h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+}
+
+.infoCard p {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f1f1;
+  padding: 10px 0;
+  margin: 0;
+}
+
+.infoCard p:last-child {
+  border-bottom: none;
+}
+
+.statusIndicator {
+  padding: 7px 14px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.statusIndicator.open {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.statusIndicator.completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* قسم الأصناف */
+.itemsSection {
+  background: #fff;
+  border-radius: 16px;
+  padding: 25px 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+  border: 1px solid #ececec;
+}
+
+.itemsSection h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+}
+
+.tableScrollWrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+.tableScrollWrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tableScrollWrapper::-webkit-scrollbar-thumb {
+  background: #cfcfcf;
+  border-radius: 20px;
+}
+
+.tableScrollWrapper::-webkit-scrollbar-track {
+  background: #efefef;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1200px;
+}
+
+.dataTable th {
+  background: #2563eb;
+  color: white;
+  font-size: 15px;
+  padding: 16px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.dataTable td {
+  padding: 14px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dataTable tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.dataTable tbody tr:hover {
+  background: #eef5ff;
+}
+
+/* مدخلات الجدول */
+.tableInput {
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid #d7d7d7;
+  padding: 0 10px;
+  transition: all 0.25s;
+  width: 100%;
+  min-width: 80px;
+  font-size: 14px;
+}
+
+.tableInput:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  outline: none;
+}
+
+.tableSelect {
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid #d7d7d7;
+  padding: 0 10px;
+  transition: all 0.25s;
+  width: 100%;
+  min-width: 80px;
+  font-size: 14px;
+  background: white;
+}
+
+.tableSelect:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  outline: none;
+}
+
+.remainingHighlight {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.itemDetails {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* أزرار الأصناف */
+.btnEdit,
+.btnDelete,
+.btnSave,
+.btnCancel {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s;
+  font-size: 14px;
+  margin: 0 3px;
+}
+
+.btnEdit {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.btnEdit:hover {
+  background: #bfdbfe;
+  transform: translateY(-2px);
+}
+
+.btnDelete {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.btnDelete:hover:not(:disabled) {
+  background: #fecaca;
+  transform: translateY(-2px);
+}
+
+.btnDelete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnSave {
+  background: #2563eb;
+  color: white;
+}
+
+.btnSave:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.btnSave:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnCancel {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+.btnCancel:hover {
+  background: #d1d5db;
+  transform: translateY(-2px);
+}
+
+/* حالة الأصناف */
+.itemStatusBadge {
+  padding: 7px 14px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.itemStatusBadge.completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.itemStatusBadge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* قسم المشاتيح */
+.stonesSection {
+  background: #fff;
+  border-radius: 16px;
+  padding: 25px 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+  border: 1px solid #ececec;
+}
+
+.stonesSection h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+}
+
+.stonesLoadingMessage,
+.stonesEmptyMessage {
+  text-align: center;
+  padding: 30px;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.stonesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.stoneCard {
+  border-radius: 16px;
+  background: white;
+  padding: 18px;
+  border: 1px solid #e6e6e6;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stoneCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.barcodeImage {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.stoneStatusBadge {
+  padding: 7px 14px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 5px 0;
+}
+
+.stoneStatusBadge.inStock {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.stoneStatusBadge.shipped {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.stoneTypesList {
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+  margin: 10px 0;
+}
+
+.stoneTotals {
+  color: #666;
+  font-size: 13px;
+}
+
+/* قسم الملخص */
+.summarySection {
+  background: #fff;
+  border-radius: 16px;
+  padding: 25px 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+  border: 1px solid #ececec;
+}
+
+.summarySection h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 25px;
+}
+
+.statItem {
+  border-radius: 14px;
+  padding: 25px;
+  background: #f8fafc;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.statItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.statLabel {
+  display: block;
+  font-size: 15px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.statValue {
+  display: block;
+  font-size: 34px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.statValue.success {
+  color: #059669;
+}
+
+.statValue.warning {
+  color: #d97706;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 640px) {
+  .container {
+    padding: 15px;
+  }
+
+  .headerSection {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .titleGroup {
+    justify-content: center;
+  }
+
+  .pageTitle {
+    font-size: 24px;
+  }
+
+  .headerActions {
+    justify-content: center;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .statValue {
+    font-size: 28px;
+  }
+}

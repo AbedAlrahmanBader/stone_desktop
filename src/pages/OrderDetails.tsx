@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import JsBarcode from "jsbarcode";
-import "../styles/orderDetails.css";
+import styles from "../styles/OrderDetails.module.css";
 
 interface EditItemState {
   stoneType: string;
@@ -120,11 +120,11 @@ function OrderDetails() {
   };
 
   if (loading) {
-    return <div className="loading-state1">جاري تحميل بيانات الطلبية...</div>;
+    return <div className={styles.loadingState}>جاري تحميل بيانات الطلبية...</div>;
   }
 
   if (!order) {
-    return <div className="not-found-state1">الطلبية غير موجودة</div>;
+    return <div className={styles.notFoundState}>الطلبية غير موجودة</div>;
   }
 
   const totalRequired = order.items.reduce(
@@ -138,32 +138,32 @@ function OrderDetails() {
   const totalCompleted = totalRequired - totalRemaining;
 
   return (
-    <div className="order-details-container1">
-      <div className="order-header-section1">
-        <div className="order-title-group1">
-          <h1>تفاصيل الطلبية</h1>
-          <span className="order-number-badge1">#{order.orderNumber}</span>
+    <div className={styles.container}>
+      <div className={styles.headerSection}>
+        <div className={styles.titleGroup}>
+          <h1 className={styles.pageTitle}>تفاصيل الطلبية</h1>
+          <span className={styles.orderNumberBadge}>#{order.orderNumber}</span>
         </div>
-        <div className="header-actions1">
-          <button className="btn-back-action1" onClick={() => navigate(-1)}>
+        <div className={styles.headerActions}>
+          <button className={styles.btnBack} onClick={() => navigate(-1)}>
             ← رجوع
           </button>
         </div>
       </div>
 
-      <div className="info-grid-layout1">
-        <div className="info-card-component1">
+      <div className={styles.infoGrid}>
+        <div className={styles.infoCard}>
           <h3>معلومات العميل</h3>
           <p><strong>الاسم:</strong> {order.customer?.name}</p>
           <p><strong>الهاتف:</strong> {order.customer?.phone || "---"}</p>
           <p><strong>البريد:</strong> {order.customer?.email || "---"}</p>
         </div>
 
-        <div className="info-card-component1">
+        <div className={styles.infoCard}>
           <h3>معلومات الطلبية</h3>
           <p>
             <strong>الحالة:</strong>
-            <span className={`status-indicator1 ${order.status?.toLowerCase()}`}>
+            <span className={`${styles.statusIndicator} ${styles[order.status?.toLowerCase()]}`}>
               {order.status === "Open" ? "مفتوحة" : "مكتملة"}
             </span>
           </p>
@@ -177,10 +177,10 @@ function OrderDetails() {
         </div>
       </div>
 
-      <div className="items-section-wrapper1">
+      <div className={styles.itemsSection}>
         <h2>الأصناف</h2>
-        <div className="table-scroll-wrapper1">
-          <table className="items-data-table1">
+        <div className={styles.tableScrollWrapper}>
+          <table className={styles.dataTable}>
             <thead>
               <tr>
                 <th>#</th>
@@ -207,6 +207,7 @@ function OrderDetails() {
                       <td>
                         <input
                           type="text"
+                          className={styles.tableInput}
                           value={editItem.stoneType}
                           onChange={(e) => setEditItem({ ...editItem, stoneType: e.target.value })}
                         />
@@ -214,6 +215,7 @@ function OrderDetails() {
                       <td>
                         <input
                           type="number"
+                          className={styles.tableInput}
                           value={editItem.length || ""}
                           onChange={(e) => setEditItem({ ...editItem, length: Number(e.target.value) })}
                         />
@@ -221,6 +223,7 @@ function OrderDetails() {
                       <td>
                         <input
                           type="number"
+                          className={styles.tableInput}
                           value={editItem.width || ""}
                           onChange={(e) => setEditItem({ ...editItem, width: Number(e.target.value) })}
                         />
@@ -228,12 +231,14 @@ function OrderDetails() {
                       <td>
                         <input
                           type="number"
+                          className={styles.tableInput}
                           value={editItem.thickness || ""}
                           onChange={(e) => setEditItem({ ...editItem, thickness: Number(e.target.value) })}
                         />
                       </td>
                       <td>
                         <select
+                          className={styles.tableSelect}
                           value={editItem.unit}
                           onChange={(e) => setEditItem({ ...editItem, unit: e.target.value })}
                         >
@@ -246,6 +251,7 @@ function OrderDetails() {
                         <input
                           type="number"
                           min="1"
+                          className={styles.tableInput}
                           value={editItem.requiredQty || ""}
                           onChange={(e) => setEditItem({ ...editItem, requiredQty: Number(e.target.value) })}
                         />
@@ -254,6 +260,7 @@ function OrderDetails() {
                       <td>
                         <input
                           type="text"
+                          className={styles.tableInput}
                           placeholder="تفاصيل إضافية..."
                           value={editItem.details}
                           onChange={(e) => setEditItem({ ...editItem, details: e.target.value })}
@@ -262,13 +269,13 @@ function OrderDetails() {
                       <td>---</td>
                       <td>
                         <button
-                          className="btn-item-save1"
+                          className={styles.btnSave}
                           onClick={() => saveEditItem(item._id)}
                           disabled={savingItem}
                         >
                           {savingItem ? "..." : "✔ حفظ"}
                         </button>
-                        <button className="btn-item-cancel1" onClick={cancelEditItem}>
+                        <button className={styles.btnCancel} onClick={cancelEditItem}>
                           ✕ إلغاء
                         </button>
                       </td>
@@ -289,21 +296,21 @@ function OrderDetails() {
                       {item.unit === "area" && "مساحة"}
                     </td>
                     <td>{item.requiredQty}</td>
-                    <td className={item.remainingQty > 0 ? "remaining-value-highlight1" : ""}>
+                    <td className={item.remainingQty > 0 ? styles.remainingHighlight : ""}>
                       {item.remainingQty}
                     </td>
-                    <td className="item-details-text1">{item.details || "---"}</td>
+                    <td className={styles.itemDetails}>{item.details || "---"}</td>
                     <td>
-                      <span className={`item-status-badge1 ${item.remainingQty === 0 ? "completed1" : "pending1"}`}>
+                      <span className={`${styles.itemStatusBadge} ${item.remainingQty === 0 ? styles.completed : styles.pending}`}>
                         {item.remainingQty === 0 ? "✓ مكتمل" : "⏳ قيد التنفيذ"}
                       </span>
                     </td>
                     <td>
-                      <button className="btn-item-edit1" onClick={() => startEditItem(item)}>
+                      <button className={styles.btnEdit} onClick={() => startEditItem(item)}>
                         ✏️
                       </button>
                       <button
-                        className="btn-item-delete1"
+                        className={styles.btnDelete}
                         onClick={() => deleteItem(item._id)}
                         disabled={deletingItemId === item._id}
                       >
@@ -318,19 +325,19 @@ function OrderDetails() {
         </div>
       </div>
 
-      <div className="linked-stones-section-wrapper1">
+      <div className={styles.stonesSection}>
         <h2>🏷️ المشاتيح المرتبطة</h2>
 
         {loadingStones ? (
-          <p className="stones-loading-message1">جاري تحميل المشاتيح...</p>
+          <p className={styles.stonesLoadingMessage}>جاري تحميل المشاتيح...</p>
         ) : stones.length === 0 ? (
-          <p className="stones-empty-message1">لا يوجد مشاتيح مرتبطة بهذه الطلبية بعد</p>
+          <p className={styles.stonesEmptyMessage}>لا يوجد مشاتيح مرتبطة بهذه الطلبية بعد</p>
         ) : (
-          <div className="stones-grid-list1">
+          <div className={styles.stonesGrid}>
             {stones.map((stone) => (
-              <div key={stone._id} className="stone-card-item1">
+              <div key={stone._id} className={styles.stoneCard}>
                 <svg
-                  className="stone-barcode-image1"
+                  className={styles.barcodeImage}
                   ref={(el) => {
                     if (!el) return;
                     try {
@@ -352,16 +359,16 @@ function OrderDetails() {
                   }}
                 />
                 <span
-                  className={`stone-status-badge1 ${
-                    stone.status === "In Stock" ? "in-stock1" : "shipped1"
+                  className={`${styles.stoneStatusBadge} ${
+                    stone.status === "In Stock" ? styles.inStock : styles.shipped
                   }`}
                 >
                   {stone.status === "In Stock" ? "متوفر" : "مشحون"}
                 </span>
-                <div className="stone-types-list1">
+                <div className={styles.stoneTypesList}>
                   {stone.items.map((it) => it.stoneType).join("، ")}
                 </div>
-                <div className="stone-totals-info1">
+                <div className={styles.stoneTotals}>
                   {stone.totalLinearMeter?.toFixed(2)} م.ط ، {stone.totalArea?.toFixed(2)} م²
                 </div>
               </div>
@@ -370,36 +377,36 @@ function OrderDetails() {
         )}
       </div>
 
-      <div className="order-summary-section1">
+      <div className={styles.summarySection}>
         <h3>ملخص الطلبية</h3>
-        <div className="summary-stats-grid1">
-          <div className="stat-item-box1">
-            <span className="stat-label-text1">إجمالي الأصناف</span>
-            <span className="stat-value-number1">{order.items.length}</span>
+        <div className={styles.summaryGrid}>
+          <div className={styles.statItem}>
+            <span className={styles.statLabel}>إجمالي الأصناف</span>
+            <span className={styles.statValue}>{order.items.length}</span>
           </div>
-          <div className="stat-item-box1">
-            <span className="stat-label-text1">الأصناف المكتملة</span>
-            <span className="stat-value-number1 success1">
+          <div className={styles.statItem}>
+            <span className={styles.statLabel}>الأصناف المكتملة</span>
+            <span className={`${styles.statValue} ${styles.success}`}>
               {order.items.filter((item: any) => item.remainingQty === 0).length}
             </span>
           </div>
-          <div className="stat-item-box1">
-            <span className="stat-label-text1">الأصناف قيد التنفيذ</span>
-            <span className="stat-value-number1 warning1">
+          <div className={styles.statItem}>
+            <span className={styles.statLabel}>الأصناف قيد التنفيذ</span>
+            <span className={`${styles.statValue} ${styles.warning}`}>
               {order.items.filter((item: any) => item.remainingQty > 0).length}
             </span>
           </div>
-          <div className="stat-item-box1">
-            <span className="stat-label-text1">إجمالي الكمية المطلوبة</span>
-            <span className="stat-value-number1">{totalRequired}</span>
+          <div className={styles.statItem}>
+            <span className={styles.statLabel}>إجمالي الكمية المطلوبة</span>
+            <span className={styles.statValue}>{totalRequired}</span>
           </div>
-          <div className="stat-item-box1">
-            <span className="stat-label-text1">إجمالي المنجز</span>
-            <span className="stat-value-number1 success1">{totalCompleted}</span>
+          <div className={styles.statItem}>
+            <span className={styles.statLabel}>إجمالي المنجز</span>
+            <span className={`${styles.statValue} ${styles.success}`}>{totalCompleted}</span>
           </div>
-          <div className="stat-item-box1">
-            <span className="stat-label-text1">إجمالي الناقص</span>
-            <span className="stat-value-number1 warning1">{totalRemaining}</span>
+          <div className={styles.statItem}>
+            <span className={styles.statLabel}>إجمالي الناقص</span>
+            <span className={`${styles.statValue} ${styles.warning}`}>{totalRemaining}</span>
           </div>
         </div>
       </div>
