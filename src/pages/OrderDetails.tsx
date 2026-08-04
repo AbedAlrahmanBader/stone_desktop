@@ -1,8 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import JsBarcode from "jsbarcode";
-import { QRCodeSVG } from "qrcode.react";
 import "../styles/OrderDetails.css";
 
 interface EditItemState {
@@ -37,11 +36,6 @@ function OrderDetails() {
 
   const [stones, setStones] = useState<OrderStone[]>([]);
   const [loadingStones, setLoadingStones] = useState(true);
-  const [showQRCode, setShowQRCode] = useState(false);
-  
-  const qrContainerRef = useRef<HTMLDivElement>(null);
-  const qrCodeRef = useRef<HTMLDivElement>(null);
-  const printContentRef = useRef<HTMLDivElement>(null);
 
   const loadOrder = async () => {
     try {
@@ -126,103 +120,6 @@ function OrderDetails() {
     } finally {
       setDeletingItemId(null);
     }
-  };
-
-  // ===== وظيفة عرض QR Code =====
-  const handleShowQRCode = () => {
-    if (!order) {
-      alert("لا توجد طلبية");
-      return;
-    }
-    setShowQRCode(true);
-  };
-
-  // ===== وظيفة طباعة QR Code =====
-  const handlePrintQRCode = () => {
-    if (!qrCodeRef.current) return;
-    
-    const printWindow = window.open('', '_blank', 'width=500,height=500');
-    if (printWindow) {
-      const content = qrCodeRef.current.innerHTML;
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html dir="rtl">
-          <head>
-            <title>QR Code - طلبية ${order?.orderNumber}</title>
-            <style>
-              body {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                margin: 0;
-                background: white;
-                font-family: Arial, sans-serif;
-              }
-              .qr-wrapper {
-                text-align: center;
-                padding: 30px;
-              }
-              .qr-wrapper h2 {
-                margin-bottom: 20px;
-                color: #333;
-              }
-              .qr-wrapper .order-number {
-                margin-top: 15px;
-                font-size: 16px;
-                color: #666;
-              }
-              .qr-wrapper .qr-container {
-                display: flex;
-                justify-content: center;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="qr-wrapper">
-              <h2>📱 رمز الطلبية</h2>
-              ${content}
-              <div class="order-number">رقم الطلبية: #${order?.orderNumber}</div>
-              <div style="margin-top: 10px; font-size: 12px; color: #aaa;">
-                ${new Date().toLocaleDateString("ar")}
-              </div>
-            </div>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-    }
-  };
-
-  // ===== وظيفة تحميل QR Code كصورة =====
-  const handleDownloadQRCode = () => {
-    const svg = document.querySelector('.qr-code-svg');
-    if (!svg) return;
-
-    const canvas = document.createElement('canvas');
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-
-    const img = new Image();
-    img.onload = () => {
-      canvas.width = img.width * 2;
-      canvas.height = img.height * 2;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.scale(2, 2);
-        ctx.drawImage(img, 0, 0);
-        const link = document.createElement('a');
-        link.download = `QR_طلبيه_${order?.orderNumber}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        URL.revokeObjectURL(url);
-      }
-    };
-    img.src = url;
   };
 
   // ===== وظيفة طباعة تفاصيل الطلبية =====
@@ -580,7 +477,6 @@ function OrderDetails() {
           </div>
 
           <script>
-            // Auto print after load
             setTimeout(() => {
               window.print();
             }, 1000);
@@ -607,17 +503,6 @@ function OrderDetails() {
   );
   const totalCompleted = totalRequired - totalRemaining;
 
-  // بيانات QR Code
-  const qrData = JSON.stringify({
-    orderNumber: order.orderNumber,
-    customer: order.customer?.name,
-    date: new Date(order.createdAt).toLocaleDateString("ar"),
-    status: order.status,
-    items: order.items.length,
-    totalQty: totalRequired,
-    url: window.location.href
-  });
-
   return (
     <div className="order-details-container1">
       <div className="order-header-section1">
@@ -631,12 +516,6 @@ function OrderDetails() {
             onClick={handlePrintOrderDetails}
           >
             🖨️ طباعة التفاصيل
-          </button>
-          <button 
-            className="btn-qr-code1" 
-            onClick={handleShowQRCode}
-          >
-            📱 QR Code
           </button>
           <button className="btn-back-action1" onClick={() => navigate(-1)}>
             ← رجوع
@@ -894,68 +773,6 @@ function OrderDetails() {
           </div>
         </div>
       </div>
-
-      {/* ===== مودال QR Code ===== */}
-      {showQRCode && (
-        <div className="qr-modal-overlay1" onClick={() => setShowQRCode(false)}>
-          <div className="qr-modal-content1" onClick={(e) => e.stopPropagation()}>
-            <div className="qr-modal-header1">
-              <h2>📱 رمز الطلبية</h2>
-              <button 
-                className="qr-modal-close1" 
-                onClick={() => setShowQRCode(false)}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="qr-modal-body1" ref={qrContainerRef}>
-              <div className="qr-code-wrapper1" ref={qrCodeRef}>
-                <div className="qr-code-container1">
-                  <QRCodeSVG
-                    className="qr-code-svg"
-                    value={qrData}
-                    size={250}
-                    bgColor="#ffffff"
-                    fgColor="#000000"
-                    level="H"
-                    includeMargin={true}
-                  />
-                </div>
-                <div className="qr-info1">
-                  <h3>#{order.orderNumber}</h3>
-                  <p><strong>العميل:</strong> {order.customer?.name}</p>
-                  <p><strong>التاريخ:</strong> {new Date(order.createdAt).toLocaleDateString("ar")}</p>
-                  <p><strong>الحالة:</strong> {order.status === "Open" ? "🟡 مفتوحة" : "🟢 مكتملة"}</p>
-                  <p><strong>عدد الأصناف:</strong> {order.items.length}</p>
-                  <p><strong>إجمالي الكمية:</strong> {totalRequired}</p>
-                </div>
-              </div>
-
-              <div className="qr-actions1">
-                <button 
-                  className="btn-print-qr1" 
-                  onClick={handlePrintQRCode}
-                >
-                  🖨️ طباعة QR
-                </button>
-                <button 
-                  className="btn-download-qr1" 
-                  onClick={handleDownloadQRCode}
-                >
-                  ⬇️ تحميل QR
-                </button>
-                <button 
-                  className="btn-close-qr1" 
-                  onClick={() => setShowQRCode(false)}
-                >
-                  ✕ إغلاق
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -1146,14 +1146,26 @@
     flex-direction: column;
   }
   
-  .btn-print-qr1,
-  .btn-download-qr1,
-  .btn-close-qr1 {
-    width: 100%;
-    justify-content: center;
-  }
+/* ===== زر طباعة التفاصيل ===== */
+.btn-print-details1 {
+  background: #1b5e20;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-  .print-page1 .print-summary1 .summary-grid1 {
-    grid-template-columns: 1fr;
+
+.btn-print-details1:hover {
+  background: #0d3b12;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+ 
   }
 }
