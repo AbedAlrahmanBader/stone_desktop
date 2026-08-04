@@ -5,7 +5,6 @@ import {
 } from "react-router-dom";
 
 import OrderDetails from "./pages/OrderDetails";
-
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";

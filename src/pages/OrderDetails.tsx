@@ -1,148 +1,65 @@
-import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import api from "../api/axios";
-import JsBarcode from "jsbarcode";
-import styles from "../styles/OrderDetails.module.css";
-
-interface EditItemState {
-  stoneType: string;
-  unit: string;
-  length: number;
-  width: number;
-  thickness: number;
-  requiredQty: number;
-  details: string;
-}
-
-interface OrderStone {
-  _id: string;
-  barcode: string;
-  status: string;
-  totalLinearMeter: number;
-  totalArea: number;
-  items: { stoneType: string }[];
-}
+import "../styles/orderDetails.css";
 
 function OrderDetails() {
   const { orderNumber } = useParams();
-  const navigate = useNavigate();
   const [order, setOrder] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const printRef = useRef<HTMLDivElement>(null);
-
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [editItem, setEditItem] = useState<EditItemState | null>(null);
-  const [savingItem, setSavingItem] = useState(false);
-  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
-
-  const [stones, setStones] = useState<OrderStone[]>([]);
-  const [loadingStones, setLoadingStones] = useState(true);
-
-  const loadOrder = async () => {
-    try {
-      const res = await api.get(`/orders/number/${orderNumber}`);
-      setOrder(res.data);
-      await loadStones(res.data._id);
-    } catch (error) {
-      alert("تعذر تحميل بيانات الطلبية");
-      navigate(-1);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadStones = async (orderId: string) => {
-    setLoadingStones(true);
-    try {
-      const res = await api.get(`/stones/order/${orderId}`);
-      setStones(res.data);
-    } catch (error) {
-      setStones([]);
-    } finally {
-      setLoadingStones(false);
-    }
-  };
 
   useEffect(() => {
     loadOrder();
-  }, [orderNumber]);
+  }, []);
 
-  const startEditItem = (item: any) => {
-    setEditingItemId(item._id);
-    setEditItem({
-      stoneType: item.stoneType,
-      unit: item.unit,
-      length: item.length || 0,
-      width: item.width || 0,
-      thickness: item.thickness || 0,
-      requiredQty: item.requiredQty,
-      details: item.details || "",
-    });
-  };
-
-  const cancelEditItem = () => {
-    setEditingItemId(null);
-    setEditItem(null);
-  };
-
-  const saveEditItem = async (itemId: string) => {
-    if (!editItem) return;
-    if (!editItem.stoneType.trim() || editItem.requiredQty <= 0) {
-      alert("يرجى تعبئة نوع الحجر والكمية بشكل صحيح");
-      return;
-    }
-
-    setSavingItem(true);
+  const loadOrder = async () => {
     try {
-      const res = await api.put(`/orders/${order._id}/items/${itemId}`, editItem);
+      const res = await api.get(`/orders/${orderNumber}`);
       setOrder(res.data);
-      cancelEditItem();
-    } catch (error: any) {
-      alert(error.response?.data?.message || "حدث خطأ أثناء تعديل الصنف");
-    } finally {
-      setSavingItem(false);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const deleteItem = async (itemId: string) => {
-    const confirmed = window.confirm("متأكد إنك بدك تحذف هذا الصنف؟");
-    if (!confirmed) return;
-
-    setDeletingItemId(itemId);
-    try {
-      const res = await api.delete(`/orders/${order._id}/items/${itemId}`);
-      setOrder(res.data);
-    } catch (error: any) {
-      alert(error.response?.data?.message || "حدث خطأ أثناء حذف الصنف");
-    } finally {
-      setDeletingItemId(null);
-    }
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  if (loading) {
-    return <div className={styles.loadingState}>جاري تحميل بيانات الطلبية...</div>;
-  }
-
-  if (!order) {
-    return <div className={styles.notFoundState}>الطلبية غير موجودة</div>;
-  }
-
-  const totalRequired = order.items.reduce(
-    (sum: number, item: any) => sum + (item.requiredQty || 0),
-    0
-  );
-  const totalRemaining = order.items.reduce(
-    (sum: number, item: any) => sum + (item.remainingQty || 0),
-    0
-  );
+  if (!order) return <h2>جاري التحميل...</h2>;
 
   return (
-    <div className={styles.container} ref={printRef}>
-     
+    <div className="order-details">
+      <h1>تفاصيل الطلبية</h1>
+
+      <div className="order-card">
+        <p><strong>رقم الطلبية:</strong> {order.orderNumber}</p>
+        <p><strong>العميل:</strong> {order.customer?.name}</p>
+        <p><strong>الحالة:</strong> {order.status}</p>
+        <p><strong>الوصف:</strong> {order.description || "---"}</p>
+      </div>
+
+      <h2>الأصناف</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>نوع الحجر</th>
+            <th>الأبعاد</th>
+            <th>الكمية</th>
+            <th>الوحدة</th>
+            <th>التفاصيل</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {order.items.map((item: any) => (
+            <tr key={item._id}>
+              <td>{item.stoneType}</td>
+              <td>
+                {item.length} × {item.width} × {item.thickness}
+              </td>
+              <td>{item.requiredQty}</td>
+              <td>{item.unit}</td>
+              <td>{item.details || "-"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
