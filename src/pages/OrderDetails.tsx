@@ -43,7 +43,6 @@ function OrderDetails() {
       setOrder(res.data);
       await loadStones(res.data._id);
     } catch (error) {
-      console.error(error);
       alert("تعذر تحميل بيانات الطلبية");
       navigate(-1);
     } finally {
@@ -57,7 +56,6 @@ function OrderDetails() {
       const res = await api.get(`/stones/order/${orderId}`);
       setStones(res.data);
     } catch (error) {
-      console.error(error);
       setStones([]);
     } finally {
       setLoadingStones(false);
@@ -100,7 +98,6 @@ function OrderDetails() {
       setOrder(res.data);
       cancelEditItem();
     } catch (error: any) {
-      console.error(error);
       alert(error.response?.data?.message || "حدث خطأ أثناء تعديل الصنف");
     } finally {
       setSavingItem(false);
@@ -116,7 +113,6 @@ function OrderDetails() {
       const res = await api.delete(`/orders/${order._id}/items/${itemId}`);
       setOrder(res.data);
     } catch (error: any) {
-      console.error(error);
       alert(error.response?.data?.message || "حدث خطأ أثناء حذف الصنف");
     } finally {
       setDeletingItemId(null);
@@ -351,7 +347,7 @@ function OrderDetails() {
                         lineColor: "#000000",
                       });
                     } catch (err) {
-                      console.error(err);
+                      // Silently handle barcode errors
                     }
                   }}
                 />
