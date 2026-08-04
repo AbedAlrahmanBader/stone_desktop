@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles/print.css";
 import logo from "../assets/AAA.jpg";
 
@@ -50,17 +50,6 @@ interface Stone {
     pieces?: number;
     status?: string;
     details?: string;
-}
-
-interface ThicknessSummaryRow {
-    stoneType: string;
-    thickness: number;
-    area: number;
-}
-
-interface ThicknessOnlyRow {
-    thickness: number;
-    area: number;
 }
 
 interface Props {
@@ -160,6 +149,8 @@ function groupSimilarStones(stones: Stone[]): Stone[] {
 }
 
 function getSoldQuantity(s: Stone): { value: string; unit: SoldUnit } {
+    // إظهار القطعة دائمًا بدل متر مربع
+    if (num(s.pieces) > 0) return { value: String(num(s.pieces)), unit: "قطعة" };
     if (num(s.area) > 0) return { value: num(s.area).toFixed(2), unit: "متر مربع" };
     if (num(s.linearMeter) > 0) return { value: num(s.linearMeter).toFixed(2), unit: "متر طول" };
     return { value: String(num(s.pieces)), unit: "قطعة" };
@@ -209,22 +200,53 @@ function ShipmentPrint({ shipment }: Props) {
     const [soldUnitOverrides, setSoldUnitOverrides] = useState<Record<number, SoldUnit>>({});
     const [enteredUnitOverrides, setEnteredUnitOverrides] = useState<Record<number, SoldUnit>>({});
 
-   type SoldTotals = { pieces: number; sqm: number; linearM: number };
+    // تحميل الإعدادات المحفوظة من localStorage عند تحميل المكون
+    useEffect(() => {
+        const savedSoldOverrides = localStorage.getItem('soldUnitOverrides');
+        const savedEnteredOverrides = localStorage.getItem('enteredUnitOverrides');
+        
+        if (savedSoldOverrides) {
+            try {
+                setSoldUnitOverrides(JSON.parse(savedSoldOverrides));
+            } catch (e) {
+                console.error('Error loading sold unit overrides:', e);
+            }
+        }
+        
+        if (savedEnteredOverrides) {
+            try {
+                setEnteredUnitOverrides(JSON.parse(savedEnteredOverrides));
+            } catch (e) {
+                console.error('Error loading entered unit overrides:', e);
+            }
+        }
+    }, []);
 
-const soldTotals = stones.reduce<SoldTotals>(
-    (acc, stone, index) => {
-        const autoSold = getSoldQuantity(stone);
-        const unit = soldUnitOverrides[index] ?? autoSold.unit;
-        const value = Number(getValueForUnit(stone, unit)) || 0;
+    // حفظ الإعدادات في localStorage عند التغيير
+    useEffect(() => {
+        localStorage.setItem('soldUnitOverrides', JSON.stringify(soldUnitOverrides));
+    }, [soldUnitOverrides]);
 
-        if (unit === "قطعة") acc.pieces += value;
-        else if (unit === "متر مربع") acc.sqm += value;
-        else acc.linearM += value; // متر طول
+    useEffect(() => {
+        localStorage.setItem('enteredUnitOverrides', JSON.stringify(enteredUnitOverrides));
+    }, [enteredUnitOverrides]);
 
-        return acc;
-    },
-    { pieces: 0, sqm: 0, linearM: 0 }
-);
+    type SoldTotals = { pieces: number; sqm: number; linearM: number };
+
+    const soldTotals = stones.reduce<SoldTotals>(
+        (acc, stone, index) => {
+            const autoSold = getSoldQuantity(stone);
+            const unit = soldUnitOverrides[index] ?? autoSold.unit;
+            const value = Number(getValueForUnit(stone, unit)) || 0;
+
+            if (unit === "قطعة") acc.pieces += value;
+            else if (unit === "متر مربع") acc.sqm += value;
+            else acc.linearM += value; // متر طول
+
+            return acc;
+        },
+        { pieces: 0, sqm: 0, linearM: 0 }
+    );
 
     const soldTotalParts: string[] = [];
     if (soldTotals.sqm > 0) soldTotalParts.push(`${soldTotals.sqm.toFixed(2)} متر مربع`);
@@ -238,42 +260,6 @@ const soldTotals = stones.reduce<SoldTotals>(
         linearM: shipment?.totalLinearMeter ?? stones.reduce((sum, s) => sum + num(s.linearMeter), 0),
         pieces: stones.reduce((sum, s) => sum + num(s.pieces), 0),
     };
-
-    const summaryByTreatment: ThicknessSummaryRow[] =
-        shipment?.summaryByTreatment && shipment.summaryByTreatment.length > 0
-            ? shipment.summaryByTreatment
-            : Object.values(
-                  stones.reduce((acc: Record<string, ThicknessSummaryRow>, s) => {
-                      const key = `${s.stoneType || "---"}|${s.thickness ?? "---"}`;
-                      if (!acc[key]) {
-                          acc[key] = { stoneType: s.stoneType || "---", thickness: num(s.thickness), area: 0 };
-                      }
-                      acc[key].area += num(s.area) || num(s.linearMeter) || num(s.pieces);
-                      return acc;
-                  }, {})
-              );
-
-    const summaryByTreatmentTotal =
-        shipment?.summaryByTreatmentTotal ??
-        summaryByTreatment.reduce((sum, r) => sum + num(r.area), 0).toFixed(2);
-
-    const summaryByThickness: ThicknessOnlyRow[] =
-        shipment?.summaryByThickness && shipment.summaryByThickness.length > 0
-            ? shipment.summaryByThickness
-            : Object.values(
-                  stones.reduce((acc: Record<string, ThicknessOnlyRow>, s) => {
-                      const key = `${s.thickness ?? "---"}`;
-                      if (!acc[key]) {
-                          acc[key] = { thickness: num(s.thickness), area: 0 };
-                      }
-                      acc[key].area += num(s.area) || num(s.linearMeter) || num(s.pieces);
-                      return acc;
-                  }, {})
-              );
-
-    const summaryByThicknessTotal =
-        shipment?.summaryByThicknessTotal ??
-        summaryByThickness.reduce((sum, r) => sum + num(r.area), 0).toFixed(4);
 
     return (
         <div className="print-container">
@@ -328,7 +314,7 @@ const soldTotals = stones.reduce<SoldTotals>(
                 <div className="title-row">
                     <div className="doc-number">
                         <span className="label-en">No.</span>
-<span className="doc-number-value">{shipment?.consignmentNumber ?? "---"}</span>
+                        <span className="doc-number-value">{shipment?.consignmentNumber ?? "---"}</span>
                         <span>: رقم</span>
                     </div>
                     <div className="certificate-title">
@@ -339,54 +325,52 @@ const soldTotals = stones.reduce<SoldTotals>(
 
                 <hr className="section-rule" />
 
-
-<div className="certificate-details">
-    <div className="detail-row">
-        <span className="label-en">Date:</span>
-        <span className="value">
-            {shipment?.createdAt
-                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
-                : shipment?.date || "03/05/2026"}
-        </span>
-        <span className="label">:  التاريخ </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Mr.</span>
-        <span className="value">
-            {/* استخدام shipment.customer مباشرة */}
-            {shipment?.customer || "---"}
-        </span>
-        <span className="label">: المرسل اليه السيد  </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Leaving hour:</span>
-        <span className="value">
-            {shipment?.leavingHour ||
-                (shipment?.createdAt
-                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                      })
-                    : "---")}
-        </span>
-        <span className="label"> : ساعة المغادرة </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Order No.</span>
-        <span className="value">{shipment?.orderNumber}</span>
-        <span className="label">:   رقم الطلبية </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Region:</span>
-        <span className="value">{shipment?.region || "القدس"}</span>
-        <span className="label">:  المنطقة </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Car No.</span>
-        <span className="value">{shipment?.carNumber}</span>
-        <span className="label">:    رقم السيارة </span>
-    </div>
-</div>
+                <div className="certificate-details">
+                    <div className="detail-row">
+                        <span className="label-en">Date:</span>
+                        <span className="value">
+                            {shipment?.createdAt
+                                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
+                                : shipment?.date || "03/05/2026"}
+                        </span>
+                        <span className="label">:  التاريخ </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Mr.</span>
+                        <span className="value">
+                            {shipment?.customer || "---"}
+                        </span>
+                        <span className="label">: المرسل اليه السيد  </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Leaving hour:</span>
+                        <span className="value">
+                            {shipment?.leavingHour ||
+                                (shipment?.createdAt
+                                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                      })
+                                    : "---")}
+                        </span>
+                        <span className="label"> : ساعة المغادرة </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Order No.</span>
+                        <span className="value">{shipment?.orderNumber}</span>
+                        <span className="label">:   رقم الطلبية </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Region:</span>
+                        <span className="value">{shipment?.region || "القدس"}</span>
+                        <span className="label">:  المنطقة </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Car No.</span>
+                        <span className="value">{shipment?.carNumber}</span>
+                        <span className="label">:    رقم السيارة </span>
+                    </div>
+                </div>
 
                 <table className="shipment-table">
                     <thead>
@@ -398,7 +382,7 @@ const soldTotals = stones.reduce<SoldTotals>(
                             <th>العرض (سم)</th>
                             <th>السمك (سم)</th>
                             <th colSpan={2}>كمية مدخلة</th>
-                            <th colSpan={2}>كمية البيع</th>
+                            <th>كمية البيع</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -409,8 +393,8 @@ const soldTotals = stones.reduce<SoldTotals>(
                             const enteredUnit = enteredUnitOverrides[index] ?? enteredDefault.unit;
                             const enteredValue = getValueForUnit(stone, enteredUnit);
 
-                            const soldUnit = soldUnitOverrides[index] ?? autoSold.unit;
-                            const soldValue = getValueForUnit(stone, soldUnit);
+                            // دائمًا نعرض القطعة في عمود البيع
+                            const soldValue = String(num(stone.pieces));
 
                             return (
                                 <tr key={`${stone.barcode || "row"}-${index}`}>
@@ -441,25 +425,6 @@ const soldTotals = stones.reduce<SoldTotals>(
                                         <span className="unit-print-label">{enteredUnit}</span>
                                     </td>
                                     <td>{soldValue}</td>
-                                    <td contentEditable={false}>
-                                        <select
-                                            className="unit-select"
-                                            value={soldUnit}
-                                            onChange={(e) =>
-                                                setSoldUnitOverrides((prev) => ({
-                                                    ...prev,
-                                                    [index]: e.target.value as SoldUnit,
-                                                }))
-                                            }
-                                        >
-                                            {SOLD_UNITS.map((u) => (
-                                                <option key={u} value={u}>
-                                                    {u}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <span className="unit-print-label">{soldUnit}</span>
-                                    </td>
                                 </tr>
                             );
                         })}
@@ -473,61 +438,7 @@ const soldTotals = stones.reduce<SoldTotals>(
                     </div>
                     <div className="total-line">
                         <span className="total-label">مجموع الكمية: 0.0 كوب,</span>
-                        {soldTotalParts.map((part, i) => (
-                            <span key={i} className="total-value">
-                                {part}
-                                {i < soldTotalParts.length - 1 ? " ، " : ""}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="summary-section">
-                    <div className="summary-title">الإجمالي حسب السماك</div>
-                    <div className="summary-tables">
-                        <table className="summary-table treatment-summary">
-                            <thead>
-                                <tr>
-                                    <th>نوع الحجر</th>
-                                    <th>السماكة (سم)</th>
-                                    <th>الكمية</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {summaryByTreatment.map((row, index) => (
-                                    <tr key={index}>
-                                        <td>{row.stoneType}</td>
-                                        <td>{row.thickness}</td>
-                                        <td>{Number(row.area).toFixed(2)}</td>
-                                    </tr>
-                                ))}
-                                <tr className="summary-total-row">
-                                    <td colSpan={2}>المجموع:</td>
-                                    <td>{summaryByTreatmentTotal}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <table className="summary-table thickness-summary">
-                            <thead>
-                                <tr>
-                                    <th>السماكة (سم)</th>
-                                    <th>الكمية</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {summaryByThickness.map((row, index) => (
-                                    <tr key={index}>
-                                        <td>{row.thickness}</td>
-                                        <td>{Number(row.area).toFixed(2)}</td>
-                                    </tr>
-                                ))}
-                                <tr className="summary-total-row">
-                                    <td>المجموع:</td>
-                                    <td>{summaryByThicknessTotal}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <span className="total-value">{totals.pieces} قطعة</span>
                     </div>
                 </div>
 
