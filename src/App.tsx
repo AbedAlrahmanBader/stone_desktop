@@ -4,7 +4,6 @@ import {
   Route
 } from "react-router-dom";
 
-import OrderDetails from "./pages/OrderDetails";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";
@@ -63,7 +62,6 @@ function App() {
             path="/shipments"
             element={<Shipments />}
           />
-<Route path="/orders/:orderNumber" element={<OrderDetails />} />
 
         </Route>
 
