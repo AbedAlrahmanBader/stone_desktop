@@ -11,6 +11,9 @@ interface StoneItem {
     linearMeter?: number;
     area?: number;
     pieces?: number;
+    details?: string; // إضافة حقل التفاصيل
+    requiredQty?: number;
+    remainingQty?: number;
 }
 
 interface StonePieceDoc {
@@ -32,6 +35,9 @@ interface Stone {
     area?: number;
     pieces?: number;
     status?: string;
+    details?: string; // إضافة حقل التفاصيل
+    requiredQty?: number;
+    remainingQty?: number;
 }
 
 interface ThicknessSummaryRow {
@@ -86,6 +92,9 @@ function flattenStones(stonePieces: StonePieceDoc[]): Stone[] {
                 area: item.area,
                 pieces: item.pieces,
                 status: stone.status,
+                details: item.details || "",
+                requiredQty: item.requiredQty || 0,
+                remainingQty: item.remainingQty || 0,
             });
         });
     });
@@ -111,6 +120,10 @@ function groupSimilarStones(stones: Stone[]): Stone[] {
             existing.linearMeter = (existing.linearMeter || 0) + (stone.linearMeter || 0);
             if (stone.barcode && !existing.barcode?.includes(stone.barcode)) {
                 existing.barcode = existing.barcode ? `${existing.barcode}, ${stone.barcode}` : stone.barcode;
+            }
+            // دمج التفاصيل
+            if (stone.details && !existing.details) {
+                existing.details = stone.details;
             }
         } else {
             grouped.push({ ...stone });
@@ -143,9 +156,15 @@ function getEnteredQuantity(s: Stone): { value: string; unit: SoldUnit } {
     return sold;
 }
 
-// دالة لإيجاد البيان من الطلبية
+// دالة لإيجاد البيان من الطلبية مع التفاصيل الكاملة
 function findOrderItemDescription(stone: Stone, orderItems?: OrderItem[]): string {
-    if (!orderItems || orderItems.length === 0) return '';
+    if (!orderItems || orderItems.length === 0) {
+        // إذا لم توجد طلبية، استخدم التفاصيل المخزنة في الحجر نفسه
+        if (stone.details) {
+            return `${stone.stoneType || "---"} - ${stone.details}`;
+        }
+        return stone.stoneType || "---";
+    }
     
     // محاولة مطابقة الصنف بناءً على النوع والأبعاد
     const matchedItem = orderItems.find(item => {
@@ -160,13 +179,31 @@ function findOrderItemDescription(stone: Stone, orderItems?: OrderItem[]): strin
     // إذا وجد تطابق تام
     if (matchedItem) {
         let description = matchedItem.stoneType;
+        
+        // إضافة التفاصيل من الطلبية
         if (matchedItem.details) {
             description += ` - ${matchedItem.details}`;
         }
+        
+        // إضافة الأبعاد إذا كانت موجودة
+        const dimensions = [];
+        if (matchedItem.length) dimensions.push(`طول: ${matchedItem.length}سم`);
+        if (matchedItem.width) dimensions.push(`عرض: ${matchedItem.width}سم`);
+        if (matchedItem.thickness) dimensions.push(`سمك: ${matchedItem.thickness}سم`);
+        if (dimensions.length > 0) {
+            description += ` (${dimensions.join('، ')})`;
+        }
+        
         // إضافة الكمية المتبقية إذا كانت متاحة
         if (matchedItem.remainingQty !== undefined && matchedItem.remainingQty > 0) {
-            description += ` (متبقي: ${matchedItem.remainingQty})`;
+            description += ` | متبقي: ${matchedItem.remainingQty}`;
         }
+        
+        // إضافة الكمية المطلوبة
+        if (matchedItem.requiredQty > 0) {
+            description += ` | مطلوب: ${matchedItem.requiredQty}`;
+        }
+        
         return description;
     }
     
@@ -183,8 +220,13 @@ function findOrderItemDescription(stone: Stone, orderItems?: OrderItem[]): strin
         return description;
     }
     
-    // إذا لم يوجد أي تطابق، ارجع فارغ
-    return '';
+    // إذا كان هناك تفاصيل مخزنة في الحجر نفسه
+    if (stone.details) {
+        return `${stone.stoneType || "---"} - ${stone.details}`;
+    }
+    
+    // إذا لم يوجد أي تطابق، ارجع نوع الحجر فقط
+    return stone.stoneType || "---";
 }
 
 function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
@@ -196,12 +238,90 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
         shipment?.stones && shipment.stones.length > 0
             ? flattenStones(shipment.stones as StonePieceDoc[])
             : [
-                  { barcode: "STN-0001", stoneType: "حجر مسمسم سراحي", length: 0, width: 30, thickness: 5, linearMeter: 0, area: 20, pieces: 20, status: "In Stock" },
-                  { barcode: "STN-0002", stoneType: "حجر مسمسم محصور", length: 69, width: 30, thickness: 5, linearMeter: 0, area: 21.74, pieces: 105, status: "In Stock" },
-                  { barcode: "STN-0003", stoneType: "جية مطبة وجه+جنبين", length: 0, width: 42, thickness: 7, linearMeter: 35, area: 0, pieces: 35, status: "In Stock" },
-                  { barcode: "STN-0004", stoneType: "عتب مسمسم/مطبة", length: 130, width: 25, thickness: 15, linearMeter: 5.2, area: 0, pieces: 4, status: "In Stock" },
-                  { barcode: "STN-0005", stoneType: "سقف مسمسم/مطبة", length: 30, width: 25, thickness: 15, linearMeter: 0, area: 0, pieces: 20, status: "In Stock" },
-                  { barcode: "STN-0006", stoneType: "سقف مسمسم/مطبة", length: 15, width: 25, thickness: 15, linearMeter: 0, area: 0, pieces: 17, status: "In Stock" },
+                  { 
+                      barcode: "STN-0001", 
+                      stoneType: "حجر مسمسم سراحي", 
+                      length: 0, 
+                      width: 30, 
+                      thickness: 5, 
+                      linearMeter: 0, 
+                      area: 20, 
+                      pieces: 20, 
+                      status: "In Stock",
+                      details: "وجه polished",
+                      requiredQty: 20,
+                      remainingQty: 5
+                  },
+                  { 
+                      barcode: "STN-0002", 
+                      stoneType: "حجر مسمسم محصور", 
+                      length: 69, 
+                      width: 30, 
+                      thickness: 5, 
+                      linearMeter: 0, 
+                      area: 21.74, 
+                      pieces: 105, 
+                      status: "In Stock",
+                      details: "وجه honed",
+                      requiredQty: 105,
+                      remainingQty: 10
+                  },
+                  { 
+                      barcode: "STN-0003", 
+                      stoneType: "جية مطبة وجه+جنبين", 
+                      length: 0, 
+                      width: 42, 
+                      thickness: 7, 
+                      linearMeter: 35, 
+                      area: 0, 
+                      pieces: 35, 
+                      status: "In Stock",
+                      details: "معالجة مطبة",
+                      requiredQty: 35,
+                      remainingQty: 0
+                  },
+                  { 
+                      barcode: "STN-0004", 
+                      stoneType: "عتب مسمسم/مطبة", 
+                      length: 130, 
+                      width: 25, 
+                      thickness: 15, 
+                      linearMeter: 5.2, 
+                      area: 0, 
+                      pieces: 4, 
+                      status: "In Stock",
+                      details: "عتب مع جلب",
+                      requiredQty: 4,
+                      remainingQty: 2
+                  },
+                  { 
+                      barcode: "STN-0005", 
+                      stoneType: "سقف مسمسم/مطبة", 
+                      length: 30, 
+                      width: 25, 
+                      thickness: 15, 
+                      linearMeter: 0, 
+                      area: 0, 
+                      pieces: 20, 
+                      status: "In Stock",
+                      details: "سقف مطبة",
+                      requiredQty: 20,
+                      remainingQty: 8
+                  },
+                  { 
+                      barcode: "STN-0006", 
+                      stoneType: "سقف مسمسم/مطبة", 
+                      length: 15, 
+                      width: 25, 
+                      thickness: 15, 
+                      linearMeter: 0, 
+                      area: 0, 
+                      pieces: 17, 
+                      status: "In Stock",
+                      details: "سقف مطبة صغير",
+                      requiredQty: 17,
+                      remainingQty: 3
+                  },
               ];
 
     stones = groupSimilarStones(stones);
@@ -487,14 +607,19 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                             const soldUnit = soldUnitOverrides[key] ?? autoSold.unit;
                             const soldValue = getValueForUnit(stone, soldUnit);
 
-                            // الحصول على البيان من الطلبية
+                            // الحصول على البيان من الطلبية مع التفاصيل
                             const orderDescription = findOrderItemDescription(stone, orderItems);
 
                             return (
                                 <tr key={key}>
                                     <td>{index + 1}</td>
-                                    <td contentEditable={false}>
-                                        {orderDescription || stone.stoneType || "---"}
+                                    <td contentEditable={false} style={{ 
+                                        backgroundColor: '#f0f8ff', 
+                                        fontWeight: '500',
+                                        color: '#0056b3',
+                                        minWidth: '150px'
+                                    }}>
+                                        {orderDescription}
                                     </td>
                                     <td>{stone.stoneType || "---"}</td>
                                     <td>{num(stone.length) === 0 ? "مفتوح" : stone.length}</td>
