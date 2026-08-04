@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "../styles/print.css";
 import logo from "../assets/AAA.jpg";
 
@@ -11,9 +11,21 @@ interface StoneItem {
     linearMeter?: number;
     area?: number;
     pieces?: number;
+}
+
+interface OrderItemRef {
+    _id?: string;
+    stoneType?: string;
+    length?: number;
+    width?: number;
+    thickness?: number;
     details?: string;
-    requiredQty?: number;
-    remainingQty?: number;
+}
+
+interface OrderRef {
+    _id?: string;
+    orderNumber?: string;
+    items?: OrderItemRef[];
 }
 
 interface StonePieceDoc {
@@ -23,8 +35,10 @@ interface StonePieceDoc {
     totalLinearMeter?: number;
     totalArea?: number;
     status?: string;
+    order?: OrderRef | null;
 }
 
+// صف مسطح جاهز للطباعة: نوع حجر واحد + باركود المشتاح يلي طلع منه
 interface Stone {
     barcode?: string;
     stoneType?: string;
@@ -36,8 +50,6 @@ interface Stone {
     pieces?: number;
     status?: string;
     details?: string;
-    requiredQty?: number;
-    remainingQty?: number;
 }
 
 interface ThicknessSummaryRow {
@@ -51,23 +63,8 @@ interface ThicknessOnlyRow {
     area: number;
 }
 
-// واجهة صنف الطلبية
-interface OrderItem {
-    _id: string;
-    stoneType: string;
-    length?: number;
-    width?: number;
-    thickness?: number;
-    unit: string;
-    requiredQty: number;
-    remainingQty: number;
-    details?: string;
-}
-
 interface Props {
     shipment: any;
-    orderItems?: OrderItem[];
-    orderNumber?: string;
 }
 
 const num = (v: any) => Number(v) || 0;
@@ -75,13 +72,37 @@ const num = (v: any) => Number(v) || 0;
 const SOLD_UNITS = ["قطعة", "متر مربع", "متر طول"] as const;
 type SoldUnit = (typeof SOLD_UNITS)[number];
 
+// بيدور على صنف الطلبية المطابق (نفس منطق findOrderItem بالباك اند):
+// stoneType + thickness + length + width بالضبط
+function findMatchingOrderDetails(
+    orderItems: OrderItemRef[] | undefined,
+    item: StoneItem
+): string {
+    if (!orderItems || orderItems.length === 0) return "";
+
+    const match = orderItems.find(
+        (oi) =>
+            String(oi.stoneType || "").trim().toLowerCase() ===
+                String(item.stoneType || "").trim().toLowerCase() &&
+            num(oi.thickness) === num(item.thickness) &&
+            num(oi.length) === num(item.length) &&
+            num(oi.width) === num(item.width)
+    );
+
+    return match?.details || "";
+}
+
+// يفرد كل مشتاح (بأنواعه المتعددة) إلى صفوف مستقلة، صف لكل نوع حجر
 function flattenStones(stonePieces: StonePieceDoc[]): Stone[] {
+
     const rows: Stone[] = [];
 
     stonePieces.forEach((stone) => {
+
         const items = stone.items && stone.items.length > 0 ? stone.items : [];
 
         items.forEach((item) => {
+
             rows.push({
                 barcode: stone.barcode,
                 stoneType: item.stoneType,
@@ -92,20 +113,22 @@ function flattenStones(stonePieces: StonePieceDoc[]): Stone[] {
                 area: item.area,
                 pieces: item.pieces,
                 status: stone.status,
-                details: item.details || "",
-                requiredQty: item.requiredQty || 0,
-                remainingQty: item.remainingQty || 0,
+                details: findMatchingOrderDetails(stone.order?.items, item),
             });
+
         });
+
     });
 
     return rows;
 }
 
+// دالة جديدة لتجميع الصفوف المتشابهة
 function groupSimilarStones(stones: Stone[]): Stone[] {
     const grouped: Stone[] = [];
     
     stones.forEach((stone) => {
+        // البحث عن صف موجود بنفس الخصائص
         const existingIndex = grouped.findIndex((g) => 
             g.stoneType === stone.stoneType &&
             g.length === stone.length &&
@@ -114,17 +137,21 @@ function groupSimilarStones(stones: Stone[]): Stone[] {
         );
 
         if (existingIndex !== -1) {
+            // دمج الكميات في الصف الموجود
             const existing = grouped[existingIndex];
             existing.pieces = (existing.pieces || 0) + (stone.pieces || 0);
             existing.area = (existing.area || 0) + (stone.area || 0);
             existing.linearMeter = (existing.linearMeter || 0) + (stone.linearMeter || 0);
+            // الحفاظ على أول details موجودة عند الدمج
+            if (!existing.details && stone.details) {
+                existing.details = stone.details;
+            }
+            // دمج الباركودات (اختياري)
             if (stone.barcode && !existing.barcode?.includes(stone.barcode)) {
                 existing.barcode = existing.barcode ? `${existing.barcode}, ${stone.barcode}` : stone.barcode;
             }
-            if (stone.details && !existing.details) {
-                existing.details = stone.details;
-            }
         } else {
+            // إضافة صف جديد
             grouped.push({ ...stone });
         }
     });
@@ -138,10 +165,11 @@ function getSoldQuantity(s: Stone): { value: string; unit: SoldUnit } {
     return { value: String(num(s.pieces)), unit: "قطعة" };
 }
 
+// بيرجع القيمة المناسبة حسب الوحدة المختارة من المستخدم
 function getValueForUnit(s: Stone, unit: SoldUnit) {
     if (unit === "قطعة") return String(num(s.pieces));
     if (unit === "متر مربع") return num(s.area).toFixed(2);
-    return num(s.linearMeter).toFixed(2);
+    return num(s.linearMeter).toFixed(2); // متر طول
 }
 
 function getEnteredQuantity(s: Stone): { value: string; unit: SoldUnit } {
@@ -155,273 +183,48 @@ function getEnteredQuantity(s: Stone): { value: string; unit: SoldUnit } {
     return sold;
 }
 
-// ===== الدالة الرئيسية لجلب تفاصيل الصنف من الطلبية =====
-function getOrderItemDetails(stone: Stone, orderItems?: OrderItem[]): string {
-    // إذا كانت الطلبية موجودة
-    if (orderItems && orderItems.length > 0) {
-        // 1. محاولة المطابقة التامة (نوع + أبعاد)
-        const exactMatch = orderItems.find(item => {
-            const matchType = item.stoneType === stone.stoneType;
-            const matchLength = !item.length || !stone.length || Math.abs(item.length - stone.length) < 0.5;
-            const matchWidth = !item.width || !stone.width || Math.abs(item.width - stone.width) < 0.5;
-            const matchThickness = !item.thickness || !stone.thickness || Math.abs(item.thickness - stone.thickness) < 0.5;
-            return matchType && matchLength && matchWidth && matchThickness;
-        });
-
-        if (exactMatch) {
-            let details = exactMatch.stoneType;
-            
-            // إضافة التفاصيل
-            if (exactMatch.details) {
-                details += `\n📝 ${exactMatch.details}`;
-            }
-            
-            // إضافة الأبعاد
-            const dims = [];
-            if (exactMatch.length) dims.push(`الطول: ${exactMatch.length}سم`);
-            if (exactMatch.width) dims.push(`العرض: ${exactMatch.width}سم`);
-            if (exactMatch.thickness) dims.push(`السمك: ${exactMatch.thickness}سم`);
-            if (dims.length > 0) {
-                details += `\n📐 ${dims.join(' | ')}`;
-            }
-            
-            // إضافة الكميات
-            details += `\n📦 المطلوب: ${exactMatch.requiredQty}`;
-            if (exactMatch.remainingQty > 0) {
-                details += ` | المتبقي: ${exactMatch.remainingQty}`;
-            } else {
-                details += ` | ✅ مكتمل`;
-            }
-            
-            // إضافة الوحدة
-            const unitMap: Record<string, string> = {
-                'pieces': 'قطع',
-                'linearMeter': 'متر طولي',
-                'area': 'مساحة'
-            };
-            details += `\n📊 الوحدة: ${unitMap[exactMatch.unit] || exactMatch.unit}`;
-            
-            return details;
-        }
-
-        // 2. محاولة المطابقة حسب النوع فقط
-        const typeMatch = orderItems.find(item => item.stoneType === stone.stoneType);
-        if (typeMatch) {
-            let details = typeMatch.stoneType;
-            if (typeMatch.details) {
-                details += `\n📝 ${typeMatch.details}`;
-            }
-            details += `\n📦 المطلوب: ${typeMatch.requiredQty}`;
-            if (typeMatch.remainingQty > 0) {
-                details += ` | المتبقي: ${typeMatch.remainingQty}`;
-            }
-            return details;
-        }
-    }
-
-    // 3. إذا لم توجد طلبية، استخدم التفاصيل المخزنة في الحجر
-    if (stone.details) {
-        let details = stone.stoneType || "---";
-        details += `\n📝 ${stone.details}`;
-        if (stone.requiredQty && stone.requiredQty > 0) {
-            details += `\n📦 المطلوب: ${stone.requiredQty}`;
-        }
-        if (stone.remainingQty && stone.remainingQty > 0) {
-            details += ` | المتبقي: ${stone.remainingQty}`;
-        }
-        return details;
-    }
-
-    // 4. الرجوع إلى نوع الحجر فقط
-    return stone.stoneType || "---";
-}
-
-function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
+function ShipmentPrint({ shipment }: Props) {
     const printPage = () => {
         window.print();
     };
 
+    // shipment.stones جاي من الباك اند كمصفوفة مشاتيح كاملة (كل وحدة فيها items[])
+    // فبنفردها هون لصفوف طباعة، صف لكل نوع حجر
     let stones: Stone[] =
         shipment?.stones && shipment.stones.length > 0
             ? flattenStones(shipment.stones as StonePieceDoc[])
             : [
-                  { 
-                      barcode: "STN-0001", 
-                      stoneType: "حجر مسمسم سراحي", 
-                      length: 0, 
-                      width: 30, 
-                      thickness: 5, 
-                      linearMeter: 0, 
-                      area: 20, 
-                      pieces: 20, 
-                      status: "In Stock",
-                      details: "وجه polished - درجة أولى",
-                      requiredQty: 20,
-                      remainingQty: 5
-                  },
-                  { 
-                      barcode: "STN-0002", 
-                      stoneType: "حجر مسمسم محصور", 
-                      length: 69, 
-                      width: 30, 
-                      thickness: 5, 
-                      linearMeter: 0, 
-                      area: 21.74, 
-                      pieces: 105, 
-                      status: "In Stock",
-                      details: "وجه honed - درجة ممتازة",
-                      requiredQty: 105,
-                      remainingQty: 10
-                  },
-                  { 
-                      barcode: "STN-0003", 
-                      stoneType: "جية مطبة وجه+جنبين", 
-                      length: 0, 
-                      width: 42, 
-                      thickness: 7, 
-                      linearMeter: 35, 
-                      area: 0, 
-                      pieces: 35, 
-                      status: "In Stock",
-                      details: "معالجة مطبة - كاملة",
-                      requiredQty: 35,
-                      remainingQty: 0
-                  },
-                  { 
-                      barcode: "STN-0004", 
-                      stoneType: "عتب مسمسم/مطبة", 
-                      length: 130, 
-                      width: 25, 
-                      thickness: 15, 
-                      linearMeter: 5.2, 
-                      area: 0, 
-                      pieces: 4, 
-                      status: "In Stock",
-                      details: "عتب مع جلب - مقاس خاص",
-                      requiredQty: 4,
-                      remainingQty: 2
-                  },
-                  { 
-                      barcode: "STN-0005", 
-                      stoneType: "سقف مسمسم/مطبة", 
-                      length: 30, 
-                      width: 25, 
-                      thickness: 15, 
-                      linearMeter: 0, 
-                      area: 0, 
-                      pieces: 20, 
-                      status: "In Stock",
-                      details: "سقف مطبة - عيار 30",
-                      requiredQty: 20,
-                      remainingQty: 8
-                  },
-                  { 
-                      barcode: "STN-0006", 
-                      stoneType: "سقف مسمسم/مطبة", 
-                      length: 15, 
-                      width: 25, 
-                      thickness: 15, 
-                      linearMeter: 0, 
-                      area: 0, 
-                      pieces: 17, 
-                      status: "In Stock",
-                      details: "سقف مطبة صغير - عيار 15",
-                      requiredQty: 17,
-                      remainingQty: 3
-                  },
+                  { barcode: "STN-0001", stoneType: "حجر مسمسم سراحي", length: 0, width: 30, thickness: 5, linearMeter: 0, area: 20, pieces: 20, status: "In Stock" },
+                  { barcode: "STN-0002", stoneType: "حجر مسمسم محصور", length: 69, width: 30, thickness: 5, linearMeter: 0, area: 21.74, pieces: 105, status: "In Stock" },
+                  { barcode: "STN-0003", stoneType: "جية مطبة وجه+جنبين", length: 0, width: 42, thickness: 7, linearMeter: 35, area: 0, pieces: 35, status: "In Stock" },
+                  { barcode: "STN-0004", stoneType: "عتب مسمسم/مطبة", length: 130, width: 25, thickness: 15, linearMeter: 5.2, area: 0, pieces: 4, status: "In Stock" },
+                  { barcode: "STN-0005", stoneType: "سقف مسمسم/مطبة", length: 30, width: 25, thickness: 15, linearMeter: 0, area: 0, pieces: 20, status: "In Stock" },
+                  { barcode: "STN-0006", stoneType: "سقف مسمسم/مطبة", length: 15, width: 25, thickness: 15, linearMeter: 0, area: 0, pieces: 17, status: "In Stock" },
               ];
 
+    // تجميع الصفوف المتشابهة
     stones = groupSimilarStones(stones);
 
-    const storageKey = `shipment_units_${shipment?.consignmentNumber || 'default'}`;
+    // تخزين اختيار الوحدة لكل صف (لو المستخدم غيّر الوحدة يدويًا)
+    const [soldUnitOverrides, setSoldUnitOverrides] = useState<Record<number, SoldUnit>>({});
+    const [enteredUnitOverrides, setEnteredUnitOverrides] = useState<Record<number, SoldUnit>>({});
 
-    const getRowKey = (stone: Stone, index: number) => {
-        return `${stone.stoneType || 'unknown'}_${stone.length || 0}_${stone.width || 0}_${stone.thickness || 0}_${index}`;
-    };
+   type SoldTotals = { pieces: number; sqm: number; linearM: number };
 
-    const loadSavedSelections = () => {
-        try {
-            const saved = localStorage.getItem(storageKey);
-            if (saved) {
-                return JSON.parse(saved);
-            }
-        } catch (e) {
-            console.error('Error loading saved selections:', e);
-        }
-        return { entered: {}, sold: {} };
-    };
-
-    const saveSelections = (entered: Record<string, SoldUnit>, sold: Record<string, SoldUnit>) => {
-        try {
-            localStorage.setItem(storageKey, JSON.stringify({ entered, sold }));
-        } catch (e) {
-            console.error('Error saving selections:', e);
-        }
-    };
-
-    const initialSaved = loadSavedSelections();
-    const initialEntered: Record<string, SoldUnit> = {};
-    const initialSold: Record<string, SoldUnit> = {};
-
-    stones.forEach((stone, index) => {
-        const key = getRowKey(stone, index);
-        const enteredDefault = getEnteredQuantity(stone);
+const soldTotals = stones.reduce<SoldTotals>(
+    (acc, stone, index) => {
         const autoSold = getSoldQuantity(stone);
-        
-        initialEntered[key] = initialSaved.entered?.[key] || enteredDefault.unit;
-        initialSold[key] = initialSaved.sold?.[key] || autoSold.unit;
-    });
+        const unit = soldUnitOverrides[index] ?? autoSold.unit;
+        const value = Number(getValueForUnit(stone, unit)) || 0;
 
-    const [enteredUnitOverrides, setEnteredUnitOverrides] = useState<Record<string, SoldUnit>>(initialEntered);
-    const [soldUnitOverrides, setSoldUnitOverrides] = useState<Record<string, SoldUnit>>(initialSold);
+        if (unit === "قطعة") acc.pieces += value;
+        else if (unit === "متر مربع") acc.sqm += value;
+        else acc.linearM += value; // متر طول
 
-    useEffect(() => {
-        saveSelections(enteredUnitOverrides, soldUnitOverrides);
-    }, [enteredUnitOverrides, soldUnitOverrides]);
-
-    useEffect(() => {
-        const handleBeforeUnload = () => {
-            saveSelections(enteredUnitOverrides, soldUnitOverrides);
-        };
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, [enteredUnitOverrides, soldUnitOverrides]);
-
-    const updateEnteredUnit = (key: string, unit: SoldUnit) => {
-        setEnteredUnitOverrides(prev => {
-            const newState = { ...prev, [key]: unit };
-            saveSelections(newState, soldUnitOverrides);
-            return newState;
-        });
-    };
-
-    const updateSoldUnit = (key: string, unit: SoldUnit) => {
-        setSoldUnitOverrides(prev => {
-            const newState = { ...prev, [key]: unit };
-            saveSelections(enteredUnitOverrides, newState);
-            return newState;
-        });
-    };
-
-    type SoldTotals = { pieces: number; sqm: number; linearM: number };
-
-    const soldTotals = stones.reduce<SoldTotals>(
-        (acc, stone, index) => {
-            const key = getRowKey(stone, index);
-            const autoSold = getSoldQuantity(stone);
-            const unit = soldUnitOverrides[key] ?? autoSold.unit;
-            const value = Number(getValueForUnit(stone, unit)) || 0;
-
-            if (unit === "قطعة") acc.pieces += value;
-            else if (unit === "متر مربع") acc.sqm += value;
-            else acc.linearM += value;
-
-            return acc;
-        },
-        { pieces: 0, sqm: 0, linearM: 0 }
-    );
+        return acc;
+    },
+    { pieces: 0, sqm: 0, linearM: 0 }
+);
 
     const soldTotalParts: string[] = [];
     if (soldTotals.sqm > 0) soldTotalParts.push(`${soldTotals.sqm.toFixed(2)} متر مربع`);
@@ -471,15 +274,6 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
     const summaryByThicknessTotal =
         shipment?.summaryByThicknessTotal ??
         summaryByThickness.reduce((sum, r) => sum + num(r.area), 0).toFixed(4);
-
-    // دالة لعرض التفاصيل بشكل منسق مع فواصل الأسطر
-    const formatDetailsForDisplay = (details: string) => {
-        return details.split('\n').map((line, i) => (
-            <div key={i} style={{ fontSize: '12px', lineHeight: '1.4', padding: '1px 0' }}>
-                {line}
-            </div>
-        ));
-    };
 
     return (
         <div className="print-container">
@@ -534,7 +328,7 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                 <div className="title-row">
                     <div className="doc-number">
                         <span className="label-en">No.</span>
-                        <span className="doc-number-value">{shipment?.consignmentNumber ?? "---"}</span>
+<span className="doc-number-value">{shipment?.consignmentNumber ?? "---"}</span>
                         <span>: رقم</span>
                     </div>
                     <div className="certificate-title">
@@ -545,131 +339,98 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
 
                 <hr className="section-rule" />
 
-                <div className="certificate-details">
-                    <div className="detail-row">
-                        <span className="label-en">Date:</span>
-                        <span className="value">
-                            {shipment?.createdAt
-                                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
-                                : shipment?.date || "03/05/2026"}
-                        </span>
-                        <span className="label">:  التاريخ </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Mr.</span>
-                        <span className="value">
-                            {shipment?.customer || "---"}
-                        </span>
-                        <span className="label">: المرسل اليه السيد  </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Leaving hour:</span>
-                        <span className="value">
-                            {shipment?.leavingHour ||
-                                (shipment?.createdAt
-                                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                      })
-                                    : "---")}
-                        </span>
-                        <span className="label"> : ساعة المغادرة </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Order No.</span>
-                        <span className="value">{shipment?.orderNumber || orderNumber || "---"}</span>
-                        <span className="label">:   رقم الطلبية </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Region:</span>
-                        <span className="value">{shipment?.region || "القدس"}</span>
-                        <span className="label">:  المنطقة </span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="label-en">Car No.</span>
-                        <span className="value">{shipment?.carNumber}</span>
-                        <span className="label">:    رقم السيارة </span>
-                    </div>
-                </div>
+
+<div className="certificate-details">
+    <div className="detail-row">
+        <span className="label-en">Date:</span>
+        <span className="value">
+            {shipment?.createdAt
+                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
+                : shipment?.date || "03/05/2026"}
+        </span>
+        <span className="label">:  التاريخ </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Mr.</span>
+        <span className="value">
+            {/* استخدام shipment.customer مباشرة */}
+            {shipment?.customer || "---"}
+        </span>
+        <span className="label">: المرسل اليه السيد  </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Leaving hour:</span>
+        <span className="value">
+            {shipment?.leavingHour ||
+                (shipment?.createdAt
+                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                      })
+                    : "---")}
+        </span>
+        <span className="label"> : ساعة المغادرة </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Order No.</span>
+        <span className="value">{shipment?.orderNumber}</span>
+        <span className="label">:   رقم الطلبية </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Region:</span>
+        <span className="value">{shipment?.region || "القدس"}</span>
+        <span className="label">:  المنطقة </span>
+    </div>
+    <div className="detail-row">
+        <span className="label-en">Car No.</span>
+        <span className="value">{shipment?.carNumber}</span>
+        <span className="label">:    رقم السيارة </span>
+    </div>
+</div>
 
                 <table className="shipment-table">
                     <thead>
                         <tr>
-                            <th style={{ width: '5%' }}>الرقم</th>
-                            <th style={{ width: '25%' }}>بيان الصنف</th>
-                            <th style={{ width: '12%' }}>المعالجة المطلوبة</th>
-                            <th style={{ width: '8%' }}>الطول (سم)</th>
-                            <th style={{ width: '8%' }}>العرض (سم)</th>
-                            <th style={{ width: '8%' }}>السمك (سم)</th>
-                            <th colSpan={2} style={{ width: '15%' }}>كمية مدخلة</th>
-                            <th colSpan={2} style={{ width: '15%' }}>كمية البيع</th>
+                            <th>الرقم</th>
+                            <th>بيان الصنف</th>
+                            <th>المعالجة المطلوبة</th>
+                            <th>الطول (سم)</th>
+                            <th>العرض (سم)</th>
+                            <th>السمك (سم)</th>
+                            <th colSpan={2}>كمية مدخلة</th>
+                            <th colSpan={2}>كمية البيع</th>
                         </tr>
                     </thead>
                     <tbody>
                         {stones.map((stone, index) => {
-                            const key = getRowKey(stone, index);
                             const enteredDefault = getEnteredQuantity(stone);
                             const autoSold = getSoldQuantity(stone);
 
-                            const enteredUnit = enteredUnitOverrides[key] ?? enteredDefault.unit;
+                            const enteredUnit = enteredUnitOverrides[index] ?? enteredDefault.unit;
                             const enteredValue = getValueForUnit(stone, enteredUnit);
 
-                            const soldUnit = soldUnitOverrides[key] ?? autoSold.unit;
+                            const soldUnit = soldUnitOverrides[index] ?? autoSold.unit;
                             const soldValue = getValueForUnit(stone, soldUnit);
 
-                            // الحصول على تفاصيل الصنف من الطلبية
-                            const itemDetails = getOrderItemDetails(stone, orderItems);
-                            const detailsLines = itemDetails.split('\n');
-
                             return (
-                                <tr key={key}>
-                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                                        {index + 1}
-                                    </td>
-                                    <td 
-                                        contentEditable={false} 
-                                        style={{ 
-                                            backgroundColor: '#e8f4f8', 
-                                            fontWeight: '500',
-                                            color: '#004466',
-                                            minWidth: '180px',
-                                            fontSize: '11px',
-                                            lineHeight: '1.4',
-                                            padding: '4px 8px',
-                                            textAlign: 'right',
-                                            direction: 'rtl'
-                                        }}
-                                    >
-                                        {detailsLines.map((line, i) => (
-                                            <div key={i} style={{ 
-                                                padding: '1px 0',
-                                                borderBottom: i < detailsLines.length - 1 ? '1px dotted #cce0e8' : 'none'
-                                            }}>
-                                                {line}
-                                            </div>
-                                        ))}
-                                    </td>
-                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                                        {stone.stoneType || "---"}
-                                    </td>
-                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                                        {num(stone.length) === 0 ? "مفتوح" : stone.length}
-                                    </td>
-                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                                        {stone.width ?? "---"}
-                                    </td>
-                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                                        {stone.thickness ?? "---"}
-                                    </td>
-                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                                        {enteredValue}
-                                    </td>
-                                    <td contentEditable={false} style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                                <tr key={`${stone.barcode || "row"}-${index}`}>
+                                    <td>{index + 1}</td>
+                                    <td>{stone.details || "---"}</td>
+                                    <td>{stone.stoneType || "---"}</td>
+                                    <td>{num(stone.length) === 0 ? "مفتوح" : stone.length}</td>
+                                    <td>{stone.width ?? "---"}</td>
+                                    <td>{stone.thickness ?? "---"}</td>
+                                    <td>{enteredValue}</td>
+                                    <td contentEditable={false}>
                                         <select
                                             className="unit-select"
                                             value={enteredUnit}
-                                            onChange={(e) => updateEnteredUnit(key, e.target.value as SoldUnit)}
-                                            style={{ fontSize: '11px', padding: '2px 4px' }}
+                                            onChange={(e) =>
+                                                setEnteredUnitOverrides((prev) => ({
+                                                    ...prev,
+                                                    [index]: e.target.value as SoldUnit,
+                                                }))
+                                            }
                                         >
                                             {SOLD_UNITS.map((u) => (
                                                 <option key={u} value={u}>
@@ -679,15 +440,17 @@ function ShipmentPrint({ shipment, orderItems, orderNumber }: Props) {
                                         </select>
                                         <span className="unit-print-label">{enteredUnit}</span>
                                     </td>
-                                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                                        {soldValue}
-                                    </td>
-                                    <td contentEditable={false} style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                                    <td>{soldValue}</td>
+                                    <td contentEditable={false}>
                                         <select
                                             className="unit-select"
                                             value={soldUnit}
-                                            onChange={(e) => updateSoldUnit(key, e.target.value as SoldUnit)}
-                                            style={{ fontSize: '11px', padding: '2px 4px' }}
+                                            onChange={(e) =>
+                                                setSoldUnitOverrides((prev) => ({
+                                                    ...prev,
+                                                    [index]: e.target.value as SoldUnit,
+                                                }))
+                                            }
                                         >
                                             {SOLD_UNITS.map((u) => (
                                                 <option key={u} value={u}>
