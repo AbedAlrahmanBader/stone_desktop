@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles/print.css";
 import logo from "../assets/AAA.jpg";
 
@@ -71,6 +71,11 @@ const num = (v: any) => Number(v) || 0;
 
 const SOLD_UNITS = ["قطعة", "متر مربع", "متر طول"] as const;
 type SoldUnit = (typeof SOLD_UNITS)[number];
+
+// مفتاح التخزين في localStorage
+const getStorageKey = (shipmentId?: string) => {
+    return `shipment_units_${shipmentId || 'default'}`;
+};
 
 // بيدور على صنف الطلبية المطابق (نفس منطق findOrderItem بالباك اند):
 // stoneType + thickness + length + width بالضبط
@@ -205,26 +210,78 @@ function ShipmentPrint({ shipment }: Props) {
     // تجميع الصفوف المتشابهة
     stones = groupSimilarStones(stones);
 
+    // الحصول على معرف الإرسالية لتخزين الاختيارات
+    const shipmentId = shipment?._id || shipment?.consignmentNumber || 'default';
+    const storageKey = getStorageKey(shipmentId);
+
+    // تحميل الاختيارات المحفوظة من localStorage
+    const loadSavedUnits = (): { sold: Record<number, SoldUnit>; entered: Record<number, SoldUnit> } => {
+        try {
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                return {
+                    sold: parsed.sold || {},
+                    entered: parsed.entered || {}
+                };
+            }
+        } catch (error) {
+            console.error('Error loading saved units:', error);
+        }
+        return { sold: {}, entered: {} };
+    };
+
+    const savedUnits = loadSavedUnits();
+
     // تخزين اختيار الوحدة لكل صف (لو المستخدم غيّر الوحدة يدويًا)
-    const [soldUnitOverrides, setSoldUnitOverrides] = useState<Record<number, SoldUnit>>({});
-    const [enteredUnitOverrides, setEnteredUnitOverrides] = useState<Record<number, SoldUnit>>({});
+    const [soldUnitOverrides, setSoldUnitOverrides] = useState<Record<number, SoldUnit>>(savedUnits.sold);
+    const [enteredUnitOverrides, setEnteredUnitOverrides] = useState<Record<number, SoldUnit>>(savedUnits.entered);
 
-   type SoldTotals = { pieces: number; sqm: number; linearM: number };
+    // حفظ الاختيارات في localStorage عند تغييرها
+    useEffect(() => {
+        try {
+            const data = {
+                sold: soldUnitOverrides,
+                entered: enteredUnitOverrides
+            };
+            localStorage.setItem(storageKey, JSON.stringify(data));
+        } catch (error) {
+            console.error('Error saving units to localStorage:', error);
+        }
+    }, [soldUnitOverrides, enteredUnitOverrides, storageKey]);
 
-const soldTotals = stones.reduce<SoldTotals>(
-    (acc, stone, index) => {
-        const autoSold = getSoldQuantity(stone);
-        const unit = soldUnitOverrides[index] ?? autoSold.unit;
-        const value = Number(getValueForUnit(stone, unit)) || 0;
+    // دالة لتحديث وحدة البيع مع الحفظ التلقائي
+    const updateSoldUnit = (index: number, unit: SoldUnit) => {
+        setSoldUnitOverrides(prev => ({
+            ...prev,
+            [index]: unit
+        }));
+    };
 
-        if (unit === "قطعة") acc.pieces += value;
-        else if (unit === "متر مربع") acc.sqm += value;
-        else acc.linearM += value; // متر طول
+    // دالة لتحديث وحدة الكمية المدخلة مع الحفظ التلقائي
+    const updateEnteredUnit = (index: number, unit: SoldUnit) => {
+        setEnteredUnitOverrides(prev => ({
+            ...prev,
+            [index]: unit
+        }));
+    };
 
-        return acc;
-    },
-    { pieces: 0, sqm: 0, linearM: 0 }
-);
+    type SoldTotals = { pieces: number; sqm: number; linearM: number };
+
+    const soldTotals = stones.reduce<SoldTotals>(
+        (acc, stone, index) => {
+            const autoSold = getSoldQuantity(stone);
+            const unit = soldUnitOverrides[index] ?? autoSold.unit;
+            const value = Number(getValueForUnit(stone, unit)) || 0;
+
+            if (unit === "قطعة") acc.pieces += value;
+            else if (unit === "متر مربع") acc.sqm += value;
+            else acc.linearM += value; // متر طول
+
+            return acc;
+        },
+        { pieces: 0, sqm: 0, linearM: 0 }
+    );
 
     const soldTotalParts: string[] = [];
     if (soldTotals.sqm > 0) soldTotalParts.push(`${soldTotals.sqm.toFixed(2)} متر مربع`);
@@ -328,7 +385,7 @@ const soldTotals = stones.reduce<SoldTotals>(
                 <div className="title-row">
                     <div className="doc-number">
                         <span className="label-en">No.</span>
-<span className="doc-number-value">{shipment?.consignmentNumber ?? "---"}</span>
+                        <span className="doc-number-value">{shipment?.consignmentNumber ?? "---"}</span>
                         <span>: رقم</span>
                     </div>
                     <div className="certificate-title">
@@ -339,54 +396,52 @@ const soldTotals = stones.reduce<SoldTotals>(
 
                 <hr className="section-rule" />
 
-
-<div className="certificate-details">
-    <div className="detail-row">
-        <span className="label-en">Date:</span>
-        <span className="value">
-            {shipment?.createdAt
-                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
-                : shipment?.date || "03/05/2026"}
-        </span>
-        <span className="label">:  التاريخ </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Mr.</span>
-        <span className="value">
-            {/* استخدام shipment.customer مباشرة */}
-            {shipment?.customer || "---"}
-        </span>
-        <span className="label">: المرسل اليه السيد  </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Leaving hour:</span>
-        <span className="value">
-            {shipment?.leavingHour ||
-                (shipment?.createdAt
-                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                      })
-                    : "---")}
-        </span>
-        <span className="label"> : ساعة المغادرة </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Order No.</span>
-        <span className="value">{shipment?.orderNumber}</span>
-        <span className="label">:   رقم الطلبية </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Region:</span>
-        <span className="value">{shipment?.region || "القدس"}</span>
-        <span className="label">:  المنطقة </span>
-    </div>
-    <div className="detail-row">
-        <span className="label-en">Car No.</span>
-        <span className="value">{shipment?.carNumber}</span>
-        <span className="label">:    رقم السيارة </span>
-    </div>
-</div>
+                <div className="certificate-details">
+                    <div className="detail-row">
+                        <span className="label-en">Date:</span>
+                        <span className="value">
+                            {shipment?.createdAt
+                                ? new Date(shipment.createdAt).toLocaleDateString("en-GB")
+                                : shipment?.date || "03/05/2026"}
+                        </span>
+                        <span className="label">:  التاريخ </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Mr.</span>
+                        <span className="value">
+                            {shipment?.customer || "---"}
+                        </span>
+                        <span className="label">: المرسل اليه السيد  </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Leaving hour:</span>
+                        <span className="value">
+                            {shipment?.leavingHour ||
+                                (shipment?.createdAt
+                                    ? new Date(shipment.createdAt).toLocaleTimeString("ar-EG", {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                      })
+                                    : "---")}
+                        </span>
+                        <span className="label"> : ساعة المغادرة </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Order No.</span>
+                        <span className="value">{shipment?.orderNumber}</span>
+                        <span className="label">:   رقم الطلبية </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Region:</span>
+                        <span className="value">{shipment?.region || "القدس"}</span>
+                        <span className="label">:  المنطقة </span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="label-en">Car No.</span>
+                        <span className="value">{shipment?.carNumber}</span>
+                        <span className="label">:    رقم السيارة </span>
+                    </div>
+                </div>
 
                 <table className="shipment-table">
                     <thead>
@@ -426,10 +481,7 @@ const soldTotals = stones.reduce<SoldTotals>(
                                             className="unit-select"
                                             value={enteredUnit}
                                             onChange={(e) =>
-                                                setEnteredUnitOverrides((prev) => ({
-                                                    ...prev,
-                                                    [index]: e.target.value as SoldUnit,
-                                                }))
+                                                updateEnteredUnit(index, e.target.value as SoldUnit)
                                             }
                                         >
                                             {SOLD_UNITS.map((u) => (
@@ -446,10 +498,7 @@ const soldTotals = stones.reduce<SoldTotals>(
                                             className="unit-select"
                                             value={soldUnit}
                                             onChange={(e) =>
-                                                setSoldUnitOverrides((prev) => ({
-                                                    ...prev,
-                                                    [index]: e.target.value as SoldUnit,
-                                                }))
+                                                updateSoldUnit(index, e.target.value as SoldUnit)
                                             }
                                         >
                                             {SOLD_UNITS.map((u) => (
@@ -482,7 +531,6 @@ const soldTotals = stones.reduce<SoldTotals>(
                     </div>
                 </div>
 
-          
                 <div className="notes-section">
                     <div className="note">
                         * Ownership of commodity is transferred when all accrued payments are settled البضاعة ليست ملكاً للمشتري ما لم تسدد قيمتها
