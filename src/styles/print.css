@@ -142,7 +142,7 @@
     height: auto;
     object-fit: cover;
     object-position: top;   /* غيرها bottom/center حسب مكان الفراغ بالصورة */
-    transform: scale(0);  /* كبّر لتغطية الفراغ - جرب أرقام مختلفة */
+    transform: scale(1.4);  /* كبّر لتغطية الفراغ - جرب أرقام مختلفة */
     transform-origin: top;
 }
 .header-contact-row {
