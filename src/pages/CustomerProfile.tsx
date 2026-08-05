@@ -508,6 +508,7 @@ function CustomerProfile() {
           <table>
             <thead>
               <tr>
+                <th>رقم الإرسالية</th>
                 <th>التاريخ</th>
                 <th>عدد القطع</th>
                 <th>المساحة الإجمالية</th>
@@ -519,13 +520,14 @@ function CustomerProfile() {
             <tbody>
               {filteredShipments.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="no-results">
+                  <td colSpan={6} className="no-results">
                     لا يوجد إرساليات مطابقة لهذا البحث
                   </td>
                 </tr>
               ) : (
                 filteredShipments.map((s: any) => (
                   <tr key={s._id}>
+                    <td dir="ltr">{s.consignmentNumber ?? "---"}</td>
                     <td>
                       {s.createdAt
                         ? new Date(s.createdAt).toLocaleDateString("ar")
