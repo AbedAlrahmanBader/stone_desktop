@@ -141,7 +141,7 @@
     width: 250px;
     height: auto;
     object-fit: contain;
-    margin-top: 15px;   /* جرب تكبر/تصغر الرقم حسب الحاجة */
+    margin-bottom: 0;   /* جرب تكبر/تصغر الرقم حسب الحاجة */
 }
 .header-contact-row {
     display: flex;
