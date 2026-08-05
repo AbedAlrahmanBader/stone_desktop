@@ -130,17 +130,18 @@
 
 .logo-container {
     width: 400px;
-    height: 220px;      /* رجعها كبيرة مؤقتًا */
-    overflow: visible;  /* شيل القص مؤقتًا */
+    height: 220px;
+    overflow: visible;
     display: flex;
     justify-content: flex-end;
-    align-items: flex-start;
+    align-items: center;   /* أو flex-end لتنزيلها أكتر */
 }
 
 .company-logo {
     width: 250px;
     height: auto;
-    object-fit: contain;   /* بدون scale أو object-position لهلق */
+    object-fit: contain;
+    margin-top: 15px;   /* جرب تكبر/تصغر الرقم حسب الحاجة */
 }
 .header-contact-row {
     display: flex;
