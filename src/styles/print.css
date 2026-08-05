@@ -130,8 +130,8 @@
 
 .logo-container {
     width: 400px;
-    height: 100px;      /* قلل هاد الرقم لحد ما يطلع بحجم مناسب */
-    overflow: hidden;
+    height: 220px;      /* رجعها كبيرة مؤقتًا */
+    overflow: visible;  /* شيل القص مؤقتًا */
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
@@ -140,10 +140,7 @@
 .company-logo {
     width: 250px;
     height: auto;
-    object-fit: cover;
-    object-position: bottom;
-    transform: scale(1.4) translateY(-15px);
-    transform-origin: top;
+    object-fit: contain;   /* بدون scale أو object-position لهلق */
 }
 .header-contact-row {
     display: flex;
