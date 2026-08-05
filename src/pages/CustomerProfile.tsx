@@ -1,5 +1,5 @@
 // CustomerProfile.tsx - الجزء المتعلق بالطلب
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import api from "../api/axios";
@@ -53,6 +53,16 @@ function CustomerProfile() {
   });
   const [editLoading, setEditLoading] = useState(false);
 
+  // ------- طباعة الإرساليات -------
+  const [printBatch, setPrintBatch] = useState<any[]>([]);
+  const [autoPrint, setAutoPrint] = useState(false);
+
+  // ------- فلاتر الإرساليات -------
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterConsignmentNumber, setFilterConsignmentNumber] = useState("");
+
   const loadCustomer = async () => {
     try {
       const res = await api.get(`/customers/profile/${id}`);
@@ -82,6 +92,91 @@ function CustomerProfile() {
   const closeShipment = () => {
     setSelectedShipment(null);
   };
+
+  // إعادة تعيين فلاتر الإرساليات
+  const resetShipmentFilters = () => {
+    setFilterStatus("All");
+    setFilterDateFrom("");
+    setFilterDateTo("");
+    setFilterConsignmentNumber("");
+  };
+
+  // قائمة حالات الإرساليات الموجودة فعليًا لهذا العميل (لتعبئة الفلتر تلقائيًا)
+  const availableShipmentStatuses = useMemo(() => {
+    const set = new Set((data?.shipments || []).map((s: any) => s.status));
+    return Array.from(set);
+  }, [data?.shipments]);
+
+  // إرساليات العميل بعد تطبيق الفلاتر
+  const filteredShipments = useMemo(() => {
+    const shipments = data?.shipments || [];
+
+    return shipments.filter((shipment: any) => {
+      const matchStatus =
+        filterStatus === "All" || shipment.status === filterStatus;
+
+      const matchConsignmentNumber =
+        filterConsignmentNumber === "" ||
+        String(shipment.consignmentNumber ?? "").includes(filterConsignmentNumber);
+
+      const shipmentDate = new Date(shipment.createdAt);
+
+      let matchFrom = true;
+      if (filterDateFrom) {
+        const fromDate = new Date(filterDateFrom);
+        fromDate.setHours(0, 0, 0, 0);
+        matchFrom = shipmentDate >= fromDate;
+      }
+
+      let matchTo = true;
+      if (filterDateTo) {
+        const toDate = new Date(filterDateTo);
+        toDate.setHours(23, 59, 59, 999);
+        matchTo = shipmentDate <= toDate;
+      }
+
+      return matchStatus && matchConsignmentNumber && matchFrom && matchTo;
+    });
+  }, [data?.shipments, filterStatus, filterConsignmentNumber, filterDateFrom, filterDateTo]);
+
+  // فتح إرسالية وطباعتها فورًا (زر الطباعة بجانب كل سطر)
+  const openShipmentAndPrint = async (shipmentId: string) => {
+    setAutoPrint(true);
+    await openShipment(shipmentId);
+  };
+
+  // طباعة إرسالية واحدة تلقائيًا بعد فتحها بالمودال
+  useEffect(() => {
+    if (selectedShipment && autoPrint) {
+      const timer = setTimeout(() => {
+        window.print();
+        setAutoPrint(false);
+      }, 200);
+
+      return () => clearTimeout(timer);
+    }
+  }, [selectedShipment, autoPrint]);
+
+  // طباعة كل الإرساليات المفلترة دفعة وحدة
+  const printAllShipments = () => {
+    if (filteredShipments.length === 0) {
+      alert("لا يوجد إرساليات لطباعتها");
+      return;
+    }
+    setSelectedShipment(null);
+    setPrintBatch(filteredShipments);
+  };
+
+  // لما تنجهز دفعة الطباعة، افتح نافذة الطباعة تلقائيًا
+  useEffect(() => {
+    if (printBatch.length > 0) {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 200);
+
+      return () => clearTimeout(timer);
+    }
+  }, [printBatch]);
 
   const handleAddOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -336,49 +431,133 @@ function CustomerProfile() {
         )}
       </div>
 
-      <h2>🚚 الإرساليات</h2>
+      <div className="section-header">
+        <h2>🚚 الإرساليات</h2>
+        <button
+          type="button"
+          className="btn-print-all"
+          onClick={printAllShipments}
+        >
+          🖨 طباعة الكل ({filteredShipments.length})
+        </button>
+      </div>
 
       {data.shipments?.length === 0 ? (
         <h3>لا يوجد إرساليات لهذا العميل</h3>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>التاريخ</th>
-              <th>عدد القطع</th>
-              <th>المساحة الإجمالية</th>
-              <th>الحالة</th>
-              <th>عرض</th>
-            </tr>
-          </thead>
+        <>
+          {/* شريط فلاتر الإرساليات */}
+          <div className="shipments-filters">
+            <div className="filter-field">
+              <label>رقم الإرسالية</label>
+              <input
+                type="text"
+                value={filterConsignmentNumber}
+                onChange={(e) => setFilterConsignmentNumber(e.target.value)}
+                placeholder="ابحث بالرقم..."
+                dir="ltr"
+              />
+            </div>
 
-          <tbody>
-            {data.shipments.map((s: any) => (
-              <tr key={s._id}>
-                <td>
-                  {s.createdAt
-                    ? new Date(s.createdAt).toLocaleDateString("ar")
-                    : "---"}
-                </td>
+            <div className="filter-field">
+              <label>الحالة</label>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="All">الكل</option>
+                {availableShipmentStatuses.map((status: any) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                <td>{s.stones?.length ?? 0}</td>
+            <div className="filter-field">
+              <label>من تاريخ</label>
+              <input
+                type="date"
+                value={filterDateFrom}
+                onChange={(e) => setFilterDateFrom(e.target.value)}
+              />
+            </div>
 
-                <td>{s.totalArea ?? 0}</td>
+            <div className="filter-field">
+              <label>إلى تاريخ</label>
+              <input
+                type="date"
+                value={filterDateTo}
+                onChange={(e) => setFilterDateTo(e.target.value)}
+              />
+            </div>
 
-                <td>{s.status || "---"}</td>
+            <button
+              type="button"
+              className="btn-reset-filters"
+              onClick={resetShipmentFilters}
+            >
+              ✕ إعادة تعيين
+            </button>
+          </div>
 
-                <td>
-                  <button
-                    onClick={() => openShipment(s._id)}
-                    disabled={loadingShipment}
-                  >
-                    فتح
-                  </button>
-                </td>
+          <div className="filters-summary">
+            عرض {filteredShipments.length} من أصل {data.shipments.length} إرسالية
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>عدد القطع</th>
+                <th>المساحة الإجمالية</th>
+                <th>الحالة</th>
+                <th>عرض</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {filteredShipments.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="no-results">
+                    لا يوجد إرساليات مطابقة لهذا البحث
+                  </td>
+                </tr>
+              ) : (
+                filteredShipments.map((s: any) => (
+                  <tr key={s._id}>
+                    <td>
+                      {s.createdAt
+                        ? new Date(s.createdAt).toLocaleDateString("ar")
+                        : "---"}
+                    </td>
+
+                    <td>{s.stones?.length ?? 0}</td>
+
+                    <td>{s.totalArea ?? 0}</td>
+
+                    <td>{s.status || "---"}</td>
+
+                    <td>
+                      <button
+                        onClick={() => openShipment(s._id)}
+                        disabled={loadingShipment}
+                      >
+                        فتح
+                      </button>
+                      <button
+                        onClick={() => openShipmentAndPrint(s._id)}
+                        disabled={loadingShipment}
+                      >
+                        🖨 طباعة
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </>
       )}
 
       {/* مودال إضافة طلبية */}
@@ -644,19 +823,56 @@ function CustomerProfile() {
         </div>
       )}
 
+      {/* مودال عرض/طباعة إرسالية واحدة */}
       {selectedShipment && (
         <div className="shipment-modal-overlay" onClick={closeShipment}>
           <div
             className="shipment-modal-content"
             onClick={(e) => e.stopPropagation()}
           >
-            <button className="shipment-modal-close" onClick={closeShipment}>
-              ✕ إغلاق
-            </button>
+            <div className="shipment-modal-actions">
+              <button onClick={() => window.print()}>
+                🖨 طباعة
+              </button>
+              <button className="shipment-modal-close" onClick={closeShipment}>
+                ✕ إغلاق
+              </button>
+            </div>
 
             <ShipmentPrint shipment={selectedShipment} />
           </div>
         </div>
+      )}
+
+      {/* منطقة طباعة كل إرساليات العميل دفعة وحدة */}
+      {printBatch.length > 0 && (
+        <div className="print-batch-container">
+          {printBatch.map((shipment, index) => (
+            <div
+              key={shipment._id}
+              className="print-batch-item"
+              style={{
+                pageBreakAfter:
+                  index < printBatch.length - 1 ? "always" : "auto",
+              }}
+            >
+              <ShipmentPrint shipment={shipment} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {printBatch.length > 0 && (
+        <style>{`
+          @media print {
+            .customer-profile > *:not(.print-batch-container) {
+              display: none !important;
+            }
+            .print-batch-container {
+              display: block !important;
+            }
+          }
+        `}</style>
       )}
     </div>
   );
