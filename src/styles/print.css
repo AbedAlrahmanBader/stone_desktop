@@ -141,7 +141,7 @@
     width: 250px;
     height: auto;
     object-fit: cover;
-    object-position: top;   /* غيرها bottom/center حسب مكان الفراغ بالصورة */
+    object-position: bottom;   /* غيرها bottom/center حسب مكان الفراغ بالصورة */
     transform: scale(1.4);  /* كبّر لتغطية الفراغ - جرب أرقام مختلفة */
     transform-origin: top;
 }
