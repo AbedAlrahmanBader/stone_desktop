@@ -1,3 +1,5 @@
+// في Customers.tsx - أضف زر تعديل في الجدول
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -16,6 +18,7 @@ function Customers() {
   const navigate = useNavigate();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -54,9 +57,16 @@ function Customers() {
     }
 
     try {
-      await api.post("/customers", form);
-
-      alert("تمت إضافة العميل");
+      if (editingCustomer) {
+        // تحديث عميل موجود
+        await api.put(`/customers/${editingCustomer._id}`, form);
+        alert("تم تحديث العميل");
+        setEditingCustomer(null);
+      } else {
+        // إضافة عميل جديد
+        await api.post("/customers", form);
+        alert("تمت إضافة العميل");
+      }
 
       setForm({
         name: "",
@@ -85,12 +95,39 @@ function Customers() {
     }
   };
 
+  // دالة لبدء التعديل
+  const startEditing = (customer: Customer) => {
+    setEditingCustomer(customer);
+    setForm({
+      name: customer.name,
+      phone: customer.phone,
+      email: customer.email,
+      address: customer.address,
+      notes: customer.notes,
+    });
+    // التمرير إلى أعلى الصفحة
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // إلغاء التعديل
+  const cancelEditing = () => {
+    setEditingCustomer(null);
+    setForm({
+      name: "",
+      phone: "",
+      email: "",
+      address: "",
+      notes: "",
+    });
+  };
+
   return (
     <div className="customers-page">
 
       <h1>العملاء</h1>
 
       <div className="customer-form">
+        <h2>{editingCustomer ? "تعديل العميل" : "إضافة عميل جديد"}</h2>
 
         <input
           name="name"
@@ -127,14 +164,23 @@ function Customers() {
           onChange={handleChange}
         />
 
-        <button onClick={saveCustomer}>
-          إضافة العميل
-        </button>
-
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button onClick={saveCustomer}>
+            {editingCustomer ? "تحديث العميل" : "إضافة العميل"}
+          </button>
+          
+          {editingCustomer && (
+            <button 
+              onClick={cancelEditing}
+              style={{ backgroundColor: "#6c757d" }}
+            >
+              إلغاء التعديل
+            </button>
+          )}
+        </div>
       </div>
 
       <table className="customers-table">
-
         <thead>
           <tr>
             <th>#</th>
@@ -143,15 +189,13 @@ function Customers() {
             <th>البريد</th>
             <th>العنوان</th>
             <th>ملاحظات</th>
-            <th>حذف</th>
+            <th>إجراءات</th>
           </tr>
         </thead>
 
         <tbody>
-
           {customers.map((customer, index) => (
             <tr key={customer._id}>
-
               <td>{index + 1}</td>
 
               <td
@@ -167,19 +211,41 @@ function Customers() {
               <td>{customer.notes}</td>
 
               <td>
-                <button
-                  className="delete-btn"
-                  onClick={() => deleteCustomer(customer._id)}
-                >
-                  حذف
-                </button>
+                <div style={{ display: "flex", gap: "5px" }}>
+                  <button
+                    className="edit-btn"
+                    onClick={() => startEditing(customer)}
+                    style={{
+                      backgroundColor: "#007bff",
+                      color: "white",
+                      border: "none",
+                      padding: "5px 10px",
+                      borderRadius: "4px",
+                      cursor: "pointer"
+                    }}
+                  >
+                    تعديل
+                  </button>
+                  
+                  <button
+                    className="delete-btn"
+                    onClick={() => deleteCustomer(customer._id)}
+                    style={{
+                      backgroundColor: "#dc3545",
+                      color: "white",
+                      border: "none",
+                      padding: "5px 10px",
+                      borderRadius: "4px",
+                      cursor: "pointer"
+                    }}
+                  >
+                    حذف
+                  </button>
+                </div>
               </td>
-
             </tr>
           ))}
-
         </tbody>
-
       </table>
 
     </div>

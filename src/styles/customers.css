@@ -65,3 +65,30 @@
 .delete-btn:hover{
     background:#b71c1c;
 }
+
+/* في customers.css - أضف هذه الأنماط */
+
+.edit-btn:hover {
+  opacity: 0.8;
+}
+
+.customer-form h2 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.customer-form button {
+  margin-top: 5px;
+}
+
+.customer-form button:first-of-type {
+  background-color: #28a745;
+}
+
+.customer-form button:first-of-type:hover {
+  background-color: #218838;
+}
+
+.customers-table td:last-child {
+  min-width: 120px;
+}
