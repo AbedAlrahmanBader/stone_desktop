@@ -141,8 +141,8 @@
     width: 250px;
     height: auto;
     object-fit: cover;
-    object-position: bottom;   /* غيرها bottom/center حسب مكان الفراغ بالصورة */
-    transform: scale(3);  /* كبّر لتغطية الفراغ - جرب أرقام مختلفة */
+    object-position: bottom;
+    transform: scale(3) translateY(-15px);
     transform-origin: top;
 }
 .header-contact-row {
