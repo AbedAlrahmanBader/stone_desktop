@@ -210,6 +210,11 @@ function ShipmentPrint({ shipment }: Props) {
     // تجميع الصفوف المتشابهة
     stones = groupSimilarStones(stones);
 
+    // ترتيب الأصناف أبجديًا حسب نوع الحجر (عمود "المعالجة المطلوبة")
+    stones.sort((a, b) =>
+        String(a.stoneType || "").localeCompare(String(b.stoneType || ""), "ar")
+    );
+
     // الحصول على معرف الإرسالية لتخزين الاختيارات
     const shipmentId = shipment?._id || shipment?.consignmentNumber || 'default';
     const storageKey = getStorageKey(shipmentId);
