@@ -34,6 +34,9 @@ function Shipments() {
 
     const [editStatus, setEditStatus] = useState("");
 
+    // تاريخ الإرسالية أثناء التعديل (بصيغة YYYY-MM-DD المناسبة لـ input[type=date])
+    const [editDate, setEditDate] = useState("");
+
     // --- فلاتر البحث ---
     const [filterCustomer, setFilterCustomer] = useState("All");
     const [filterStatus, setFilterStatus] = useState("All");
@@ -89,6 +92,9 @@ function Shipments() {
         setEditingId(shipment._id);
         setEditCustomer(shipment.customer);
         setEditStatus(shipment.status);
+        setEditDate(
+            new Date(shipment.createdAt).toISOString().slice(0, 10)
+        );
 
     };
 
@@ -99,6 +105,7 @@ function Shipments() {
         setEditingId(null);
         setEditCustomer("");
         setEditStatus("");
+        setEditDate("");
 
     };
 
@@ -111,7 +118,8 @@ function Shipments() {
             await api.put(`/shipments/${id}`, {
 
                 customer: editCustomer,
-                status: editStatus
+                status: editStatus,
+                createdAt: editDate
 
             });
 
@@ -430,15 +438,27 @@ function Shipments() {
                             <td>
 
                                 {
-                                new Date(
-                                    shipment.createdAt
-                                )
-                                .toLocaleDateString()
+                                    editingId === shipment._id ? (
+
+                                        <input
+                                            type="date"
+                                            value={editDate}
+                                            onChange={(e) =>
+                                                setEditDate(e.target.value)
+                                            }
+                                        />
+
+                                    ) : (
+
+                                        new Date(
+                                            shipment.createdAt
+                                        ).toLocaleDateString()
+
+                                    )
                                 }
 
                             </td>
 
-                          
 
                             <td>
 
