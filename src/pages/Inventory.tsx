@@ -24,6 +24,11 @@ interface StoneOrder {
     };
 }
 
+interface StoneCustomer {
+    name: string;
+    phone?: string;
+}
+
 interface Stone {
     _id: string;
     barcode: string;
@@ -32,6 +37,7 @@ interface Stone {
     totalArea: number;
     status: string;
     order?: StoneOrder | null;
+    customer?: StoneCustomer | null; // عميل مرتبط مباشرة بالمشتاح بدون طلبية
 }
 
 interface StoneEditForm {
@@ -625,8 +631,9 @@ const printQRAndBarcode = (
             .toLowerCase()
             .includes(search.toLowerCase());
         
-        // البحث باسم العميل
-        const customerName = stone.order?.customer?.name?.toLowerCase() || "";
+        // البحث باسم العميل (من الطلبية إذا موجودة، وإلا من العميل المباشر على المشتاح)
+        const customerName =
+            (stone.order?.customer?.name ?? stone.customer?.name ?? "").toLowerCase();
         const matchCustomer = customerSearch === "" || customerName.includes(customerSearch.toLowerCase());
         
         // فلتر الحالة
@@ -727,13 +734,19 @@ const printQRAndBarcode = (
                                                         >
                                                             {stone.status === "In Stock" ? "متوفر" : "مشحون"}
                                                         </span>
-                                                        {stone.order && (
+                                                        {stone.order ? (
                                                             <span className="stone-header-order">
                                                                 📋 {stone.order.orderNumber}
                                                                 {stone.order.customer?.name
                                                                     ? ` — ${stone.order.customer.name}`
                                                                     : ""}
                                                             </span>
+                                                        ) : (
+                                                            stone.customer?.name && (
+                                                                <span className="stone-header-order">
+                                                                    👤 {stone.customer.name}
+                                                                </span>
+                                                            )
                                                         )}
                                                     </>
                                                 )}
@@ -878,7 +891,7 @@ const printQRAndBarcode = (
                                                     onClick={() =>
                                                         printQRAndBarcode(
                                                             stone.barcode,
-                                                            stone.order?.customer?.name,
+                                                            stone.order?.customer?.name ?? stone.customer?.name,
                                                             stone.order?.orderNumber
                                                         )
                                                     }
