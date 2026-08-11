@@ -101,7 +101,7 @@ function AddStone() {
       // جلب جميع المشاتيح وترتيبها تنازليًا حسب الباركود
       const response = await api.get("/stones");
       const stones = response.data;
-      
+
       if (stones.length === 0) {
         // إذا لم يوجد أي مشتاح، نبدأ من 10006
         setBarcode("10006");
@@ -112,7 +112,7 @@ function AddStone() {
       const numericBarcodes = stones
         .map((s: any) => Number(s.barcode))
         .filter((num: number) => !isNaN(num));
-      
+
       if (numericBarcodes.length === 0) {
         setBarcode("10006");
         return;
@@ -295,6 +295,12 @@ function AddStone() {
         payload.orderNumber = orderNumber;
       }
 
+      // ✅ إضافة العميل مباشرة إذا كان مختار بدون طلبية
+      // (لو في طلبية، العميل بينجلب من الطلبية نفسها بالـ backend)
+      if (selectedCustomerId && !orderNumber) {
+        payload.customerId = selectedCustomerId;
+      }
+
       await api.post("/stones", payload);
 
       alert("تم إضافة المشتاح بنجاح");
@@ -305,7 +311,7 @@ function AddStone() {
       setCustomerOrders([]);
       setOrderItems([]);
       setItems([emptyItem()]);
-      
+
       // توليد باركود جديد للمشتاح التالي
       await generateNextBarcode();
     } catch (error: any) {
@@ -326,13 +332,11 @@ function AddStone() {
             setBarcode(e.target.value);
             setIsAutoBarcode(false);
           }}
-          style={{ 
+          style={{
             backgroundColor: isAutoBarcode ? '#f0f0f0' : 'white',
             direction: 'ltr'
           }}
         />
-      
-    
       </div>
 
       {/* اختيار العميل */}
